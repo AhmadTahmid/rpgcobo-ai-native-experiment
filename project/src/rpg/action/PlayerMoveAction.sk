@@ -183,7 +183,7 @@ class PlayerMoveAction
 	//	ハシゴの正面にぶつかっている場合、もしくは上からハシゴの上端に乗った場合
 	function checkLadder(){
 		local b3body = rp3d.b3body, shp = b3body.getShape(), b3world = rpgstage.b3world;
-		local pos1 = v_1( 0, 0.8, 0.01).rotate( rp3d.dir, 0, 0).add( rp3d.pos);
+		local pos1 = v_1( 0, rp3d.offsy, 0.01).rotate( rp3d.dir, 0, 0).add( rp3d.pos);
 		local b3res = b3world.contactTest( 0, shp, pos1, -1, G_STAGE);
 		local chkbtm = false;
 		if( !b3res.len()){	//	横方向のコリジョン未検出。この場合に上からのチェックに移行
@@ -198,14 +198,15 @@ class PlayerMoveAction
 			if( !hb.fbuid || ::fblks[hb.fbtype].variations[hb.fbparam&0xfff]["ctype"]!=1) continue;	//	ctype=1がハシゴ
 			//
 			local fb = bwcol.bw.getFreeBlock( hb.fbuid);
+			local w = shp.getBounds( null, r_1).r;
 			if( chkbtm){	//	下のハシゴに上から乗った場合。
-				local p = Vector3D( 0, 0, -0.5).rotate( fb.rot*Math.HPI).add( fb.x*0.5, rp3d.pos.y-0.75, fb.z*0.5);
+				local p = Vector3D( 0, 0, -w).rotate( fb.rot*Math.HPI).add( fb.x*0.5, rp3d.pos.y+0.75, fb.z*0.5);
 				return { pos=p, dir= fb.rot*Math.HPI };
 			}else{
 				local fbn = v_1( 0, 0, 1).rotate( fb.rot * Math.HPI);
 				local n = v_2( hb.nx, hb.ny, hb.nz);
 				if( fbn.dot( n) <= -0.99){	//	柱の正面に接触している場合、完全に正面に立てるように位置を計算して返す。
-					local p = Vector3D( fb.x*0.5, rp3d.pos.y, fb.z*0.5).add( hb.nx*0.5, 0, hb.nz*0.5);	//	y座標は同じ
+					local p = Vector3D( fb.x*0.5, rp3d.pos.y, fb.z*0.5).add( hb.nx*w, 0, hb.nz*w);	//	y座標は同じ
 					return { pos=p, dir= fb.rot*Math.HPI };
 				}
 			}

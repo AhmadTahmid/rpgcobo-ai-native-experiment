@@ -1332,7 +1332,8 @@ RPGSystem.option .. {
 			local r = ::getvar( opd.rate, opd);
 			if( ::rnd( 1.0) > r) return;
 			local dst = dmg.dst;
-			dmg.dst = self;	//	単にdstを変更するだけで良し。
+			dmg.dst = self;
+			dmg.form.setupDamage( dmg);	//	dmg.formに対して新しいdstを指定してもう一度計算
 			//	TODO : actで庇うキャラの前に立つ。
 			local rp3d = ::rpgstage.battle?.getChara3D( self), dst3d = ::rpgstage.battle?.getChara3D( dst);
 			rp3d.manuaction.act( @(){
