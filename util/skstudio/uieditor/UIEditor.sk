@@ -793,9 +793,14 @@ class UIEditor extends EditorViewBase
 		}
 		local undo = [], redo = [];
 		foreach( v in tfa){
-			local oldp = v.parent, oldprev = oldp.children[oldp.children.indexOf( v)-1];
-			redo[0] <- OP_MoveSKView( to, v, prev);
-			undo .. OP_MoveSKView( oldp, v, oldprev);
+			local oldp = v.parent, oldprev = oldp.children[oldp.children.indexOf( v)-1], dp1, dp2;
+			if( oldp != to){
+				local p1 = Vector3D( v.pos).transform( oldp.mat).transform( to.getInvMatrix()).sub( v.pos);
+				dp1 = (Math.iround( p1.x), Math.iround( p1.y));
+				dp2 = (-dp1[0], -dp1[1]);
+			}
+			redo[0] <- OP_MoveSKView( to, v, prev, dp1);
+			undo .. OP_MoveSKView( oldp, v, oldprev, dp2);
 		}
 		redo .. OP_SelectSKViews( this, a);
 		undo .. OP_SelectSKViews( this, a);

@@ -47,10 +47,10 @@ class UICanvasTool
 						if( e.count == 2){
 							if( editor.uiright.viewtree.expandToItem( mon)){
 								editor.uiright.viewtree.setSelectedItem( mon);
-								editor.uiright.viewtree.scrollItemToVisible( mon);
 							}else{
 								if( mon["isdir"]) editor.uiright.viewtree.expandItem( mon, true);
 							}
+							editor.uiright.viewtree.scrollItemToVisible( mon);
 						}else
 						if( e.isCommandDown() || e.isAltDown()){
 							toolfunc = UISelectFunc( this, e);

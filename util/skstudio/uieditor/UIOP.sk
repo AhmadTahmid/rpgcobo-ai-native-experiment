@@ -30,11 +30,20 @@
 		}
 	}
 
-	function OP_MoveSKView( p, view, prev){
+	function OP_MoveSKView( p, view, prev, dp=null){
 		return @() {
 			view.removeFromParent();
 			local i = typeof( prev)==SS_INTEGER ? prev : (p.children ? p.children.indexOf( prev) : 0);
 			if( i >= 0) p.insertChild( i+1, view); else p.insertChild( 0, view);
+			if( dp){
+				local mot = view.getMotion( SKViewPropertyID.POSITION);
+				for( local k = mot.key; k; k = k.next){
+					k.p[0] += dp[0];
+					k.p[1] += dp[1];
+				}
+				view.moveFrame( null, view.framepos);
+				view.updateMatrix();
+			}
 		}
 	}
 
@@ -78,8 +87,8 @@
 
 	function OP_SelectSKViews( editor, sellist){
 		return @() { 
-			editor.refresh();
 			editor.setSelection( sellist);
+			editor.refresh();
 		}
 	}
 

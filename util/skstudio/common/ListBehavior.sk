@@ -674,6 +674,11 @@ class TreeBehavior extends ListBehavior
 		return super.refreshItems();
 	}
 
+	function isExpanded( item){
+		local v = getItemView( item);
+		return ( v && item["isdir"] && expands[ item]);
+	}
+
 	//	指定したアイテムを展開する。既にツリー上に存在するアイテムで更にディレクトリになっている場合のみ有効。
 	//	
 	function expandItem( item, anim=false){

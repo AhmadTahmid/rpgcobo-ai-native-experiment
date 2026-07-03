@@ -1014,6 +1014,14 @@ class VoiceSelectPopup extends Popup
 			close();
 			break;
 		}
+		case "btn_ok":
+		{
+			retid = voicelist.getSelectedItems()[0]["id"];
+			ret = 1;
+			close();
+			e.consume();
+			break;
+		}
 		case "sndlist":
 		{
 			local cmd = e.actioncmd;
@@ -1028,7 +1036,7 @@ class VoiceSelectPopup extends Popup
 			break;
 		}
 		}
-		super.actionevent( e);
+		if( !e.consumed) super.actionevent( e);
 	}
 
 	function playvoice( id){

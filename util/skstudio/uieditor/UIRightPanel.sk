@@ -268,32 +268,39 @@ class UIRightPanel
 			break;
 		case ITEM_SORT:
 		{
+			if( viewtree.isExpanded( cmd.to) && cmd.way==1){	//	グループが展開されてて、グループの直後に挿入する場合は子の先頭に挿入
+				cmd.to = cmd.to.children[0];
+				cmd.way = -1;
+			}
 			editor.moveViews( cmd.from, cmd.to, cmd.way);
 			refresh();
 			break;
 		}
 		case ACTION_PERFORMED:
 			if( e.isMouseDown( BUTTON2_MASK)){
-				showRename( cmd);
-			}
-			//	リストアイテムをダブルクリックしたらそのアイテムがactiomcmd
-			//	チェックボックスなんかだと{"idx":4,"src":"GPUIButton:0x000001EC62F3D410","item":"SKGroupView:0x000001EC60ECA020","itemview":"SKLibView:0x000001EC62F3E020"}
-			local src = e.actioncmd["src"];
-			if( src){
-				local v = e.actioncmd.item;
-				local redo = [], undo = [];
-				local lflags = v.layerflags;
-				if( src["name"] == "visichk"){
-					lflags = lflags ^ 1;
+				if( cmd){
+					showRename( cmd);
 				}
-				if( src["name"] == "lockchk"){
-					lflags = (lflags&~6) | ((((lflags>>1)+1)%3)<<1);
+			}else{
+				//	リストアイテムをダブルクリックしたらそのアイテムがactiomcmd
+				//	チェックボックスなんかだと{"idx":4,"src":"GPUIButton:0x000001EC62F3D410","item":"SKGroupView:0x000001EC60ECA020","itemview":"SKLibView:0x000001EC62F3E020"}
+				local src = cmd["src"];
+				if( src){
+					local v = cmd.item;
+					local redo = [], undo = [];
+					local lflags = v.layerflags;
+					if( src["name"] == "visichk"){
+						lflags = lflags ^ 1;
+					}
+					if( src["name"] == "lockchk"){
+						lflags = (lflags&~6) | ((((lflags>>1)+1)%3)<<1);
+					}
+					redo .. OP_SKViewFlags( v, lflags);
+					undo .. OP_SKViewFlags( v, v.layerflags);
+					editor.submitOp( redo, undo);
+					refresh();
+					editor.canvas.refresh();
 				}
-				redo .. OP_SKViewFlags( v, lflags);
-				undo .. OP_SKViewFlags( v, v.layerflags);
-				editor.submitOp( redo, undo);
-				refresh();
-				editor.canvas.refresh();
 			}
 			break;
 		}
@@ -577,10 +584,6 @@ class UIRightPanel.UIActionEdit
 			}
 			break;
 		}
-	}
-
-	function pasteAction( n, act){
-
 	}
 
 	function showContextMenu( e){
