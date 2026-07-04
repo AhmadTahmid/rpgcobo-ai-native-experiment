@@ -136,7 +136,20 @@ local ttsmodellist = [
 	geminivo( "Sadachbia", "Lively", 0), geminivo( "Sadaltager", "Knowledgeable", 0), geminivo( "Sulafat", "Warm", 1),
 ];
 
-
+local wavvoicelist(){
+	local ret = [];
+	local fn( r){
+		if( r.isdir){
+			foreach( c in r.getList()) fn( c);
+		}else{
+			if( r.name.endsWith( ".ogg")){
+				ret .. ({ lbl=r.path.substring( 16), icon="\ue029", val=r.path});
+			}
+		}
+	}
+	fn( ::getResource( "/resource/voice"));
+	return ret;
+}
 
 ::voiceconf_changed <- false;		//	ボイスが編集されて保存された時にtrue
 
@@ -166,6 +179,14 @@ class ResEditorVoice extends EditorViewBase
 			{ pid="text", lbl="$T.lbl_text", type=STRING, multiline=3, cnt="cnt6.ui"},
 		]
 	};
+	
+	static wavpropdef = {
+		name = "$T.lbl_voice",
+		props = [
+			{ pid="key", lbl="$T.lbl_key", type=STRING, },
+			{ pid="wav", lbl="$T.lbl_file", type=LIST, list=wavvoicelist, cnt="cnt6.ui", },
+		]
+	}
 
 	//	ノーマルボイスのプロパティ　は後回し！
 	
@@ -213,7 +234,15 @@ class ResEditorVoice extends EditorViewBase
 	static function setvoiceviewfunc( la, v, i){
 		local ed = la.ref;
 		v.setValue( "key", i.key);
-		v.setValue( "text", i["text"] || (d["wav"]?d.wav.substring( d.wav.lastIndexOf( "/")+1):""));
+		if( i["wav"]){
+			if( i.wav.startsWith( "/resource/voice/")){
+				v.setValue( "text", i.wav.substring( 16));
+			}else{
+				v.setValue( "text", i.wav);
+			}
+		}else{
+			v.setValue( "text", i["text"]);
+		}
 		local lc = la.ref.sellang;	//	選択言語
 		local va = la.ref.selitem.data;	//	ボイスアクター
 		local path = getVoicePath( va, i, lc), ovdata = ed.getTTSVoiceData( path);
@@ -268,6 +297,8 @@ class ResEditorVoice extends EditorViewBase
 		pager.setPageNum( caps / 100);
 		pager.setPage( 0);
 		setPage( 0);
+
+		addEventListener( DROPTARGET_EVENT, dndevent);
 	}
 
 	function setActive( b){
@@ -295,6 +326,9 @@ class ResEditorVoice extends EditorViewBase
 	function refreshItem( item){
 		local i = itemlist.items.indexOf( item);
 		if( i >= 0) itemlist.refreshItem( i);
+		if( selitem == item){
+			itemSelected( selitem);
+		}
 	}
 	
 	function itemSelected( item){
@@ -362,7 +396,7 @@ class ResEditorVoice extends EditorViewBase
 			::skstudio.updateChangeFile( this);
 			return true;
 		case "menu_edit_copy":
-			copy();
+			copyVoiceActor();
 			return true;
 		case "menu_edit_paste":
 			paste( getClipboard( "voice"));
@@ -430,19 +464,22 @@ class ResEditorVoice extends EditorViewBase
 		local menudata = [
 			{ id="copy", lbl="$T.menu_edit_copy", icon="\ue14d" },
 			{ id="paste", lbl="$T.menu_edit_paste", icon="\ue14f", disable=!cbdata},
+			"-",
+			{ id="del", lbl="$T.lbl_delete", icon="\ue14e", disable=!isValidData( selitem["data"]) },
 		]
 		local ret = MenuPopup.run( menudata);
 		switch( ret["id"]){
-		case "copy": return copy();
-		case "paste": return paste( cbdata);
+		case "copy": return copyVoiceActor();
+		case "paste": return pasteVoiceActor( cbdata);
+		case "del": return deleteVoiceActor( selitem);
 		}
 	}
 
-	function copy(){
+	function copyVoiceActor(){
 		putClipboard( "voice", selitem);
 	}
 
-	function paste( cbdata){
+	function pasteVoiceActor( cbdata){
 		if( cbdata){
 			local item = selitem, resid = selitem.id, d = data[resid], oldd = deepclone( d), self = this;
 			local newd = cbdata.data;
@@ -461,6 +498,26 @@ class ResEditorVoice extends EditorViewBase
 			submitOp( redo, undo, null);	//	trk無し
 			refresh();
 		}
+	}
+
+	function deleteVoiceActor( va){
+		local resid = va.id, d = data[resid], self = this;
+		local litem = allitems.find( @( v) v.id==resid);
+		local empva = makeempty();
+		local redo = [@(){
+			delete self.data[resid];
+			litem.data = empva;
+			self.itemlist.refreshItems();
+			self.refreshItem( litem);
+		}];
+		local undo = [@(){
+			self.data[resid] <- d;
+			litem.data = d;
+			self.itemlist.refreshItems();
+			self.refreshItem( litem);
+		}];
+		submitOp( redo, undo, null);	//	trk無し
+		refresh();
 	}
 	
 	function propevent( e){
@@ -485,31 +542,77 @@ class ResEditorVoice extends EditorViewBase
 				}
 			}else
 			if( e.isMouseDown( BUTTON2_MASK)){
+				if( e.actioncmd){
+					voicelist.setSelectedItem( e.actioncmd);
+				}
 				showVoiceContextMenu( e);
 			}else{
-				local src = voicelist.getItemView( cmd);
-				local ret = VoicePropertyEditPopup.run2( src, ttspropdef, cmd);
-				if( ret && (ret.data<>cmd || ret.ovdata<>getTTSVoiceData( ret.path))){
-					local self = this;
-					local oldov = getTTSVoiceData( ret.oldpath);
-					local data = selitem.data, list = data[sellang].list;
-					local i = list.indexOf( cmd);
-					local redo = [@(){
-						list[i] = ret.data;
-						if( ret.ovdata) self.ovdatamap[ret.path] <- ret.ovdata;
-						self.updateVoiceList();
-					}];
-					local undo = [@(){
-						list[i] = cmd;
-						if( oldov) self.ovdatamap[ret.oldpath] <- oldov;
-						self.updateVoiceList();
-					}];
-					submitOp( redo, undo, null);
+				if( cmd["wav"]){
+					editWavVoice( cmd);
+				}else{
+					editTTSVoice( cmd);
 				}
 			}
 			break;
 		case ITEM_SELECTED:
 			break;
+		case ITEM_REMOVE:
+			if( cmd[0]){
+				deleteVoiceOp( selitem.id, sellang, cmd[0]);
+			}
+			break;
+		case ITEM_SORT:
+		{
+			local resid = selitem.id, lc = sellang;
+			local self = this;
+			local data = this.data[resid], list = data[lc].list;
+			local olddata = clone list, newdata = ::applyItemSwap( clone list, e);
+			local redo = [@(){ list.clear() ... newdata; self.updateVoiceList(); }];
+			local undo = [@(){ list.clear() ... olddata; self.updateVoiceList(); }];
+			submitOp( redo, undo);
+			break;
+		}
+		}
+	}
+
+	function editTTSVoice( vo){
+		local src = voicelist.getItemView( vo);
+		local ret = TTSVoicePropertyEditPopup.run2( src, ttspropdef, vo);
+		if( ret && (ret.data<>vo || ret.ovdata<>getTTSVoiceData( ret.path))){
+			local self = this;
+			local oldov = getTTSVoiceData( ret.oldpath);
+			local data = selitem.data, list = data[sellang].list;
+			local i = list.indexOf( vo);
+			local redo = [@(){
+				list[i] = ret.data;
+				if( ret.ovdata) self.ovdatamap[ret.path] <- ret.ovdata;
+				self.updateVoiceList();
+			}];
+			local undo = [@(){
+				list[i] = vo;
+				if( oldov) self.ovdatamap[ret.oldpath] <- oldov;
+				self.updateVoiceList();
+			}];
+			submitOp( redo, undo, null);
+		}
+	}
+
+	function editWavVoice( vo){
+		local src = voicelist.getItemView( vo);
+		local ret = PropertyEditPopup.run( src, wavpropdef, vo);
+		if( ret && ret<>vo){
+			local self = this;
+			local data = selitem.data, list = data[sellang].list;
+			local i = list.indexOf( vo);
+			local redo = [@(){
+				list[i] = ret;
+				self.updateVoiceList();
+			}];
+			local undo = [@(){
+				list[i] = vo;
+				self.updateVoiceList();
+			}];
+			submitOp( redo, undo, null);
 		}
 	}
 
@@ -517,16 +620,97 @@ class ResEditorVoice extends EditorViewBase
 	function showVoiceContextMenu( e){
 		local menudata = [
 			{ id="add_tts", lbl="$T.lbl_addttsvoice", icon="\ue91f" },
-			{ id="add_wav", lbl="$T.lbl_addsndvoice", icon="\ue029" },
+			{ id="add_wav", lbl="$T.lbl_addsndvoice", icon="\ue029", 
+				submenu = @(){
+					local a = [
+						{ lbl="$T.lbl_import_file", icon="\ueb82", id="import_wav" }
+					];
+					local wa = wavvoicelist();
+					if( length( wa)){
+						a .. "-" ... wa.map( @( v)+{ lbl=v.lbl, icon=v.icon, val=v.val, id="add_wav"})
+					}
+					return a;
+				}
+			},
 		]
+		local vo = e.actioncmd;
+		local cbdata = getClipboard( "voiceitem");	//	開くたびにクリップボード取得しちゃうけどまーだいじょぶかな
+		if( vo){
+			menudata ... [
+				"-",
+				{ id="copy", lbl="$T.menu_edit_copy", icon="\ue14d" },
+				{ id="paste", lbl="$T.menu_edit_paste", icon="\ue14f", disable=!cbdata},
+				"-",
+				{ id="del", lbl="$T.lbl_delete", icon="\ue14e" }
+			];
+		}else{
+			menudata ... [
+				"-",
+				{ id="paste", lbl="$T.menu_edit_paste", icon="\ue14f", disable=!cbdata},
+			];
+		}
 		local ret = MenuPopup.run( menudata);
 		switch( ret["id"]){
 		case "add_tts":
 			addTTSVoiceOp( selitem.id, sellang);
 			break;
 		case "add_wav":
+			addWavVoiceOp( selitem.id, sellang, ret.val);
+			break;
+		case "import_wav":
+		{
+			local sndpath = skstudio.showFileOpen( { filter=["*.wav","*.ogg","*.mp3","*.m4a","*.flac"], abspath=true, pathgroup="voice" });
+			if( sndpath){
+				local f = FileRef( sndpath);
+				local r = showImportSound( f);
+				if( r) addWavVoiceOp( selitem.id, sellang, r.path);
+			}
 			break;
 		}
+		case "copy":
+			putClipboard( "voiceitem", vo);
+			break;
+		case "del":
+			deleteVoiceOp( selitem.id, sellang, vo);
+			break;
+		case "paste":
+		{
+			local resid = selitem.id, lc = sellang;
+			local self = this;
+			local data = this.data[resid], list = data[lc].list;
+			local newd = cbdata;
+			//	
+			local redo = [@(){
+				list .. newd;
+				self.updateVoiceList();
+			}];
+			local undo = [@(){
+				list.removeValue( newd);
+				self.updateVoiceList();
+			}];
+			submitOp( redo, undo, null);	//	trk無し
+			refresh();
+			break;
+		}
+		}
+	}
+
+	function deleteVoiceOp( resid, lc, vo){
+		local self = this;
+		local data = this.data[resid], list = data[lc].list;
+		local idx = list.indexOf( vo);
+		if( idx < 0) return;
+		local redo = [@(){
+			delete list[idx];
+			self.updateVoiceList();
+			self.voicelist.refreshItems();
+		}];
+		local undo = [@(){
+			list[idx] <- vo;
+			self.updateVoiceList();
+			self.voicelist.refreshItems();
+		}];
+		submitOp( redo, undo, null);	//	trk無し
 	}
 
 	//	
@@ -537,9 +721,9 @@ class ResEditorVoice extends EditorViewBase
 			return { id="add", icon=v.icon, lbl=rtf( disable?"[#666]"..v.name : v.name), lang=v, disable=disable };
 		});
 		local menudata = [
-			{ lbl="言語を追加", submenu = addlangmenu },
+			{ lbl="$T.lbl_addlang", submenu = addlangmenu },
 			"-",
-			{ lbl="言語を削除", id="del"}
+			{ lbl="$T.lbl_dellang", id="del"}
 		];
 		local self = this;
 		local ret = MenuPopup.run( menudata);
@@ -614,6 +798,24 @@ class ResEditorVoice extends EditorViewBase
 		submitOp( redo, undo, null);	//	trk無し
 	}
 
+	function addWavVoiceOp( resid, lc, wav){
+		local self = this;
+		local data = this.data[resid], list = data[lc].list;
+		local vo = { key="VOICE", wav=wav };
+		local redo = [@(){
+			list .. vo;
+			self.updateVoiceList();
+			self.itemlist.refreshItems();
+		}];
+		local undo = [@(){
+			list.removeValue( vo);
+			self.updateVoiceList();
+			self.itemlist.refreshItems();
+		}];
+		submitOp( redo, undo, null);	//	trk無し
+	}
+
+
 	//	
 	function updateListItemView( resid){
 		local i = itemlist.items.findi( @( v) v.id==resid);
@@ -638,10 +840,76 @@ class ResEditorVoice extends EditorViewBase
 		if( ovdatamap[path]) return ovdatamap[path];
 		return ::getResourceContent( path);
 	}
+
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	//	dnd
+
+	function acceptDrag( e){
+		return false;
+	}
+	
+	function isDropable( f){
+		local n = f.name; n = n.substring( n.lastIndexOf( "."+1)).toLowerCase();
+		return (#["wav","ogg","mp3","m4a",]).contains( n);
+	}
+
+	function acceptDrop( ds, x, y){
+		if( ds instanceof FileDragSource){
+			local a = ds.filelist;
+			foreach( f in a){
+				if( isDropable( f)) return true;
+			}
+		}
+		return false;
+	}
+
+	function dndevent( e){
+		switch( e.id){
+		case TARGET_DRAG_ENTER:
+		case TARGET_DRAG_OVER:
+			break;
+		case TARGET_DRAG_EXIT:
+			break;
+		case TARGET_DROP:
+			local f = e.dragsrc.filelist[0];
+			showImportSound( f);
+			break;
+		}
+	}
+	
+	//	ファイルを指定してインポートダイアログ表示
+	//	※undo不可
+	function showImportSound( f){
+		local d = SoundImportDialog.prepareImport( f, true);	//	oggonly
+		if( d){
+			local ret = SoundImportDialog.run( d);
+			if( ret){
+				local c = ret.conv, fn = ret.name;
+				if( fn[0] == '/') fn = fn.substring( 1);
+				local dn = "/resource/voice/" .. fn.substring( 0, fn.lastIndexOf( "/")+1);
+				if( dn.endsWith( "/")) dn = dn.substring( 0, length( dn)-1);
+				fn = fn.substring( fn.lastIndexOf( "/")+1);
+				local pr = getResource( dn);
+				if( !pr){	//	ディレクトリが無い場合は作る
+					local df = FileRef( ::resroot.file, dn.substring( 1));
+					df.mkdirs();
+					::skstudio.fileview.refreshDir( "/resource/voice");
+					pr = getResource( dn);
+				}
+				local ext = (c=="none")?fn.substring( fn.lastIndexOf( ".")) : (c=="OGG") ? ".ogg" : ".wav";
+				local r = pr.create( fn..ext, ret.outbb);
+				::skstudio.fileview.refreshDir( "/resource/voice");
+				Popups.showInfo( "$T.pop_sndimport");
+				refresh();
+				return r;
+			}
+		}
+	}
 }
 
 //	
-class VoicePropertyEditPopup extends PropertyEditPopup
+class TTSVoicePropertyEditPopup extends PropertyEditPopup
 {
 	static POPUPUIPATH = srcdir .. "/ui/voiceproppopup.ui";
 

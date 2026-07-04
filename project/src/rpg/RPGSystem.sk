@@ -762,6 +762,7 @@ function getVoiceFile( va, vo, lang){
 }
 
 function getVoicePath( va, vo, lang){
+	if( vo["wav"]) return vo["wav"];
 	return "/resource/voice_tts/" .. getVoiceFile( va, vo, lang);
 }
 

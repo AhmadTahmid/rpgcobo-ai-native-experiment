@@ -1034,6 +1034,8 @@
 	"lbl_addttsvoice"					: {"ja":"TTSボイスを追加", "en":"Add TTS Voice"}
 	"lbl_addsndvoice"					: {"ja":"音声ボイスを追加", "en":"Add Sound Voice"}
 	"lbl_genvoice"						: {"ja":"ボイス生成", "en":"Generate Voice"}
+	"lbl_addlang"						: {"ja":"言語を追加", "en":"Add Language"}
+	"lbl_dellang"						: {"ja":"言語を削除", "en":"Delete Language"}
 	"lbl_wall"							: {"ja":"壁", "en":"Wall"}
 	"lbl_floor"							: {"ja":"床", "en":"Floor"}
 	"lbl_poke"							: {"ja":"はみ出し", "en":"Poke"}
@@ -1299,6 +1301,24 @@
 	"tmpl_popen_blender_addon"			: {"ja":"[#ddd]$name のアドオンをインストール中\n", "en":"[#ddd]Installing $name add-ons"}
 	"pop_relaunch"						: {"ja":"RPG-Coboがリロードされました", "en":"RPG-Cobo has been reloaded"}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	//	contest
+
+	"lbl_contest_noentry"				: {"ja":"[#bff][i]エントリーされていません\n[n][b]あなたのRPGをコンテストに応募しましょう！", "en":"[#bff][i]Not submitted\n[n][b]Submit your RPG to the contest!"}
+	"lbl_contest_entry"					: {"ja":"このプロジェクトをエントリー", "en":"Submit to Contest"}
+	"lbl_contest_details"				: {"ja":"コンテストの詳細を確認", "en":"Check contest details"}
+
+	"lbl_contest_comment"				: {"ja":"コメントや補足事項がある方は記入してください", "en":"Please enter any comments or additional information"}
+	"lbl_contest_note"					: {"ja":"※応募の前に、予めコンテストの詳細を確認してください。", "en":"Please check the contest details before submitting"}
+	"lbl_uploading_project"				: {"ja":"プロジェクトをアップロード中…", "en":"Uploading Project..."}
+	"lbl_uploading_project_done"		: {"ja":"プロジェクトのアップロードが完了しました", "en":"Project upload completed."}
+	"lbl_uploading_project_error"		: {"ja":"プロジェクトのアップロードが失敗しました", "en":"Project upload failed."}
+	"lbl_uploading_outofdate"			: {"ja":"コンテストの応募期限が過ぎています", "en":"The contest submission period has ended."}
+	
+	"tmpl_contest_hasentry"				: {"ja":"[#eff][b]エントリー済[n]： $title\n$time   $size", "en":"[#eff][b]Submitted[n]： $title\n$time   $size"}
+	"tmpl_contest_entry"				: {"ja":"このプロジェクトでコンテストに応募しますか？", "en":"Do you want to submit this Project to the Contest?"}
+	"tmpl_contest_dialog_title"			: {"ja":"[#bff][b]${v}[O] にプロジェクトをエントリー", "en":"Submit Project for [#bff][b]${v}[O]"}
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	//	UI
 

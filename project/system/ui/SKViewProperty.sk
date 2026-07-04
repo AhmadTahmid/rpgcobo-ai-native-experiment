@@ -229,7 +229,7 @@ local resizetype = ["0:OFF","1:ON","2:ON+Anime"]
 ::SKVP .. { pid=SYNC_ANIMATION,	lbl="$T.lbl_syncanime",		type=BOOL,		};
 ::SKVP .. { pid=SCALEWEIGHT,		lbl="$T.lbl_scalerate",		type=SCALAR,	range=(0,1), defval=0.5, q=10};
 
-::SKVP .. { pid=METADATA,		lbl="$T.lbl_meatdata",			type=STRING, multiline=true };
+::SKVP .. { pid=METADATA,		lbl="$T.lbl_meatdata",			type=STRING, multiline=6, cnt="cnt6v.ui" };
 ::SKVP .. { pid=STRETCHALIGN,	lbl="$T.lbl_align",			type=ALIGN_STRETCH};
 ::SKVP .. { pid=TIPS,			lbl="$T.lbl_tips",			type=STRING, };
 

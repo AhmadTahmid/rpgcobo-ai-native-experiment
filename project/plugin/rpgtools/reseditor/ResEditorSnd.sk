@@ -792,6 +792,7 @@ class SoundImportDialog extends UndoableDialog
 		proplist = PropertyListBehavior( view.findChild( "proplist"), null);
 		proplist.listview.addEventListener( ACTION_EVENT, propevent);
 		proplist.listview.addEventListener( ITEM_EVENT, propevent);
+		proplist.immediate = true;
 		proplist.ref = this;
 		view.setValue( "infile", rtf( "[b]%S[n]    %d:%02d    %dch    %dHz    %S" % (d.f.name, d.pcm.time/1000, (d.pcm.time/10)%100, d.pcm.ch, d.pcm.freq, sizestr( d.orgbb.size))));
 		view.setValue( "outsize", "");
@@ -869,9 +870,12 @@ class SoundImportDialog extends UndoableDialog
 			break;
 		case "btn_play":
 			if( ss){
-				ss.stop();
+				if( ss.getState() != SK_SND_DONE){
+					ss.stop();
+					return;
+				}
 				ss = null;
-			}else
+			}
 			if( wav){
 				local m = ::soundmanager;
 				ss = m.ctx.createWaveSoundSource( wav);
