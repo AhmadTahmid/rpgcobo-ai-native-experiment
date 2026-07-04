@@ -341,6 +341,7 @@ class FileResource extends Resource
 
 	function create( name, data){
 		if( !isdir) throw Exception( "unable to create file : " .. path);
+		getList();
 		local f = FileRef( file, name);
 		f.save( data);
 		f = FileRef( file, name);
@@ -350,7 +351,6 @@ class FileResource extends Resource
 		}else{
 			r.file = f;
 		}
-		getList();
 		list .. r;
 		return r;
 	}
@@ -569,7 +569,9 @@ function runsk( path){
 {	//	sakana.proj, permission
 	local r = ::getResource( "/sakana.proj");
 	::sakana <- r? decodeJSON( r.loadData()) : { appname = "sakana", };
-	skSetPermissionMap( sakana[sakana["permission"]] || sakana["permission"], { cdir=skGetCurrentDir(), bindir=skGetBinBaseDir(), datadir=skGetDataDir(), cachedir=skGetCacheDir(), docdir=skGetDocumentDir(), host=skGetHostName(), user=skGetUserName(), });
+	local p = sakana[sakana["permission"]] || sakana["permission"];
+	foreach( i, v in sakana["permission_ex"]){ if( p[i]) p[i] = v ... p[i]; }	//	前に足すことで優先。
+	skSetPermissionMap( p, { cdir=skGetCurrentDir(), bindir=skGetBinBaseDir(), datadir=skGetDataDir(), cachedir=skGetCacheDir(), docdir=skGetDocumentDir(), host=skGetHostName(), user=skGetUserName(), });
 }
 
 {	//	load system

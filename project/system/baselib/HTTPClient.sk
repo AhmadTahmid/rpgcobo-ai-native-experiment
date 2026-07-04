@@ -286,8 +286,8 @@ class HTTPClient
 				}else{
 					local senderlen = sender.httpGetContentLength();
 					for( ;;){
-						bbuf.size = 0;
-						local w = sender.httpSend( bbuf, 1024*1024*15);		//	15MBまで可能
+						bbuf.resize( 0);
+						local w = sender.httpSend( bbuf, 1024*1024*2);	//	2MBずつ。これで120msもかかる。。。
 						bbuf.pos = 0;
 						if( listener){	//	listenerがある場合は送信状況も監視しないと
 							con.write( bbuf);
@@ -301,6 +301,7 @@ class HTTPClient
 							con.write( bbuf);
 						}
 						writtenlen += w;
+						if( verbose) printf( "HTTPClient sent %d / %d\n", writtenlen, senderlen);
 						if( w == 0 || writtenlen >= senderlen) break;	//	owari!
 						suspend();	//	送信サイズが大きいと固まるのでsuspendする
 					}
@@ -416,7 +417,7 @@ class HTTPClient
 				readlen = 0;
 				local _t = skGetTime();
 				local _dl = 0;
-				for( ;;){
+				if( contentlength > 0) for( ;;){	//	contentlengthが0の時は受信しない。
 					local r = recv( bbuf, 0);
 					if( r > 0){
 						receiver.httpReceive( bbuf);
@@ -769,6 +770,7 @@ class HTTPFileSender
 		if( len > 0){
 			local bb = fs.readfor( len);
 			bbuf.putBuffer( bb);
+			len = bb.size;
 		}
 		writesize += len;
 		return len;
