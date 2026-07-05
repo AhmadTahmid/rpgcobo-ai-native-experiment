@@ -3,7 +3,7 @@ local bb1 = ByteBuffer();
 local bb2 = ByteBuffer();
 local bb3 = ByteBuffer();
 local bb4 = ByteBuffer();
-prelexext <- " sk conf pm ptd json trns ";
+prelexext <- " sk conf pm ptd json trns plugsk ";
 patchgen <- 4;
 
 skLoadAddon( "popen");	//	vcdiff.exe
@@ -61,6 +61,7 @@ function getCompressFlag( file, bbuf){
 	case "sk":
 	case "conf":
 	case "trns":
+	case "plugsk":
 		if( size < 1024) return 0;
 		else return SX_DATA_COMP_HIGH;				//	high
 	//	etc( dynamic text )					※何度も解放・読み込みが発生すると仮定。fastで伸張時間を短縮する。

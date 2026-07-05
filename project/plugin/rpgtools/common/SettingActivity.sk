@@ -110,6 +110,21 @@ local saveProjectBackup( outfile, isbg=false){
 	return fn;
 }
 
+//	バックアップ数を制限する。古いものから削除する
+//	※ファイル名のみで自動バックアップか判定しているので、名前を変えると消されたり消されなかったり。。。
+local runLimitBackupCount(){
+	//	バックアップ数の制限
+	local maxnum = ::workspace["backupnum"] ?? 8;
+	local backupdir = FileRef( "backup");
+	local files = backupdir.getList( "backup-*a.zip").sort( @( v) -v.lastmodified);
+	printf( "checkBackupCount %S / %S files=%S\n", length( files), maxnum, encodeJSON( files.map( @( v)[v.name,Date( v.lastmodified).asString()]), 5));
+	while( length( files) > maxnum){
+		local f = files.pop();
+		printf( "Deleting old backup file. %S\n", f.path);
+		f.deleteFile();
+	}
+}
+
 local backupfilename( postfix=""){
 	local d = Date( Date.currentTime() - Date.timezone());
 	local dstr = sprintf( "%02d%02d%02d-%02d%02d", d.tm_year%100, d.tm_mon+1, d.tm_mday, d.tm_hour, d.tm_min);
@@ -127,14 +142,15 @@ local runAutoBackup(){
 	local tmpf = FileRef( "tmp/autobackup.zip");
 	local prgfunc( r, sz){}	//	noop
 	local t0 = skGetTime();
-	printf( "Auto Backup start...\n");
-	saveProjectBackup( tmpf, true) ( prgfunc);
 	local bf = FileRef( "backup/"..fn);
+	printf( "Auto Backup start... file=%S\n", bf.path);
+	saveProjectBackup( tmpf, true) ( prgfunc);
 	tmpf.moveTo( bf);
 	printf( "Auto Backup done. time=%S file=%S\n", skGetTime( t0), bf.path);
+	runLimitBackupCount();	//	古いバックアップを削除
 }
 
-local checkAutoBackup(){q
+local checkAutoBackup(){
 	local t = Date.currentTime();
 	local h = ::workspace["autobackup"] ?? 24;
 	if( !::workspace["autobackuped"]){
