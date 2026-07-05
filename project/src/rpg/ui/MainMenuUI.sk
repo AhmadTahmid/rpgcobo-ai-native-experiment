@@ -509,12 +509,15 @@ RPGSystem.ui ..
 			p.updateScoreMap();
 		}
 
+		//	排他装備は上から優先されていく。もっとちゃんと計算したほうが良いような気も。。。
 		local besteq( p){
 			local list = [...rpgstat.weapons, ...rpgstat.armors, ...p.equips];
+			local excludes = 0;
 			foreach( slotidx, _ in p.equips){
-				local a = p.getEquipableItems( slotidx, list);
+				local a = p.getEquipableItems( slotidx, list).filter( @( eq) !(excludes & eq["data"]["excludes"]));
 				local eq = getBestEquip( a);
 				p.equips[slotidx] = eq;
+				excludes |= eq["data"]["excludes"];	//	bitsがどんどん増えていく
 				if( eq) list.removeValue( eq);
 			}
 			p.updateOptions();
@@ -620,26 +623,28 @@ RPGSystem.ui ..
 			}
 			"select" : @( e){	//	選択時に説明表示＋ステータスに差分表示
 				if( "item" in e.item){
+					reseteq( p1, orgeqs);
 					local item = e.item["item"];
 					p1.setEquip( slotidx, item);	//	装備変更
 					view.setValue( "desc", item ? RPGSystem.getDescription( item) : "");
 				}
 			}
 			"back" : @( e){
+				reseteq( p1, orgeqs);
 				::playSound( "SE004");
 				return "back";
 			}
 		});
 		//	
 		if( ret == "back"){
-			//	キャンセルされたら装備を元に戻す
-			p1.setEquip( slotidx, curitem);	
+			//	キャンセルされたら装備を元に戻す => "back"の reseteq( p1, orgeqs); でやってる
 		}else{
 			//	装備決定
 			local selitem = ret.item;
 			if( selitem != curitem){
 				swapequip( curitem, selitem);
-				p0.setEquip( slotidx, selitem);
+				local rems = p0.setEquip( slotidx, selitem);
+				foreach( eq in rems) swapequip( eq, null);
 			}
 		}
 		view.action( "slotsel").waitAction();

@@ -777,10 +777,23 @@ class RPGPlayer extends RPGCharaBase
 	}
 	
 	//	指定したスロットの装備を設定する。
+	//	excludesチェックをして、外れる装備を配列にして返す。
 	function setEquip( slotidx, item){	//	int, RPGItem
 		equips[slotidx] = item;
+		local a = null;
+		if( item){	//	排他装備チェック
+			local d = item.data;
+			foreach( i, eq in equips){
+				if( !eq || i==slotidx) continue;
+				if( (eq.data["excludes"]&(1<<d.eqtype)) || (d["excludes"]&(1<<eq.data.eqtype))) {
+					equips[i] = null;
+					if( !a) a = [eq]; else a .. eq;
+				}
+			}
+		}
 		updateOptions();
 		updateScoreMap();
+		return a;
 	}
 
 	//	このキャラの装備している武器のRPGItemを返す。

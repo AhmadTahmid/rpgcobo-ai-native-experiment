@@ -449,12 +449,14 @@ class RPGEventRunner
 					local eq = li.find( @( v) v.dataid==eqid);
 					if( eq){
 						::rpgstat.swapItem( eq, cureq);	//	cureqはリストに入ってないので、cureqがリストに入ってeqはあぶれる
-						p.equips[i] = eq;
+						local rems = p.setEquip( i, eq);
+						foreach( eq in rems) ::rpgstat.addItem( eq);
 						::rpgvar.ERROR = 0;
 					}
 				}else{
 					if( cureq) ::rpgstat.addItem( cureq);
-					p.equips[i] = RPGObject.create( eqid);
+					local rems = p.setEquip( i, RPGObject.create( eqid));
+					foreach( eq in rems) ::rpgstat.addItem( eq);
 					::rpgvar.ERROR = 0;
 				}
 			}

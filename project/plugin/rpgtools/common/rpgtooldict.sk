@@ -786,6 +786,9 @@
 	"lbl_pinchfriends"					: {"ja":"ピンチの味方", "en":"Friends in a pinch"}
 	"lbl_atkresult"						: {"ja":"攻撃結果", "en":"Attack Result"}
 
+	"lbl_baseskill"						: {"ja":"基本スキル", "en":"Basic Skill"}
+	"lbl_eqexcludes"					: {"ja":"同時装備不可", "en":"Cannot equip together"}
+
 	"lbl_changeable"					: {"ja":"変更可", "en":"Changeable"}
 	"lbl_unchangeable"					: {"ja":"変更不可", "en":"Unchangeable"}
 	

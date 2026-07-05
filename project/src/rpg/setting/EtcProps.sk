@@ -239,8 +239,19 @@ weaponprops .. {
 };
 
 weaponprops .. {
+	pid = "excludes"
+	lbl = "$T.lbl_eqexcludes"
+	
+	type = CHECKBITS
+	list = @( pl) typelist( "eqtype")
+
+	defval = 0
+};
+
+
+weaponprops .. {
 	pid = "skillid"
-	lbl = "基本スキル"
+	lbl = "$T.lbl_baseskill"
 	
 	type = DATAID
 	datatype = ["skill"],
@@ -272,6 +283,16 @@ armorprops .. {
 	type = SCALAR
 	range = (0,9999)
 	defval = 100
+};
+
+armorprops .. {
+	pid = "excludes"
+	lbl = "$T.lbl_eqexcludes"
+	
+	type = CHECKBITS
+	list = @( pl) typelist( "eqtype")
+
+	defval = 0
 };
 
 armorprops .. memoprop
