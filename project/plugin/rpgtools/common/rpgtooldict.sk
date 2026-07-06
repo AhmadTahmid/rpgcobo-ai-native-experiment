@@ -1307,9 +1307,12 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	//	contest
 
+	"pop_loginforcontest"				: {"ja":"コンテストへの参加にはログインが必要です。", "en":"Login is required to join to the contest."}
+
 	"lbl_contest_noentry"				: {"ja":"[#bff][i]エントリーされていません\n[n][b]あなたのRPGをコンテストに応募しましょう！", "en":"[#bff][i]Not submitted\n[n][b]Submit your RPG to the contest!"}
 	"lbl_contest_entry"					: {"ja":"このプロジェクトをエントリー", "en":"Submit to Contest"}
 	"lbl_contest_details"				: {"ja":"コンテストの詳細を確認", "en":"Check contest details"}
+	"lbl_contest_error"					: {"ja":"コンテストの情報が取得できませんでした", "en":"Failed to retrieve contest information."}
 
 	"lbl_contest_comment"				: {"ja":"コメントや補足事項がある方は記入してください", "en":"Please enter any comments or additional information"}
 	"lbl_contest_note"					: {"ja":"※応募の前に、予めコンテストの詳細を確認してください。", "en":"Please check the contest details before submitting"}

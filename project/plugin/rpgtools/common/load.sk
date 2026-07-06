@@ -16,3 +16,4 @@ runsk( "AccountActivity.sk");
 runsk( "SettingActivity.sk");
 runsk( "DebugActivity.sk");
 runsk( "BuildActivity.sk");
+runsk( "ContestActivity.sk");

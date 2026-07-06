@@ -19,7 +19,7 @@
 		{ "name":"data"  , "includes":["/**"] }
 	],
 	"permission_lv2":{
-		"https":[["rpg-cobo.com",1],["*.rpg-cobo.com",1],["*.googleapis.com",1],["translate.google.com",1],0],
+		"https":[["rpg-cobo.com",1],["*.rpg-cobo.com",1],["*.googleapis.com",1],["translate.google.com",1],["*.3c9ec7556d550b1dde3df39fde6990cc.r2.cloudflarestorage.com",1],0],
 		"connect":[["127.0.0.1/*",3],0],
 		"bind":[["127.0.0.1/*",3],["192.168.*.*/*",3],["172.16.*.*/*",3],0],
 		"file":[["**/{sakana.proj,*.{exe,bat,ps1,psm1,dll}}",4,1],["**/*.local",4,1],["$cdir/**",7,1],["$datadir/**",7,1],["$cachedir/**",7,1],4],

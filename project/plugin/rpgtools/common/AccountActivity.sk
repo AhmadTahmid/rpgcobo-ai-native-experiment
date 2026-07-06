@@ -56,6 +56,8 @@ class Account extends Serializable
 		build_status = "${buildserv}/status/$session"
 		build_download = "${buildserv}/download/$session"
 		build_clean = "${buildserv}/close/$session"
+		contest_stat = urlenv.url_user.."/api/contest_stat?id=$id&token=$token"
+		contest_entry = urlenv.url_user.."/api/contest_entry"	//	POST
 	};
 
 	<ser_o> uid = null;			//	email | steamid
@@ -285,7 +287,7 @@ class LoginDialog extends Dialog
 				if( f != fore){ if( fore = f) break; }	//	アプリがアクティブになったらbreak
 			}
 			local ret = ::account.requestAPI({ api="checkapplogin", reqid=reqid, });
-			// printf( "checkapplogin.............. result:%S\n", encodeJSON( ret, 5));
+			printf( "checkapplogin... reqid:%S result:%S\n", reqid, encodeJSON( ret));
 			if( ret["result"] == "OK"){
 				::account.setAccount( ret.data, true);
 				setDone( ::account);

@@ -1,0 +1,335 @@
+import VirtualKeyCode;
+import ModifiersMask;
+import PropertyType;
+
+////////////////////////////////////////////////////////////////////////////////
+//	
+//	コンテスト
+//	
+//	- まずはrpg-cobo.comに期間中のコンテストを問い合わせる。 https://rpg-cobo.com/contestinfo.json
+//		⇒ { lbl:"第一回 RPG-Cobo 作品コンテスト", period=["2026/07/09 12:00:00","2026/09/08 23:59:59"], id:"2026TGS", url="https://rpg-cobo.com/post/20260709-contest1" }
+//	- ある場合、期間内の場合はアクティビティをregister。
+//	- アクティビティボタンを押したらポップアップ表示。この時、期間外だったら終了表示(JST)
+//	- 提出の状態は https://user.rpg-cobo.com/api/contest_stat?id=xxx&token=xxxxxxxx
+//		⇒ { time:"2026/07/09 11:33:55", path="contest/2026TGS/1xxxxxxx.zip", title="Sample Quest", comment="", confirm="ok"}
+//	- 
+//	- アップロードは POST https://user.rpg-cobo.com/api/contest_entry
+//		⇒ アップロード用のURLが来るのでそこにPUT。
+//	
+
+
+//	コンテストの時間はJST
+local jstime( d){
+	return Date( d.getTime() + (9*60*60));
+}
+
+local localtime( d){
+	local tz = Date.timezone();
+	local ld = Date( Date( d).getTime() - tz);
+	return sprintf( "%04d-%02d-%02d %02d:%02d:%02d(%+d)", ld.tm_year+1900, ld.tm_mon+1, ld.tm_mday, ld.tm_hour, ld.tm_min, ld.tm_sec, -tz/60/60);
+}
+
+local checkperiod( period){
+	local d = jstime( Date());	//	jst時刻を取る
+	local d0 = Date( period[0]), d1 = Date( period[1]);	//	jstで時間が入ってる
+	return d < d0 ? -1 : d > d1 ? 1 : 0;
+}
+
+local urlenv = {
+	url_web = "https://rpg-cobo.com",
+}
+
+{	//	.rpgcobo-env.local
+	local f = FileRef( ".rpgcobo-env.local");
+	if( f.exists()) urlenv ... decodeJSON( f.load());
+}
+
+//	コンテスト情報。設定される
+local contestinfo = {};
+
+
+class ContestDialog extends UndoableDialog
+{
+	comedit = null;
+	zipg = null;
+	
+	//	BuildingDialogに渡す
+	zipfile = null;
+	zipthread = null;
+	buildserv = null;				//	host
+	
+	constructor( v){
+		super( v);
+		zipg = view.findChild( "zipg");
+		zipg.setVisible( false);
+		view.setValue( "msg", "$T.lbl_build_zipping");
+		comedit = view.findChild( "edit");
+		view.setValue( "title", rtf( tmpl( T.tmpl_contest_dialog_title, {v=lang(contestinfo.title)})));
+	}
+
+	function refresh(){
+	}
+
+	function shown(){
+		local g = zipg, rlbl = zipg.findChild( "rlbl");
+		local prgptr = ptr( 0.0);
+		local prgfunc( p, s){
+			if( p > ~prgptr+0.02 || (p>=1.0 && ~prgptr<1.0)){
+				g.anime( p>=2.0 ? 12 : p>=1.0 ? 11 : p*10.0);
+				rlbl.setText( s);
+				prgptr << p;
+				suspend();
+			}
+		}
+		zipg.setVisible( true);
+		zipthread = newthread();
+		zipthread.start( @(){
+			::skstudio.freezeEditorView( true);	//	editorの再描画を抑制して並列処理を高速化
+			startZip( prgfunc);
+			::skstudio.freezeEditorView( false);
+		}, this);
+	}
+
+	//	
+	function startZip( prgfunc){
+		prgfunc( 0.0, "");
+		local t0 = skGetTime();
+		local srcdir = FileRef( ".");
+		//	zipするファイルを集める
+		local ziplist = [];
+		local visitfile( f, chkfn){
+			if( chkfn( f)){
+				local fn = f.name;
+				if( f.isDirectory()){
+					foreach( cf in f.getList()) visitfile( cf, chkfn);
+				}else{
+					ziplist .. f;
+				}
+			}
+		}
+		//	完全な形でアップロードするために、backup, build等の排除可能なもの以外は全て入れる
+		local skipmap = { ".git"=1, "backup"=1, "build"=1, "private"=1, "tmp"=1, "docs"=1, };
+		foreach( f in srcdir.getList()) visitfile( f, @( f) !skipmap[f.name]);
+		//	
+		local num = length( ziplist), size = 0;
+		local bb = ziplist.reduce( @( f, bb){
+			bb.putt( f.path); bb.puti( f.size); bb.putl( f.lastmodified); return bb;
+		}, ByteBuffer());
+		bb.pos = 0;
+		zipfile = FileRef( "tmp/uploading.zip");
+		local hash = bb.hashcode();
+		if( zipfile.exists() && ::buildziphash == hash){
+			printf( "HASH ONAJI! %S\n", hash);
+			size = zipfile.size;
+			goto SKIP;
+		}
+		//
+		//	zip実行。6並列で高速化
+		local zip = ZipWriter( zipfile);
+		local fa = [];
+		for( local l = 0;l < num;l ++){
+			local f = ziplist[l];
+			fa .. (f, ::getRelativePath( srcdir.path, f.path));
+			if( length( fa)>=6 || l==num-1){
+				size += zip.writeLocalFilesAtOnce( fa);
+				fa.clear();
+				prgfunc( l * 1.0 / num, sizestr( size));
+			}
+		}
+		zip.writeCentral();
+		zip.close();
+		zipfile.refresh();
+		printf( "ZIPPED TIME=%S\n", skGetTime( t0));
+		::buildziphash = hash;
+	SKIP:
+		prgfunc( 1.0, sizestr( size));
+		view.findChild( "rung").anime( 1);
+	}
+
+	function getProjectVer(){
+		local f = FileRef( "rpgcobo.ver");
+		if( f.exists()){
+			try{
+				local t = decodeJSON( f.load());
+				return t.tag;
+			}catch( ex){}
+		}
+		return null;
+	}
+
+	function actionevent( e){
+		switch( e.src["name"]){
+		case "btn_run":
+		{
+			if( !Dialogs.confirm( {msg=rtf( "$T.tmpl_contest_entry"), icon="\ue2c3"})) break;
+			doUpload();
+			break;
+		}
+		}
+		super.actionevent( e);
+	}
+
+	function doUpload(){
+		local params = {
+			token = ::account.token,
+			info = {
+				id = contestinfo.id,
+				title = ::conf.setting.title,
+				zipsize = int( zipfile.size),
+				comment = comedit.getText(),
+			},
+		};
+		try{
+			local r = ::account.requestAPI( {api="contest_entry", method="POST", params=params});
+			printf( "contest_entry params=%S result=%S\n", encodeJSON( params, 5), encodeJSON( r, 5));
+			if( r.result != "OK"){
+				Popups.showError( "$T.lbl_uploading_project_error: "..r.error);
+				return;
+			}
+			//	http PUT
+			local self = this;
+			local putproj( prgfunc){
+				local http = HTTPClient();
+				http.listener = @( h, id, arg){
+					switch( id){
+					case "send":
+						local w = arg.w * 1.0 / arg.size;
+						prgfunc( w);
+						break;
+					}
+				}
+				http.verbose = true;
+				http.addHeader( "Content-Type", "application/zip");
+				http.put( r.puturl, HTTPFileSender( self.zipfile));
+				prgfunc( 1.0);
+				ContestPopup.statcache <- null;	//	キャッシュクリア
+				return true;
+			}
+			//	プログレス表示
+			local ret = Dialogs.progress( "$T.lbl_uploading_project", putproj, false);	//	キャンセル不可
+			if( ret instanceof Exception){
+				Popups.showError( "$T.lbl_uploading_project_error");
+			}else{
+				Popups.showInfo( "$T.lbl_uploading_project_done");
+				//	自分も消しちゃう
+				close();
+			}
+		}catch( ex){
+			printexception( ex);
+			Popups.showError( "$T.lbl_uploading_project_error");
+		}
+	}
+
+	function checkCancel( c){
+		if( c == VK_ENTER) return true;	//	enterで始まらんように
+		return super.checkCancel( c);
+	}
+
+	static function run(){
+		local dlg = this( "/plugin/rpgtools/common/ui/contestdialog.ui");
+		dlg.show();
+	}
+}
+
+class ContestPopup extends Popup
+{
+	static UIPATH = "/plugin/rpgtools/common/ui/contestpopup.ui";
+	static statcache = null;
+
+	function init( v){
+		super.init( v);
+		v.setValue( "contestname", contestinfo.title);
+		v.setValue( "stat", "");
+		local btn_entry = v.findChild( "btn_entry");
+		btn_entry.setVisible( false);
+		newthread().start( @(){
+			local r = ContestPopup.statcache;
+			if( !r){
+				r = ::account.requestAPI( {api="contest_stat", token=::account.token, id=contestinfo.id });
+				ContestPopup.statcache <- r;
+				printf( "contest_stat result=%S\n", encodeJSON( r, 5));
+			}
+			if( r.result != "OK"){
+				v.setValue( "stat", rtf( "[#FC0]$T.lbl_contest_error:\n"..r["error"]));
+			}else
+			if( r["outofdate"]){
+				v.setValue( "stat", rtf( "[#FC0]$T.lbl_uploading_outofdate"));
+			}else
+			if( !r["stat"]){
+				v.setValue( "stat", rtf( T.lbl_contest_noentry));
+				btn_entry.setVisible( true);
+			}else{
+				local stat = r.stat;
+				local str = tmpl( T.tmpl_contest_hasentry, { title=stat["title"], time=localtime( stat.time), size=sizestr( stat.zipsize)});
+				v.setValue( "stat", rtf( str));
+				btn_entry.setVisible( true);
+			}
+		}, this);
+	}
+
+	function actionevent( e){
+		switch( e.src["name"]){
+		case "btn_entry":
+			close();
+			ContestDialog.run();
+			break;
+		case "btn_web":
+			skOpenURL( contestinfo.url);
+			// close();
+			break;
+		}
+		super.actionevent( e);
+	}
+
+	static function run( p){
+		local pop = ContestPopup( ::loadSKView( UIPATH));
+		pop.poplayout = 4;	//	左右中
+		pop.show( null, p);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+local showContestMenu( btn){
+	if( ::account.status != 1){
+		Popups.showInfo( "$T.pop_loginforcontest");
+		return;
+	}
+	ContestPopup.run( btn);
+}
+
+//	contest activity
+local activity = {
+	uid="act_contest",
+	place="bottom",
+	order=60,
+	icon=("\uea23",0xffff33ff),
+	badge = ("\ue838",0xffff00ff),
+	tips="CONTEST TITLE"
+	// slbl="$T.lbl_build"
+
+	info = {};
+	func = showContestMenu,
+}
+
+//	
+newthread().start( @(){
+	try{
+		local http = HTTPClient();
+		http.throwhttperror = false;
+		local bb = http.get( urlenv.url_web .. "/contestinfo.json");
+		if( http.statuscode < 400){
+			local info = decodeJSON( bb);
+			local p = checkperiod( info.period);
+			printf( "Contest Check: %S period=%S\n", encodeJSON( info), p);
+			if( p != 0) return;
+			contestinfo ... info;
+			activity.tips = lang( info.title);
+			::skstudio.registerActivity( activity);
+		}else{
+			printf( "HTTP Contest Check failed. status=%S\n", http.statuscode);
+		}
+	}catch( ex){
+		printexception( ex);
+	}
+}, this);
