@@ -308,6 +308,7 @@ class RPG3DPopupView extends SKLibView
 {
 	rp3d = null;			//	アタッチされているRPG3DObject。
 	tpos = 2;				//	getEffectPositionの値。デフォルトでは2(bottom)
+	toffs = null;			//	Vector3D
 
 	function setTarget( s){
 		rp3d = ref = s;
@@ -321,11 +322,15 @@ class RPG3DPopupView extends SKLibView
 	//	rp3dを完全に囲うようにposとstretch。posは左上揃え。
 	//	※アクション中の激しい動きでピッキングできないのはいけないのでbaseposの場所に配置される。ボクセルもピクチャーも同様。
 	function updateFunc( dt){
-		if( !rp3d) return true;
+		if( !rp3d) return true;	//	u-m???
+		if( !rp3d.alive){
+			removeFromParent();
+			return false;
+		}
 		local cam = parent.renderer.camera;	//	parent -> SK3DView
 		local p = v_0( rp3d.getEffectPosition( tpos)).transform( rp3d.mat);
 		local w = p.transform( cam.viewmat).transformw( cam.prjmat);
-		pos( p.x, p.y, 0.0).scale( 0.5/w, -0.5/w, 1.0).add( 0.5, 0.5, 0.0).scale( parent.bnd.w, parent.bnd.h, 1.0);
+		pos( p.x, p.y, 0.0).scale( 0.5/w, -0.5/w, 1.0).add( 0.5, 0.5, 0.0).scale( parent.bnd.w, parent.bnd.h, 1.0).add( toffs);
 		matdirty = true;
 		layerflags |= 1;
 		repaint();

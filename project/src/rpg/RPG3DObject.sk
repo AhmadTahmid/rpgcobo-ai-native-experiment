@@ -3,7 +3,8 @@ import AnimationPart;
 import CollisionGroupID;
 import BlockFlagID;
 
-local v_0 = Vector3D(), v_1 = Vector3D(), v_2 = Vector3D(), v_3 = Vector3D(), m_1 = Matrix(), r_1 = Rect3D(), q_1 = Quaternion(), q_2 = Quaternion(), a_1 = [0,0];
+local v_0 = Vector3D(), v_1 = Vector3D(), v_2 = Vector3D(), v_3 = Vector3D(), v_4 = Vector3D(), v_5 = Vector3D(), v_6 = Vector3D();
+local m_1 = Matrix(), r_1 = Rect3D(), q_1 = Quaternion(), q_2 = Quaternion(), a_1 = [0,0];
 
 AnimationLayer.id <- null;
 AnimationLayer.part <- null;
@@ -193,6 +194,7 @@ class RPG3DObject extends SK3DObject
 	pitch = 0.0;				//	X軸回転。RPG3DMapAssetのみ
 	bank = 0.0;					//	Z軸回転。RPG3DMapAssetのみ
 	offsy = 0.0;				//	コリジョンの中心Y
+	movdiv = 0.25;				//	壁抜け防止用。moveTest時に移動量を分割してチェック。
 
 	mount = null;				//	MountState : 動く地面に乗っている状態。
 	mountable = false;			//	乗っかることができる RPG3DMapAssetのみtrue
@@ -601,7 +603,7 @@ class RPG3DObject extends SK3DObject
 
 	//	指定した位置からvecの長さのに進むときのコリジョンを判定する。
 	//	押し戻しがあった場合にそのベクトルを返す。
-	function moveTest( pos, vec){
+	function moveTest1( pos, vec){
 		local shp = b3body.getShape(), b3world = scn.b3world;
 		local pos1 = v_1( pos).add( 0, offsy, 0).add( vec);	//	todo : offsmatにしないと！
 		local b3res = b3world.contactTest( 0, shp, pos1, G_CHARA, G_STAGE|G_CHARA|G_OBJECT);
@@ -621,6 +623,23 @@ class RPG3DObject extends SK3DObject
 			return pv.add( mv);	//	+と-の押し戻しベクトルを合成して返す
 		}
 	}
+
+	//	指定した位置からvecの長さのに進むときのコリジョンを判定する。
+	//	※FPS低下対策で、移動量が大きい場合は分割して判定する。
+	function moveTest( pos, vec){
+		local div = Math.iceil( vec.length() / movdiv);
+		if( div <= 1) return moveTest1( pos, vec);
+		//	分割して移動テスト
+		local dv = v_4( vec).scale( 1.0/div);
+		local dp = v_5( pos), dr = v_6( 0.0);
+		for( local l = 0;l < div;l ++){
+			local r = moveTest1( dp, dv);
+			dp.add( dv).add( r);
+			dr.add( r);
+		}
+		return dr;
+	}
+
 
 	//	指定した位置で設置しているか判定する。dyまで下の床が有効。
 	function groundTest( pos, dy){
@@ -827,6 +846,15 @@ class RPG3DObject extends SK3DObject
 			}
 		};
 	}
+
+	//	ワープ。瞬間的な移動だからposを書き換えればいいだけだが、タイミングを制御できるようにclosure化。
+	function warpTo( t){
+		local self = this, p1 = t.target;
+		return @( dt){
+			self.pos( p1);
+			return t["next"];
+		};
+	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	//	各種ポップアップ
@@ -841,9 +869,10 @@ class RPG3DObject extends SK3DObject
 		);
 		local r = #Rect2D(), v = #Vector3D(), r2 = #Rect2D();
 		r.set( 10000, 10000, -20000, -20000);
+		local m = m_1.identity().translate( pos).scale( scale.x).translate( pivot);	//	rotを抜いた座標変換
 		foreach( s in sa){
-			v.set( b.r, b.s, b.t).scale( s).add( b.x, b.y, b.z);
-			local w = v.transform( mat).transform( vmat).transformw( pmat);
+			v.set( b.r, b.s, b.t).scale( s).add( b.x, b.y, b.z).transform( m);
+			local w = v.transform( vmat).transformw( pmat);
 			if( w <= 0.0) continue;		//	カメラ手前。。。
 			local s = 1.0 / w * 0.5;
 			v.scale( s, -s, s).add( 0.5);
@@ -856,7 +885,8 @@ class RPG3DObject extends SK3DObject
 	//	ダメージポップアップ。回復、ミスも表示。表示位置からは移動しない
 	function popupDamage( str, col=0xffffffff, type=0){
 		str = string( str);
-		local v = ::loadSKView( type==1 ? "/resource/ui/parts/popstr2.ui": "/resource/ui/parts/popstr.ui");
+		local r = ::RPGMain.getUIResource( type==1 ? "/resource/ui/parts/popstr2.ui": "/resource/ui/parts/popstr.ui");
+		local v = ::loadSKView( r);
 		local list = v.findChild( "chrlist");
 		list.setRowCount( length( str));
 		foreach( i, c in str){
@@ -867,14 +897,18 @@ class RPG3DObject extends SK3DObject
 				r.action( "pop");
 			}, i*60);
 		}
-		local r = projectBounds();
-		local gy = r.h;
-		if( this["pic"]){
-			gy *= 1.0-pic.gndpos[1];
-		}
+		local self = this;
+		local fn(){
+			local r = self.projectBounds();
+			local gy = r.h;
+			if( self["pic"]){ gy *= 1.0-self.pic.gndpos[1]; }
+			v.pos( r.x+(r.w>>1), r.y+gy, 0);
+			v.matdirty = true;
+			return true;
+		};
+		v.addUpdateFunc( fn);	//	毎フレーム位置更新
 		local parent = scn.ref;		//	SK3DView
 		v.findChild( "g").buf.color0 = col;
-		v.pos( r.x+(r.w>>1), r.y+gy, 0);
 		parent.addChild( v);
 		setTimeout( @() v.removeFromParent(), 900);
 	}
@@ -882,11 +916,18 @@ class RPG3DObject extends SK3DObject
 	//	コンディションポップアップ。put, rem
 	function popupCondition( condid, action="put"){
 		local data = ::conf.cond[condid];
-		local v = ::loadSKView( "/resource/ui/pop_cond.ui");
+		local r = ::RPGMain.getUIResource( "pop_cond.ui");
+		local v = ::loadSKView( r);
 		v.setValue( "icon", data.icon);
-		local r = projectBounds();
+		local self = this;
+		local fn(){
+			local r = self.projectBounds();
+			v.pos( r.x+(r.w>>1), r.y+(r.h>>1), 0);
+			v.matdirty = true;
+			return true;
+		};
+		v.addUpdateFunc( fn);	//	毎フレーム位置更新
 		local parent = scn.ref;	//	SK3DView
-		v.pos( r.x+(r.w>>1), r.y+(r.h>>1), 0);
 		parent.addChild( v);
 		v.actionAndDie( action);
 	}
@@ -894,7 +935,8 @@ class RPG3DObject extends SK3DObject
 	//	expゲージポップアップ。表示後にexpは増えていき、レベルアップしたらゲージは巻き戻りフラッシュ
 	//	この表示は自動では消えずに、バトル終了のマップ切り替えで初めて消える。
 	function popupExpGauge(){
-		local v = ::loadSKView( "/resource/ui/parts/expgauge.ui", RPG3DPopupView);
+		local r = ::RPGMain.getUIResource( "parts/expgauge.ui");
+		local v = ::loadSKView( r, RPG3DPopupView);
 		local pc = rpgobj, lv0 = pc.LV;
 		v.bindValues({
 			bar = @(){
@@ -907,6 +949,48 @@ class RPG3DObject extends SK3DObject
 		v.setTarget( this);
 		local parent = scn.ref;	//	SK3DView
 		parent.addChild( v);
+	}
+
+	static plcscalemap = [0.5,0.0,1.0];
+
+	//	汎用の情報ポップアップ。
+	function popupInfo( prms){
+		local parent = scn.ref;	//	SK3DView
+		local vname = "3d_"..this;
+		local v = parent.findChild( vname);	// 各キャラ1
+		if( !prms["op"]){
+			local r = ::RPGMain.getUIResource( prms["uipath"] || "pop_info.ui");
+			if( !v || v.ref != r){
+				v?.actionAndDie( "hide");
+				v = ::loadSKView( r);
+				local self = this, sh = plcscalemap[prms["place"]] ?? 0.0, offs = prms["offs"];
+				local fn(){
+					local r = self.projectBounds();
+					v.pos( r.x+(r.w>>1), r.y+(r.h*sh), 0).add( offs[0], offs[1], 0);
+					v.matdirty = true;
+					return true;
+				};
+				v.addUpdateFunc( fn);	//	毎フレーム位置更新
+				v.name = vname;
+				parent.addChild( v);
+				v.action( "show");
+				v.ref = r;
+			}
+			local lblvar = prms.lbl, self = rpgobj || event;	//	selfこれで良いかな？
+			local lblfunc = @(){
+				local s = string( ::getvar( lblvar, self));
+				return s.contains( "[") ? ::rtf( s) : s;
+			}
+			v.bindValue( "lbl", lblfunc);	//	毎フレームlblfunc()が呼ばれて表示が更新
+			if( prms["time"]){
+				setTimeout( @() v.actionAndDie( "hide"), prms.time);
+			}
+		}else
+		if( prms["op"] == "hide"){
+			v?.actionAndDie( "hide");
+		}else{
+			v?.action( prms["op"]);
+		}
 	}
 }
 
@@ -1359,6 +1443,7 @@ class RPG3DVoxChara extends RPG3DObject
 		local shp = createShape( cv["colshp"]||SK_SHAPE_CAPSULE, colsize);
 		local offsmat = Matrix.fromTranslate( 0, colsize[1], 0);
 		offsy = colsize[1];
+		movdiv = colsize[0] * 0.65;	//	壁抜け対策。movdivを超える移動量は分割されて移動チェックされる。重くなるが仕方ない。
 		b3body = b3Body( 0.0, shp, mat, G_CHARA, G_CHARA|G_OBJECT|G_STAGE);	//	G_EVENTはいらんかな
 		b3body.ref = this;
 		b3body.setOffsetTransform( offsmat);
@@ -1518,8 +1603,8 @@ class RPG3DVoxChara extends RPG3DObject
 			local b = findBone( "body");
 			local pm = drawpmmap[b["parts"]["id"]];
 			if( pm){
-				// local r = pm.bnd, v = Vector3D( r.x, r.y, r.z).add( pm["pivot"]);//.transform( b.invbindpose);
-				local r = pm.bnd, v = Vector3D( r.x, r.y, r.z).add( pm["pivot"]).transform( b.mat);
+				// local r = pm.bnd, v = v_0( r.x, r.y, r.z).add( pm["pivot"]);//.transform( b.invbindpose);
+				local r = pm.bnd, v = v_0( r.x, r.y, r.z).add( pm["pivot"]).transform( b.mat);
 				return (v.x, v.y, v.z, null);
 			}
 			break;
@@ -1527,9 +1612,9 @@ class RPG3DVoxChara extends RPG3DObject
 			local b = (findBone( "head")||findBone( "face")), p = b["parts"];
 			local pm = drawpmmap[p["id"]];
 			if( pm){
-				// local r = pm.bnd, v = Vector3D( r.x, r.y, r.z).add( pm["pivot"]);
+				// local r = pm.bnd, v = v_0( r.x, r.y, r.z).add( pm["pivot"]);
 				// return (0,r.s,0, "head");
-				local r = pm.bnd, v = Vector3D( r.x, r.y, r.z).add( pm["pivot"]).transform( b.mat);
+				local r = pm.bnd, v = v_0( r.x, r.y, r.z).add( pm["pivot"]).transform( b.mat);
 				return (v.x, v.y, v.z, null);
 			}
 			break;

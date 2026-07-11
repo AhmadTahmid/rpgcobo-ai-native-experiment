@@ -13,6 +13,15 @@ local oplist = [
 	{ lbl="$T.lbl_hide", val="hide" }	
 ];
 
+local who2list = [
+	{ lbl="$T.who_player", val=1 }
+	{ lbl="$T.who_event", val=2 }
+]
+
+local place2list = [
+	{ lbl="$T.lbl_up", val=1 }
+	{ lbl="$T.lbl_down", val=2 }
+]
 
 ////////////////////////////////////////////////////////////////////////////////////
 //	上部汎用情報表示
@@ -59,7 +68,7 @@ RPGSystem.ui ..
 	
 	props = [				//	
 		{ pid="op", lbl="$T.lbl_operation", type=LIST, list=oplist, refresh=true }
-		{ pid="text", lbl="$T.lbl_text", type=STRING, variable=true, hide=@( pl) !!pl.getParam( "op") }
+		{ pid="text", lbl="$T.lbl_text", type=STRING, variable=1, hide=@( pl) !!pl.getParam( "op") }
 		{ pid="time", lbl="$T.ui_info_top_time", type=VARIABLE, constbits=2|8, varbits=1|2|4, hide=@( pl) !!pl.getParam( "op") }
 	],
 
@@ -177,15 +186,44 @@ RPGSystem.ui ..
 	type = "info"			//	mainmanu, submenu, choose, dialog, message, info, debug, misc, 
 	
 	props = [				//	
-		{ pid="op", lbl="$T.lbl_operation", type=LIST, list=oplist },
-		{ pid="lbl", lbl="$T.lbl_text", type=STRING, },
-		{ pid="col", lbl="$T.lbl_color", type=RGBA },
+		{ pid="who", lbl="$T.lbl_who", type=LIST, list=who2list, variable=1 },
+		{ pid="lbl", lbl="$T.lbl_text", type=STRING, variable=1 },
+		{ pid="col", lbl="$T.lbl_color", type=RGBA, variable=1 },
 	],
 	
-	defval = { op = null, lbl = "9999", col = -1, who = 1 }
+	defval = { lbl = "9999", col = -1, who = 1 }
 
 	uifunc = @( prms){
-		local rp3d = ::rpgstage.player3d;
+		local rp3d = prms["rp3d"] || ::rpgstage.player3d;
 		rp3d.popupDamage( prms.lbl, prms.col);
+	}
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////
+//	3Dキャラの頭上や足元に情報を表示。
+//	lblに式を指定すると、同期して表示される。
+
+RPGSystem.ui ..
+{
+	key = "ui_pop_info"
+	lbl = "$T.ui_pop_info"
+	icon = "\ue892"
+	type = "info"			//	mainmanu, submenu, choose, dialog, message, info, debug, misc, 
+	
+	props = [				//	
+		{ pid="op", lbl="$T.lbl_operation", type=LIST, list=oplist },
+		{ pid="who", lbl="$T.lbl_who", type=LIST, list=who2list, variable=1 },
+		{ pid="place", lbl="$T.lbl_place", type=LIST, list=place2list, variable=1 },
+		{ pid="lbl", lbl="$T.lbl_text", type=VARIABLE, constbits=4|8, varbits=1|2|4, hide=@( pl) !!pl.getParam( "op") }
+		{ pid="time", lbl="$T.lbl_time", type=SCALAR, range=(0,3000), ui="bar", barrange=(0,3000,100), variable=1 }
+	]
+	
+	defval = { op = null, lbl = "'INFO", who = 1, place = 1, time=1000 }
+	
+	//	rp3dはRPGEvent.showUIで指定される。rp3dが無い場合は、::rpgstage.player3dが使われる。
+	uifunc = @( prms){
+		local rp3d = prms["rp3d"] || ::rpgstage.player3d;
+		rp3d.popupInfo( prms);
 	}
 };
