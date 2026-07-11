@@ -267,6 +267,12 @@ class ResEditorMapVox extends EditorViewBase
 		categorySelected( categories[0]);
 	}
 
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ _resource={ [res.name] = data}}};
+		return t;
+	}
+
 	function findCategoryButton( v){
 		foreach( r in catglist.rows){
 			foreach( c in r.children) if( c.ref == v) return c;

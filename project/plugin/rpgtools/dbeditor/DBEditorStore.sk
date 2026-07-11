@@ -39,7 +39,7 @@ local reqfailprop = { pid="reqfail", lbl="$T.reqfail", type=LIST, list=reqfailli
 	hide=@( pl) (!length( pl.getParam( "reqs")) && !pl.getParam( "needown"))
 }
 
-class DBEditorStore extends EditorViewBase
+class DBEditorStore extends DBEditor
 {
 	//	ストアの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops1 = [
@@ -152,8 +152,6 @@ class DBEditorStore extends EditorViewBase
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	
-	res = null;				//	Resource : 
-	data = null;			//	R000等のデータのコピー。
 	selitem = null;			//	
 
 	//	view

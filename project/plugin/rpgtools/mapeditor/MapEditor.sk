@@ -278,6 +278,24 @@ class MapEditor extends EditorViewBase
 		}
 	}
 
+	//	作業中のデータでデバッグするための情報取得
+	//	dataの他に、bw、あと縮小マップも？ついでにsetting.inimapも？？
+	function getWorkingData(){
+		local t = { conf={}, res={}};
+		if( datares){
+			t.conf.map <- { [mapid] = data };
+			t.res[bwres.path] <- ObjectOutput.encode( bw);
+		}else{
+			local d = deepclone( bwres.getContent());
+			local bb = ObjectOutput.encode( bw);
+			local cbb = compressZSTD( bb, 6);	//	重くても圧縮率高く。。。
+			local bw64 = encodeBASE64( cbb);
+			d.bw64 = bw64;
+			t.conf._resource <- { map_asset = { [bwres.name] = d}};
+		}
+		return t;
+	}
+
 	//	全体マップ画像をアップデートする。※保存はメニューの保存時に。。。
 	//	
 	function updateMapShot(){

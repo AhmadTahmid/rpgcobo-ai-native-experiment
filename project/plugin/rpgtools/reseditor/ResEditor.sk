@@ -113,6 +113,12 @@ class ResEditor extends EditorViewBase
 		addEventListener( ACTION_EVENT, actionevent)
 	}
 
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ _resource={ [res.name] = data}}};
+		return t;
+	}
+
 	function updateCapsView( caps){
 		pager.setPageNum( caps / 100);
 		capsmenu.setValue( "lbl", "×"..(caps));

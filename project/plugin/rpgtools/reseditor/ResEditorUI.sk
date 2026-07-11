@@ -106,6 +106,12 @@ class ResEditorUI extends EditorViewBase
 		resdirpath = ::resroot.file.path .. "/resource/ui";
 	}
 
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ _resource={ [res.name] = data}}};
+		return t;
+	}
+
 	//	アイテム数は100個固定。
 	function updateItemList(){
 		local defpic = "/skstudio/img/ui/pic_tr.png";

@@ -81,7 +81,7 @@ local stproptmpl = {
 	//	set()を入れる！！！
 };
 
-class DBEditorSkill extends EditorViewBase
+class DBEditorSkill extends DBEditor
 {
 	//	スキルの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops1 = [
@@ -99,9 +99,6 @@ class DBEditorSkill extends EditorViewBase
 	];
 
 	//////////////////////////////////////////////////////////////////////////////////////
-
-	res = null;				//	Resource : 
-	data = null;			//	S000等のデータのコピー。
 	
 	//	view
 	baseproplist1 = null;		//	PropertyListBehavior : 基本パラメータ。拡張はできない。
@@ -269,13 +266,7 @@ class DBEditorSkill extends EditorViewBase
 	}
 
 	function testAction(){
-		//	現在の作業データをテンポラリに保存
-		local f = FileRef( "tmp/debugconf.json");
-		local dbtype = getdbtype( res.path);
-		local bb = encodeJSON({ [`${dbtype}.${res.name}`]={...data, consume=[0,0], }}, 5, ByteBuffer());	//	消費0にして確実に打てるように
-		bb.pos = 0;
-		f.save( bb);
-		local m = { uid="menu_debug_battle", mapid="M001", gid=1, skillid=res.name, confpath=f.path, };
+		local m = { uid="menu_debug_battle", mapid="M001", gid=1, skillid=res.name, };
 		startDebugMenu( m);
 	}
 }

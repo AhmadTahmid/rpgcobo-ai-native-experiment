@@ -52,7 +52,7 @@ local _ctgeqtype( bits){
 }
 
 
-class DBEditorArmor extends EditorViewBase
+class DBEditorArmor extends DBEditor
 {
 	//	スキルの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops1 = [
@@ -76,9 +76,6 @@ class DBEditorArmor extends EditorViewBase
 	static eqmask = 2|4;
 
 	//////////////////////////////////////////////////////////////////////////////////////
-
-	res = null;				//	Resource : 
-	data = null;			//	S000等のデータのコピー。
 
 	props = null;
 	

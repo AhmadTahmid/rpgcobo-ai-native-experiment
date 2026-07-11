@@ -59,7 +59,22 @@ local clearSaveData( m){
 	}
 }
 
+//	workingdataは、confとresourceのデータがある
+//	editor.getWorkingData()で取得する
+local gatherWorkingData(){
+	local wd = { conf={}, res={}};
+	foreach( path, e in ::skstudio.tabeditors){
+		if( e.isFileChanged() && e["getWorkingData"]){
+			local d = e.getWorkingData();
+			override( wd, d, true);
+		}
+	}
+	return wd;
+}
+
+
 //	デバッグを開始。タイトルから、選択したセーブから、
+//	※作業中のデータを取得する
 function startDebugMenu( m){
 	local args;
 	switch( m["uid"]){
@@ -75,8 +90,14 @@ function startDebugMenu( m){
 		if( m["enemyid"]) args .. "-enemy" .. m.enemyid;
 		break;
 	}
-	if( m["bwpath"]) args ... ["-bw", m.bwpath];
-	if( m["confpath"]) args ... ["-conf", m.confpath];
+	local wd = gatherWorkingData();
+	if( length( wd.conf) + length( wd.res)){
+		local bb = ObjectOutput.encode( wd);
+		local tmpdir = FileRef( "tmp");
+		local wdfile = FileRef( tmpdir, "wd.ser");
+		wdfile.save( bb);
+		args ... ["-wd", wdfile.path];
+	}
 	local exe = FileRef( "rpgcobo.exe");
 	local p = popen_s();
 	p.open( exe, ["-testplay", ...args], 0x100);

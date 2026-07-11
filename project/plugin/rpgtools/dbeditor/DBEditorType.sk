@@ -14,11 +14,8 @@ import RPGPropertyType;
 
 local srcdir = dirname( callee().getSourceName());
 
-class DBEditorType extends EditorViewBase
+class DBEditorType extends DBEditor
 {
-	res = null;				//	Resource : 
-	data = null;			//	type.confのデータのコピー。
-	
 	//	
 	typelistview = null;		//	GPUIListView : 横並びにタイプが並ぶ
 
@@ -38,6 +35,12 @@ class DBEditorType extends EditorViewBase
 		typelistview.updateLayout();
 	}
 
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ [res.name] = data}};	//	システム設定系は直接
+		return t;
+	}
+	
 	function refresh(){
 	}
 	

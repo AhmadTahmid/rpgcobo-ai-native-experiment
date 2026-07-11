@@ -111,18 +111,6 @@ class MapTool
 
 	function processDefaultContextMenu( e, m){
 		if( m["uid"] == "menu_debug_here"){
-			if( editor.isFileChanged()){
-				//	現在の作業データをテンポラリに保存
-				local f = FileRef( "tmp/debugconf.json");
-				local bb = encodeJSON({ [`map.${editor.mapid}`]=editor.data, }, 5, ByteBuffer());
-				bb.pos = 0;
-				f.save( bb);
-				local bf = FileRef( "tmp/debugmap.bw");
-				local bb = ObjectOutput.encode( editor.bw);
-				bb.pos = 0;
-				bf.save( bb);
-				m ... {bwpath=bf.path, confpath=f.path};
-			}
 			startDebugMenu( m);
 		}else
 		if( m["toolid"]){

@@ -119,6 +119,12 @@ class ResEditorBGM extends EditorViewBase
 		//
 		addEventListener( DROPTARGET_EVENT, dndevent);
 	}
+	
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ _resource={ [res.name] = data}}};
+		return t;
+	}
 
 	function setActive( b){
 		super.setActive( b);

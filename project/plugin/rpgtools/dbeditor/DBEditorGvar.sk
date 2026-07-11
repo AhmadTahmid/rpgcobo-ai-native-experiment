@@ -16,7 +16,7 @@ import VarType;
 local srcdir = dirname( callee().getSourceName());
 
 
-class DBEditorGvar extends EditorViewBase
+class DBEditorGvar extends DBEditor
 {
 	static gvartypes = [
 		{ lbl="$T.vartype0", val=0, }
@@ -28,9 +28,6 @@ class DBEditorGvar extends EditorViewBase
 		{ lbl="$T.vartype5", val=5, }
 		{ lbl="$T.vartype6", val=6, }
 	];
-
-	res = null;				//	Resource : 
-	data = null;			//	gvar.confのデータのコピー。
 	
 	//	
 	gvarlist = null;		//	GPUIListView : 
@@ -54,6 +51,12 @@ class DBEditorGvar extends EditorViewBase
 		setPage( 0);
 
 		addEventListener( ACTION_EVENT, actionevent)
+	}
+
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ [res.name] = data}};	//	システム設定系は直接
+		return t;
 	}
 
 	function updateCapsView( caps){

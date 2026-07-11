@@ -80,6 +80,15 @@ class ResEditorIcon extends EditorViewBase
 		iconlist.addEventListener( DROPTARGET_EVENT, dropevent);
 	}
 
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ _resource={ [res.name] = data}}, res={}};
+		local d = buildEmojiData();
+		t.res["/resource/icon/usericon.json"] <- d[0];
+		t.res["/resource/icon/usericon.bin"] <- d[1];
+		return t;
+	}
+
 	//	指定したコードポイントのアイコン表示を更新
 	function updateIcon( cp){
 		local c = iconviewmap[cp];

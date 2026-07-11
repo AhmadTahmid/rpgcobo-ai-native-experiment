@@ -13,7 +13,7 @@ local srcdir = dirname( callee().getSourceName());
 //	DBEditorDBEditor : コンディション編集
 //	
 
-class DBEditorCond extends EditorViewBase
+class DBEditorCond extends DBEditor
 {
 	//	スキルの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops = [
@@ -22,9 +22,6 @@ class DBEditorCond extends EditorViewBase
 	];
 
 	//////////////////////////////////////////////////////////////////////////////////////
-
-	res = null;				//	Resource : 
-	data = null;			//	S000等のデータのコピー。
 	
 	//	view
 	baseproplist = null;		//	PropertyListBehavior : 基本パラメータ。拡張はできない。

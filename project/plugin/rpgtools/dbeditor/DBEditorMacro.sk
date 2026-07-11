@@ -19,7 +19,7 @@ local runmodelist = [
 //	DBEditorMacro : マクロ編集
 //	
 
-class DBEditorMacro extends EditorViewBase
+class DBEditorMacro extends DBEditor
 {
 	//	スキルの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops = [
@@ -32,9 +32,6 @@ class DBEditorMacro extends EditorViewBase
 	
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	res = null;				//	Resource : 
-	data = null;			//	X000等のデータのコピー。
-	
 	//	view
 	proplist = null;		//	PropertyListBehavior : 
 	cmdlist = null;			//	EventCommandList : 

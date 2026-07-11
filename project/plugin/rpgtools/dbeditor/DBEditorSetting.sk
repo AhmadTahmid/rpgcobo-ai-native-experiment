@@ -14,12 +14,10 @@ local srcdir = dirname( callee().getSourceName());
 //	
 //	
 
-class DBEditorSetting extends EditorViewBase
+class DBEditorSetting extends DBEditor
 {
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	res = null;				//	Resource : 
-	data = null;			//	conf.setting
 	appicon = null;			//	RGBAImage : 128x128程度。32~512までかな
 	
 	//	view
@@ -66,6 +64,12 @@ class DBEditorSetting extends EditorViewBase
 		//
 		bindSettingProperties();
 		refresh();
+	}
+
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ [res.name] = data}};	//	システム設定系は直接
+		return t;
 	}
 	
 	//	

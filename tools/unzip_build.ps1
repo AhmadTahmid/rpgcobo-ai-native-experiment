@@ -2,7 +2,7 @@ param(
     [string]$ZipName,
     [string]$DestName
 )
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 Set-Location -Path $PSScriptRoot
 
 if( Test-Path ..\build\$DestName) {

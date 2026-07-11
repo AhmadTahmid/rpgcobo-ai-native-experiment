@@ -301,6 +301,12 @@ class ResEditorVoice extends EditorViewBase
 		addEventListener( DROPTARGET_EVENT, dndevent);
 	}
 
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ _resource={ [res.name] = data}}};
+		return t;
+	}
+	
 	function setActive( b){
 		super.setActive( b);
 		if( !b){
@@ -723,7 +729,7 @@ class ResEditorVoice extends EditorViewBase
 		local menudata = [
 			{ lbl="$T.lbl_addlang", submenu = addlangmenu },
 			"-",
-			{ lbl="$T.lbl_dellang", id="del"}
+			{ lbl="$T.lbl_dellang", id="del", disable=length( langtabs.tabitems)<=1, icon="\ue872" }
 		];
 		local self = this;
 		local ret = MenuPopup.run( menudata);
@@ -736,6 +742,11 @@ class ResEditorVoice extends EditorViewBase
 			submitOp( redo, undo, null);	//	trk無し
 			break;
 		case "del":
+			local c = langtabs.tabitems[e.actioncmd]["code"] || sellang, item = selitem;
+			local oldt = d[c];
+			local redo = [@(){ delete d[c]; self.itemSelected( item); self.itemlist.refreshItems(); }];
+			local undo = [@(){ d[c] <- oldt; self.itemSelected( item); self.itemlist.refreshItems(); }];
+			submitOp( redo, undo, null);	//	trk無し
 			break;
 		}
 	}

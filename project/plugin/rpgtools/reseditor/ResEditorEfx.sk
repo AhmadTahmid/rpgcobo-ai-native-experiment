@@ -35,10 +35,10 @@ class ResEditorEfx extends ResEditor
 		{ pid="billboard", lbl="$T.lbl_billboard", type=BOOL, defval=false }
 		{ pid="ovfx", lbl="$T.lbl_ovfx", type=PROPERTYLIST, 
 			propdef={ ...OverlayEffect.ovfxpropdef,
+				mdlid = @() (::skstudio.editor.preview.resid=="CE000" ? "CV000" : ::skstudio.editor.preview.resid),
+				
 				edit = @( val, pl){
-					local mdlid = ::skstudio.editor.preview.resid;
-					if( mdlid=="CE000") mdlid="CV000";
-					local newval = OVFXPropertyEditPopupV.run( null, pl.prop.propdef, val, {mdlid=mdlid});
+					local newval = OVFXPropertyEditPopupV.run( null, pl.prop.propdef, val);
 					return newval;
 				}
 			}, defval={}

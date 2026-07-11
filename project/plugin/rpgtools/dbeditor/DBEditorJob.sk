@@ -13,7 +13,7 @@ local srcdir = dirname( callee().getSourceName());
 //	DBEditorJob : ジョブ編集
 //	
 
-class DBEditorJob extends EditorViewBase
+class DBEditorJob extends DBEditor
 {
 	//	ジョブの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops = [
@@ -25,9 +25,6 @@ class DBEditorJob extends EditorViewBase
 
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	res = null;				//	Resource : 
-	data = null;			//	S000等のデータのコピー。
-	
 	//	view
 	baseproplist = null;
 	proplist = null;

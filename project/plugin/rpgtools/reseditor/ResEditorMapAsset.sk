@@ -32,9 +32,18 @@ class ResEditorMapAsset extends ResEditor
 			}
 		}
 	];
+
+	static titlelbl = "$T.lbl_resedit : $T.side_res_map_asset";
 	
 	function init( path){
 		super.init( path);
+	}
+
+	//	作業中のデータでデバッグするための情報取得
+	//	TODO : bw64は個々のマップエディタから取得される。ここにあるのは古いデータ。。。
+	function getWorkingData(){
+		local t = { conf={ _resource={ [res.name] = data}}};
+		return t;
 	}
 
 	function isValidData( d){

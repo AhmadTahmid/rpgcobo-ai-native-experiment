@@ -23,7 +23,7 @@ local createInitialAIPage(){
 };
 
 
-class DBEditorEnemy extends EditorViewBase
+class DBEditorEnemy extends DBEditor
 {
 	//	エネミーの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops1 = [
@@ -38,9 +38,6 @@ class DBEditorEnemy extends EditorViewBase
 	static baseprops2 = [
 		{ pid="mdlid", lbl="$T.lbl_model", type=RESID_PREVIEW, restype=["enemy_pic","chara_vox"], defval="EP000", size="big" },
 	];
-	
-	res = null;				//	Resource : 
-	data = null;			//	P000等のデータのコピー。
 	
 	//	view
 	baseproplist1 = null;		//	PropertyListBehavior : 基本パラメータ。拡張はできない。
@@ -171,14 +168,9 @@ class DBEditorEnemy extends EditorViewBase
 
 	function startDebug(){
 		local enemyid = res.name;
-		//	現在の作業データをテンポラリに保存
-		local f = FileRef( "tmp/debugconf.json");
-		local bb = encodeJSON({ [`enemy.${res.name}`]=data, }, 5, ByteBuffer());
-		bb.pos = 0;
-		f.save( bb);
 		local mapid = Table.findi( ::conf.map, @( v, i) v["encount"][0]["enemies"][0]);
 		local gid = ::conf.map[mapid].encount[0].gid;
-		local m = { uid="menu_debug_battle", mapid=mapid, gid=gid, enemyid=enemyid, confpath=f.path, };
+		local m = { uid="menu_debug_battle", mapid=mapid, gid=gid, enemyid=enemyid, };
 		startDebugMenu( m);
 	}
 }

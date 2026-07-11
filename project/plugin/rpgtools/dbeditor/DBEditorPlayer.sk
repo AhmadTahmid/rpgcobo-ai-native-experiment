@@ -12,7 +12,7 @@ local srcdir = dirname( callee().getSourceName());
 //	DBEditorPlayer : プレイヤーのデータ編集エディター
 //	
 
-class DBEditorPlayer extends EditorViewBase
+class DBEditorPlayer extends DBEditor
 {
 	//	プレイヤーの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops1 = [
@@ -25,9 +25,6 @@ class DBEditorPlayer extends EditorViewBase
 		{ pid="mdlid", lbl="$T.lbl_model", type=RESID_PREVIEW, restype=["chara_vox"], defval="CV000" },
 		{ pid="picid", lbl="$T.lbl_picture", type=RESID_PREVIEW, restype=["event_pic"], defval="" },
 	];
-	
-	res = null;				//	Resource : 
-	data = null;			//	P000等のデータのコピー。
 	
 	//	view
 	baseproplist1 = null;		//	PropertyListBehavior : 基本パラメータ。拡張はできない。

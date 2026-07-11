@@ -35,8 +35,11 @@ function getdbtype( path){
 	return null;
 }
 
-class DBEditor 
+class DBEditor extends EditorViewBase
 {
+	res = null;				//	Resource : 
+	data = null;			//	P000等のデータのコピー。
+	
 	static function createEditor( path){
 		local dbtype = getdbtype( path);
 		if( !dbtype) return null;
@@ -61,17 +64,12 @@ class DBEditor
 		return ed;
 	}
 
-	// static function createTabMenus( path){
-	// 	local dbtype = getdbtype( path);
-	// 	local fn = @(){
-	// 		local dbside = ::skstudio.getSideView( "side_dbview");
-	// 		dbside.setCurrentPath( path);
-	// 		::skstudio.openSideView( "side_dbview");
-	// 	};
-	// 	return [
-	// 		{ lbl="データベースに表示", icon="\uf120", fn=fn},
-	// 	];
-	// }
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={}};
+		t.conf[res.pres.name] <- { [res.name] = data };
+		return t;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

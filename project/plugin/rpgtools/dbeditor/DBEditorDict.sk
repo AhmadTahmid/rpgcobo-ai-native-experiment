@@ -14,14 +14,11 @@ import RPGPropertyType;
 
 local srcdir = dirname( callee().getSourceName());
 
-class DBEditorDict extends EditorViewBase
+class DBEditorDict extends DBEditor
 {
 	static GROUPUIPATH = srcdir .. "/ui/dictgroup.ui";
 	static ITEM1UIPATH = srcdir .. "/ui/dictitem1.ui";	//	category3
 	static ITEM2UIPATH = srcdir .. "/ui/dictitem2.ui";	//	category0~2
-
-	res = null;				//	Resource : 
-	data = null;			//	dict.confのデータのコピー。
 	
 	//	
 	dictlistview = null;		//	GPUIListView : 横並びにタイプが並ぶ
@@ -35,6 +32,12 @@ class DBEditorDict extends EditorViewBase
 		data = deepclone( res.getContent());
 		
 		createList();
+	}
+
+	//	作業中のデータでデバッグするための情報取得
+	function getWorkingData(){
+		local t = { conf={ [res.name] = data}};	//	システム設定系は直接
+		return t;
 	}
 
 	function createList(){
