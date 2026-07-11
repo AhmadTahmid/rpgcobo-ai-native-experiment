@@ -72,7 +72,7 @@ class TipsRunner
 		foreach( i,v in ta){
 			if( v == tipview) continue;
 			if( !v.isVisible()) continue;		//	!enabledでも良し
-			if( v.modal) break;
+			if( v.modal) return;
 			local ts = fget( v, "tips");
 			if( ts){ tv = v; break; }
 		}

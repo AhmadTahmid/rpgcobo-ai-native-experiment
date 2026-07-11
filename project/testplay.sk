@@ -98,7 +98,7 @@ local applydebugpref(){
 	}
 	switch( slot){
 	case -2:	//	title
-		if( !args.contains( "-map") && !args.contains( "-battle")){
+		if( !args.contains( "-map") && !args.contains( "-battle") && !args.contains( "-event")){
 			RPGMain.goTitle();
 			applydebugpref();
 			goto SKIP;
@@ -119,25 +119,11 @@ local applydebugpref(){
 	}
 	applydebugpref();
 	
-	//	セーブ前データの置き換え。bwとconfを置き換えれる
-	// if( (i=args.indexOf( "-bw")) >= 0){
-	// 	local mapid = args[args.indexOf( "-map")+1], path = args[i+1];
-	// 	local res = getResource( "/data/mapdata/%S.bw" % mapid);
-	// 	res.file = FileRef( path);	//	ファイルを置き換えちゃう
-	// }
-	// //	{ map.M001: {...} }のような形式。
-	// if( (i=args.indexOf( "-conf")) >= 0){
-	// 	local t = decodeJSON( FileRef( args[i+1]).load());
-	// 	foreach( i, v in t){
-	// 		putField( ::conf, i, v);
-	// 	}
-	// }
-
 	//	
 	if( (i=args.indexOf( "-map")) >= 0){
 		local mapid = args[i+1], pos = decodeJSON( args[i+2]);
 		local portal = { mapid=mapid, pos=pos};
-		local sstat = ::rpgstat.stagemap[mapid] || (::rpgstat.stagemap[mapid] <- RPGStageState());
+		local sstat = ::rpgstat.stagemap[mapid] <- RPGStageState();		//	RPGStageStateは毎回初期化。
 		sstat.enter( mapid, portal, ++rpgvar.REMAPID);
 		::rpgstat.mapid = mapid;
 		local stg = RPGStage( rpgstat.mapid);
@@ -172,6 +158,30 @@ local applydebugpref(){
 		if( !sstat) sstat = ::rpgstat.stagemap[mapid] <- RPGStageState();
 		sstat.enter( mapid, cmd_.dest, rpgvar.REMAPID);
 		local stg = RPGStage( cmd_.mapid);
+		stg.launch( cmd_);
+	}else
+	if( (i=args.indexOf( "-event")) >= 0){
+		local mapid = args[i+1], evid = int( args[i+2]), evpage = int( args[i+3]);
+		local map = ::conf.map[mapid], ev = map.event[evid], r = (ev.pos[3]+2)&3, v = Vector3D(0,0,-2).rotate( r*Math.PI/2, 0, 0).add( ev.pos).scale( 0.5);
+		local portal = { mapid=mapid, pos=[v.x,v.y,v.z,r]};
+		local sstat = ::rpgstat.stagemap[mapid] <- RPGStageState();
+		sstat.enter( mapid, portal, ++rpgvar.REMAPID);
+		::rpgstat.mapid = mapid;
+		local stg = RPGStage( rpgstat.mapid);
+		local cmd_ = {
+			startfunc = @( st, opt){
+				local p = ev.page[evpage];
+				if( !p["pararun"]){	//	メインイベント実行
+					st.mainevent = "MATTE";	
+					newthread().start( @(){
+						sleep( 300);
+						st.mainevent = null;
+						local ev = st.getEvent( evid);
+						ev.forceTrigger( evpage)
+					}, st);
+				}
+			},
+		}
 		stg.launch( cmd_);
 	}else{
 		local stg = RPGStage( rpgstat.mapid);

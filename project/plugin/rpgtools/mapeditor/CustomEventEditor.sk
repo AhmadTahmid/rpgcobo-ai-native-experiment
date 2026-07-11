@@ -25,6 +25,7 @@ class CustomEventEditor
 
 	op = null;				//	OperationStack
 	roledef = null;			//	RPGSystem.eventrole.custom
+	evid = 0;				//	int : イベントID
 	data = null;			//	table : イベントデータ
 	page = null;			//	table : ページデータ
 	pageidx = 0;
@@ -39,7 +40,8 @@ class CustomEventEditor
 	
 	savefunc = null;		//	Ctrl+Sに対応する
 
-	constructor( e, v, c){
+	constructor( e, v, c, i){
+		evid = i;
 		editor = e;
 		view = v;
 		v.ref = this;
@@ -152,6 +154,11 @@ class CustomEventEditor
 			e.consume();
 			// view.removeFromParent();
 			view.postActionEvent( data);
+			break;
+		case "btn_debug":
+			e.consume();
+			local m = { uid="menu_debug_event", mapid=editor.mapid, evid=evid, evpage=pageidx };
+			startDebugMenu( m);
 			break;
 		case "aipagebtn":
 			local pidx = e.src.ref;

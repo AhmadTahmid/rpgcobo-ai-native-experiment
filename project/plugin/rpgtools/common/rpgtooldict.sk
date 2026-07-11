@@ -918,6 +918,7 @@
 	"lbl_runatmenu"						: {"ja":"メニュー時にも実行", "en":"Run at Menu"}
 	"lbl_runreqs"						: {"ja":"実行条件", "en":"Requirements to run"}
 	"lbl_pagereqs"						: {"ja":"ページ選択条件", "en":"Requirements"}
+	"lbl_pagetest"						: {"ja":"ページのテスト", "en":"Page Test"}
 	"lbl_addcmd"						: {"ja":"コマンド挿入", "en":"Insert Command"}
 	"lbl_editcmd"						: {"ja":"コマンド編集", "en":"Edit Command"}
 	"lbl_reqs"							: {"ja":"条件", "en":"Requirements"}
@@ -1335,6 +1336,7 @@
 	"ui_info_timer"						: {"ja":"タイマー表示", "en":"Show Timer"}
 	"ui_info_money"						: {"ja":"所持金表示", "en":"Show Money"}
 	"ui_pop_damage"						: {"ja":"ダメージポップアップ", "en":"Popup Damage"}
+	"ui_pop_info"						: {"ja":"キャラ上に情報ポップアップ", "en":"Popup info on Chara"}
 	//	message
 	"ui_message_talk"					: {"ja":"会話ウィンドウ", "en":"Talk Window"}
 	"ui_message_log"					: {"ja":"ログメッセージ", "en":"Log Message"}

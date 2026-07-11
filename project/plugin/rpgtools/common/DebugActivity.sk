@@ -89,6 +89,9 @@ function startDebugMenu( m){
 		if( m["skillid"]) args .. "-skill" .. m.skillid;
 		if( m["enemyid"]) args .. "-enemy" .. m.enemyid;
 		break;
+	case "menu_debug_event":
+		args = ["-slot", ::workspace.saveslotidx, "-event", m.mapid, m.evid, m.evpage];
+		break;
 	}
 	local wd = gatherWorkingData();
 	if( length( wd.conf) + length( wd.res)){

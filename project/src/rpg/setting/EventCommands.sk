@@ -2007,9 +2007,9 @@ local camrestoreprop = { pid="restore", lbl="$T.lbl_restoreonend", type=LIST, li
 ], variable=1};
 
 local camvalmap = {
-	[0] = { type=0, target=0, trans=0, restore=0 },
-	[1] = { type=1, target=0, trans=0, zoom=0, pos=(0,0,0), hpb=(0,0,0), restore=0 },
-	[2] = { type=2, mkid=null, trans=0, zoom=0, pos=(0,0,0), hpb=(0,0,0), restore=0 },
+	[0] = { type=0, target=0, fade=0, restore=0, easing=0, wait=true },
+	[1] = { type=1, target=0, fade=0, dzoom=0, dpos=(0,0,0), dhpb=(0,0,0), restore=0, easing=0, wait=true },
+	[2] = { type=2, mkid=null, fade=0, dzoom=0, dpos=(0,0,0), dhpb=(0,0,0), restore=0, easing=0, wait=true },
 }
 
 eventcmd .. {
@@ -2040,7 +2040,7 @@ eventcmd .. {
 			a .. { pid="target", lbl="$T.lbl_target", type=LIST, list=who2list, variable=1 };
 			a .. { pid="dzoom", lbl="$T.lbl_zoom", type=SCALAR, ui="bar", range=(-10.0,10.0), q=10, variable=1 };
 			a .. { pid="dpos", lbl="$T.lbl_focuspos", type=VEC3, range=(-10.0,10.0), q=100, variable=1 };
-			a .. { pid="dhpb", lbl="$T.lbl_rotation", type=VEC3, range=(-180,180), variable=1 };
+			a .. { pid="dhpb", lbl="$T.lbl_rotation", type=ROT_HPB, range=(-180,180), variable=1, cnt="cnt6.ui" };
 			break;
 		case 2:
 			if( mklist){
@@ -2306,6 +2306,7 @@ eventcmd .. {
 	color = color5
 	
 	props = @( cmd){
+		local is3dpos( mvtype){ return mvtype=="obj" || mvtype=="warp"; }
 		local isobj = cmd["movetype"]=="obj";
 		local a = [];
 		a .. { pid="who", lbl="$T.lbl_who", type=LIST, list=who2list, variable=1, refresh=true, }
@@ -2317,23 +2318,25 @@ eventcmd .. {
 			"-"
 			{ lbl="$T.movetype_obj", val="obj", }
 		], set = @( prop, data, val){
-			if( val == "obj" && data["val"] != "obj"){
-				data.pos <- [0,0,0]; data.rot <- [0,0,0]; data.easing <- 0; data.fade <- 1000;
-			}else
-			if( val != "obj" && data["val"] == "obj"){
-				data.pos <- [0,0]; delete data["rot"]; delete data["easing"]; delete data["fade"];
-			}
+			local old = data[prop.pid];
+			if( is3dpos( val) && !is3dpos( old)){ data.pos <- [0,0,0]; }
+			if( !is3dpos( val) && is3dpos( old)){ data.pos <- [0,0]; }
+			if( val == "obj" && old != "obj"){ data.rot <- [0,0,0]; data.easing <- 0; data.fade <- 1000; }
+			if( val != "obj" && old == "obj"){ delete data["rot"]; delete data["easing"]; delete data["fade"]; }
 			data[prop.pid] <- val;
 		}
 		};
-		if( isobj){
+		if( is3dpos( cmd["movetype"])){
 			a .. { pid="pos", lbl="$T.lbl_position(X Y Z)", type=VEC3, range=(-128,128), q=10, variable=1, }
+		}else{
+			a .. { pid="pos", lbl="$T.lbl_position(X Z)", type=VEC2, range=(-128,128), q=10, variable=1, }
+		}
+		if( isobj){
 			a .. { pid="rot", lbl="$T.lbl_rotation", type=ROT_HPB, range=(-360,360), cnt="cnt6.ui", variable=1 }
 			a .. { pid="fade", lbl="$T.lbl_fadetime", type=SCALAR, range=(0,3000), ui="bar", barrange=(0,3000,100), variable=1 }
 			a .. { pid="easing", lbl="$T.lbl_easing", type=LIST, list=RPGProperties.easinglist, variable=1 }
 			a .. { pid="wait", lbl="$T.lbl_waitaction", type=BOOL, variable=1 }
 		}else{
-			a .. { pid="pos", lbl="$T.lbl_position(X Z)", type=VEC2, range=(-128,128), q=10, variable=1, }
 			a .. { pid="movespd", lbl="$T.lbl_movespd", type=SCALAR, range = (0,10), q=10, ui="bar", variable=1, }
 			a .. { pid="dirbase", lbl="$T.dirbase", type=LIST, list=dirbaselist, variable=1 }
 			a .. { pid="wait", lbl="$T.lbl_waitaction", type=BOOL, variable=1 }

@@ -665,7 +665,7 @@ class MapTools.tool_event extends MapTool
 	function editCustomEvent( gz){
 		local view = ::loadSKView( srcdir.."/ui/customevent.ui");
 		view.stretchSize( editor.bnd.w, editor.bnd.h);
-		local edit = CustomEventEditor( editor, view, gz.data);
+		local edit = CustomEventEditor( editor, view, gz.data, gz.id);
 		editor.modaledit = edit;
 		editor.addChild( view);
 		view.requestFocus();

@@ -283,7 +283,12 @@ class MapEditor extends EditorViewBase
 	function getWorkingData(){
 		local t = { conf={}, res={}};
 		if( datares){
-			t.conf.map <- { [mapid] = data };
+			local d = data;
+			if( modaledit){	//	カスタムイベント編集中。。。
+				d = deepclone( d);
+				d.event[modaledit.evid] <- modaledit.data;
+			}
+			t.conf.map <- { [mapid] = d };
 			t.res[bwres.path] <- ObjectOutput.encode( bw);
 		}else{
 			local d = deepclone( bwres.getContent());

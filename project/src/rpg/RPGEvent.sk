@@ -218,6 +218,19 @@ class RPGEventRunner
 		local fn = evdef["exec"];	//	nullもありえる
 		fn( this, cmd);
 	}
+
+	//	コマンドの誰に対して実行するかのターゲットを取得する
+	//	who = RPGObjectRef, 0:cam3d, 1:player, 2:event, int:eventid?
+	function getWho3D( who){
+		local p;
+		switch( who){
+		case 0: p = ::rpgstage.cam3d; break;
+		case 1: p = ::rpgstage.player3d; break;
+		case 2: p = this["rp3d"]; break;
+		default: p = who["rp3d"]; break;	//	RPGObjectRef
+		}
+		return p;
+	}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	//	個別コマンド
@@ -546,13 +559,18 @@ class RPGEventRunner
 	//	※cmd内のテキストはRPGMain.showUIに渡す前にテンプレート展開しておく必要がある。
 	//	
 	function showUI( cmd){
-		cmd = replaceTemplate( cmd);
-		local ret = RPGMain.showUI( cmd);
+		local _cmd = replaceTemplate( cmd);
+		if( _cmd["who"]){
+			if( _cmd != cmd) _cmd = clone _cmd;
+			_cmd.rp3d <- getWho3D( _cmd.who);
+		}
+		local p = null;
+		local ret = RPGMain.showUI( _cmd);
 		//	クローズタイミング
 		if( ret instanceof SKView){
-			local n = "uiclose" .. cmd.key;
+			local n = "uiclose" .. _cmd.key;
 			_removestopfunc( n);	//	今ついてるcloseuifuncがあれば消去
-			switch( cmd["uiclose"]){
+			switch( _cmd["uiclose"]){
 			case 1:
 				_setstopfunc( n, @() ret.actionAndDie( "hide") );
 				break;
@@ -731,11 +749,11 @@ class RPGEventRunner
 			rp3d.manuaction = ManualMoveAction( rp3d);
 			local mact = rp3d.mainaction;
 			// mact?.setSuspended( true);
-			local al = rp3d.animlayers.layers[0];	//	
+			local al = rp3d.animlayers["layers"][0];	//	アニメーションを退避
 			_setstopfunc( "manuaction"..rp3d, @(){
 				rp3d.manuaction = null;
 				// mact?.setSuspended( false);
-				rp3d.setAnimeLayer( al);
+				if( al) rp3d.setAnimeLayer( al);
 			});
 		}
 		return rp3d.manuaction;
@@ -745,12 +763,11 @@ class RPGEventRunner
 	function moveChara( cmd){
 		local rp3d = cmd.who["rp3d"] || (cmd.who==1 ? stage.player3d : (stage.getEvent( cmd.who)["rp3d"] || rp3d));
 		if( rp3d){
-			local isobj = cmd.movetype=="obj";
 			local vec;
 			if( typeof( cmd.pos) <= SS_STRING){	//	数値が入っている場合はZ方向への移動とみなす
 				vec = Vector3D( 0, 0, float( cmd.pos));
 			}else{
-				vec = (isobj ? Vector3D( cmd.pos) : Vector3D( cmd.pos[0], 0.0, cmd.pos.last()));	//	obj以外は2Dベクトル。arrayじゃないとエラー吐く
+				vec = (2 in cmd.pos ? Vector3D( cmd.pos) : Vector3D( cmd.pos[0], 0.0, cmd.pos.last()));	//	obj以外は2Dベクトル。arrayじゃないとエラー吐く
 			}
 			local d = 0.0;
 			switch( cmd["dirbase"]){
@@ -785,7 +802,7 @@ class RPGEventRunner
 	//	一定時間イベントを硬直させる。イベントが終了しても効果は継続する。
 	function freezeEvent( cmd){
 		local dst3d = null;	//	RPG3DObject
-		dst3d = cmd["who"]==1 ? stage.player3d : rp3d;	//	要RPGObjectRef対応
+		dst3d = getWho3D( cmd["who"]);
 		//
 		if( dst3d){
 			stage.subthread( @(){
@@ -852,13 +869,7 @@ class RPGEventRunner
 	//	エフェクトの再生
 	//	{"cmd":"cmd_efx","efxid":"FX020","pos":[0.0,0.0,0.0],"wait":true,"who":1}
 	function showEffect( cmd){
-		local p = null;
-		switch( cmd["who"]){
-		case 0: break;
-		case 1: p = rpgstage.player3d; break;
-		case 2: p = this["rp3d"]; break;
-		default: p = cmd.who["rp3d"]; break;
-		}
+		local p = getWho3D( cmd["who"]);
 		if( !p) return;
 		local e = p.effect( { id=cmd.efxid, });
 		if( cmd["wait"] && e["efx"]["waittime"]){
@@ -867,13 +878,7 @@ class RPGEventRunner
 	}
 
 	function fadeOpacity( cmd){
-		local p = null;
-		switch( cmd["who"]){
-		case 0: break;
-		case 1: p = rpgstage.player3d; break;
-		case 2: p = this["rp3d"]; break;
-		default: p = cmd.who["rp3d"]; break;
-		}
+		local p = getWho3D( cmd["who"]);
 		if( !p) return;
 		local mod = OpacityFadeModifier( p, cmd);
 		p.addModifier( mod);
@@ -884,17 +889,11 @@ class RPGEventRunner
 	
 	//	効果音の再生
 	function playSound( cmd){
-		local p = null;
-		switch( cmd["who"]){
-		case 0: break;
-		case 1: p = ::rpgstage.player3d; break;
-		case 2: p = this["rp3d"]; break;
-		default: p = cmd.who["rp3d"]; break;
-		}
+		local p = getWho3D( cmd["who"]);
 		if( p){
 			p.playSound( cmd.sndid);
 		}else{
-			::playSound( cmd.sndid);
+			::playSound( cmd.sndid);	//	UI sound
 		}
 	}
 
@@ -932,13 +931,7 @@ class RPGEventRunner
 
 	//	ライトの発生
 	function setLight( cmd){
-		local p = null;
-		switch( cmd["who"]){
-		case 0: p = ::rpgstage.cam3d; break;
-		case 1: p = ::rpgstage.player3d; break;
-		case 2: p = this["rp3d"]; break;
-		default: p = cmd["who"]["rp3d"]; break;
-		}
+		local p = getWho3D( cmd["who"]);
 		if( !p) p = rp3d;
 		p.setLight( cmd);
 	}
@@ -1320,6 +1313,17 @@ class RPGStageEventRunner extends RPGEventRunner
 		case 7:	//	実行し続ける。
 			return !trgdisable;
 		}
+	}
+
+	//	イベントを強制的に実行する。主にデバッグ用
+	function forceTrigger( pi){
+		thread.call( @(){
+			local p = pagelist[pi];
+			if( p){
+				setPage( p);
+				run_running();
+			}
+		}, this);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
