@@ -17,7 +17,7 @@ local srcdir = dirname( callee().getSourceName());
 //	
 pluginfo <- {
 	name : { "ja":"RPG-Cobo ツール","en":"RPG-Cobo Tools"}
-	auther : "djkotori"
+	author : "djkotori"
 	ver : "0.1.6"
 	tags : ["editor"]
 	icon : srcdir.."/icon.png"

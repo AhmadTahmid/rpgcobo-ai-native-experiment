@@ -560,8 +560,9 @@ class RPGEventRunner
 	//	
 	function showUI( cmd){
 		local _cmd = replaceTemplate( cmd);
+		if( _cmd != cmd) _cmd = clone _cmd;
+		_cmd.caller <- this;
 		if( _cmd["who"]){
-			if( _cmd != cmd) _cmd = clone _cmd;
 			_cmd.rp3d <- getWho3D( _cmd.who);
 		}
 		local p = null;

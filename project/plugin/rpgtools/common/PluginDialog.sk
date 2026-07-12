@@ -198,7 +198,7 @@ class PropertyBehaviors.PluginInfo extends PropertyBehavior
 	
 	function setParam( v){
 		local sp = StringBuffer();
-		if( v["auther"]) sp .. T.lbl_auther .. ": " .. lang( v.auther) .. "\n\n";
+		if( v["author"]) sp .. T.lbl_author .. ": " .. lang( v.author) .. "\n\n";
 		if( v["ver"]) sp .. T.lbl_version .. ": " .. v.ver .. "\n\n";
 		if( v["desc"]) sp .. lang( v.desc) .. "\n";
 		lbl.setValue( string( sp));

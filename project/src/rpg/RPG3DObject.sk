@@ -976,7 +976,8 @@ class RPG3DObject extends SK3DObject
 				v.action( "show");
 				v.ref = r;
 			}
-			local lblvar = prms.lbl, self = rpgobj || event;	//	selfこれで良いかな？
+			local self = VarGetter( (prms["caller"], rpgobj, event));	//	selfこれで良いかな？
+			local lblvar = prms.lbl;
 			local lblfunc = @(){
 				local s = string( ::getvar( lblvar, self));
 				return s.contains( "[") ? ::rtf( s) : s;

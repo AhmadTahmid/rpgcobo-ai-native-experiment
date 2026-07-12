@@ -215,7 +215,7 @@ RPGSystem.ui ..
 		{ pid="op", lbl="$T.lbl_operation", type=LIST, list=oplist },
 		{ pid="who", lbl="$T.lbl_who", type=LIST, list=who2list, variable=1 },
 		{ pid="place", lbl="$T.lbl_place", type=LIST, list=place2list, variable=1 },
-		{ pid="lbl", lbl="$T.lbl_text", type=VARIABLE, constbits=4|8, varbits=1|2|4, hide=@( pl) !!pl.getParam( "op") }
+		{ pid="lbl", lbl="$T.lbl_text", type=VARIABLE, constbits=4|8, varbits=2|4, hide=@( pl) !!pl.getParam( "op") }	//	ワーク変数は指定不可。イベント変数も微妙ではある。。。
 		{ pid="time", lbl="$T.lbl_time", type=SCALAR, range=(0,3000), ui="bar", barrange=(0,3000,100), variable=1 }
 	]
 	

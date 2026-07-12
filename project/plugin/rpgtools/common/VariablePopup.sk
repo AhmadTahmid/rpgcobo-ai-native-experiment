@@ -82,7 +82,7 @@ class VariableVarPopup extends Popup
 		//
 		local eva = EventVarAccessor( varbits);
 		varaccs = [];
-		if( varbits&1) varaccs .. {lbl=eva.name,icon="",va=eva};	//	eva.icon
+		if( varbits&3) varaccs .. {lbl=eva.name,icon="",va=eva};	//	eva.icon
 		foreach( va in RPGSystem.varaccs){
 			varaccs .. {
 				lbl=va.name, icon="", va=va, disable = !(va.varbits & varbits),	//	va.icon
@@ -91,6 +91,7 @@ class VariableVarPopup extends Popup
 		typelist.setListItems( varaccs);
 		typelist.setSelectedIndex( 0);
 		if( var){
+			varkey = var;
 			local type = varaccs.find( @( v) v.va.info( var));
 			typelist.setSelectedItem( type);
 			setType( type);
@@ -420,7 +421,7 @@ class VariableBehavior
 		case 2: setVar( "'ABC"); return true;
 		case 3: setVar( "\tW"); return true;
 		case 4: 
-			local v = (varbits&1) ? "W" : (varbits&2) ? "G000" : "MONEY";
+			local v = (varbits&1) ? "W" : (varbits&2) ? "A" : (varbits&4) ? "G000" : "MONEY";
 			v = VariableVarPopup.run( e, varbits, v);
 			if( v){ setVar( v); return true; }
 			break;

@@ -77,12 +77,12 @@ local defmapid(){
 	return mapid;
 }
 
-local proplbl( props, pid){
+function proplbl( props, pid){
 	return props.find( @( v) v.pid==pid)["lbl"] || "";
 }
 
 //	
-local propstr( props, cmd, pid){
+function propstr( props, cmd, pid){
 	if( cmd["_var"][pid]) return varstr( cmd._var[pid]);
 	local prop = props.find( @( v) v.pid==pid);
 	return getPropertyText( prop, cmd);
@@ -155,7 +155,6 @@ eventcmd .. {
 	name = "$T.cmd_if"
 	icon = "\ueb26"
 	color = color0
-	subblocks = true
 
 	props = [
 		reqsprop
@@ -196,7 +195,6 @@ eventcmd .. {
 	name = "$T.cmd_loop"
 	icon = "\ue9d6"
 	color = color0
-	subblocks = true
 	
 	props = [reqsprop]
 
@@ -280,7 +278,6 @@ eventcmd .. {
 	name = "$T.cmd_iterate"
 	icon = "\ue240"
 	color = color0
-	subblocks = true
 	
 	props = [
 		{ pid="itervar", lbl="$T.cmd_iterate_itervar", type=VARIABLE, varbits=31, constbits=0, },
