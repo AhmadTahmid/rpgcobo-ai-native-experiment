@@ -1350,7 +1350,7 @@ eventcmd .. {
 	
 	cmdinfo = @( cmd){
 		local uidef = RPGSystem.ui[cmd.key];
-		local info = uidef["lbl"] || "???";
+		local info = lang( uidef["lbl"]) || "???";
 		if( "op" in cmd){
 			local props = fget( uidef, "props", uidef, cmd);
 			info = sprintf( "%S → %S", info, propstr( props, cmd, "op"));

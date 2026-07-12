@@ -199,6 +199,15 @@ class RPGCharaBase extends RPGObject
 	selected = false;				//	UI用。コマンド選択時にこのキャラが選択されていることを示す。
 	escaped = false;				//	逃走などで戦闘を離脱。主にエネミー用。プレイヤー側も個別に逃走する場合はこれを使えば良し
 	turn = 0;						//	ターン
+
+	//	追加ステータス定義
+	static exstats = {};			//	プラグインによる追加ステータス。etc[key]に保存される。
+	
+	//	追加ステータスプロパティ定義を追加する。
+	//	※ここでいうステータスは、HP,MPなど変化する値。PATK,MDEFなどは、スコアプロパティ。
+	static function addStatusProp( pid, defval=0){
+		exstats[pid] <- defval;
+	}
 	
 	constructor(){
 		conds = [];
@@ -206,9 +215,15 @@ class RPGCharaBase extends RPGObject
 		options = [];
 	}
 
-	//	MAXHP, ATK等のスコアプロパティを直接参照できる。
+	//	追加ステータスの参照、MAXHP, ATK等のスコアプロパティを直接参照できる。
 	function _get( key){
+		if( key in exstats){ return etc[key] ?? exstats[key]; }
 		return scoremap[key];
+	}
+	
+	function _set( key, val){
+		if( key in exstats) return etc[key] <- val;
+		return undefined;
 	}
 
 	//	データ読み込み完了時に呼ばれる。
@@ -624,7 +639,7 @@ class RPGPlayer extends RPGCharaBase
 		foreach( prop in ::RPGSystem.playerprops){
 			if( prop["proptype"] != "status") continue;	//	登録タイプがstatusのパラメータ以外は無視
 			local pid = prop.pid;
-			local val = convertPropertyValue( data[pid], prop.type);	//	DATAID, DATAIDS等を変換する。
+			local val = convertPropertyValue( data[pid] ?? prop.defval, prop.type);	//	DATAID, DATAIDS等を変換する。
 			::setField( this, pid, val);	//	"jobs.0"というフィールド名の時、jobs[0]=valとなる
 		}
 		equips.resize( length( ::conf.type.eqslot));	//	装備部位数のタイプ設定に数を合わせる

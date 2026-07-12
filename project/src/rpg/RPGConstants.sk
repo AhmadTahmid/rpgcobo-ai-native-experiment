@@ -85,11 +85,14 @@ enum VarType
 //	イベントのトリガー条件。有効条件
 enum EventTriggerType
 {
-	TRG_NONE = 0,		//	トリガーしない。
-	TRG_AUTO = 1,		//	自動でトリガー。マクロなら常駐、ステージなら入場時に開始。
-	TRG_REACH = 2,		//	プレイヤー範囲内に入った。
-	TRG_SEARCH = 3,		//	プレイヤー範囲内に入って調べる（話す）ボタン。
-	TRG_INSIDE = 4,		//	プレイヤーが範囲内に完全に入った。
+	TRG_NONE = 0,			//	トリガーしない。
+	TRG_SEARCH_S = 1,		//	近距離で調べる（話す）ボタン
+	TRG_SEARCH_L = 2,		//	遠距離で調べる（話す）ボタン
+	TRG_CONTACT = 3,		//	プレイヤーとイベントが接触した
+	TRG_REACH = 4,			//	プレイヤーがイベントの一定以内に近づいた
+	TRG_INSIDE = 5,			//	プレイヤーが範囲内に完全に入った。
+	TRG_SPAWN = 6,			//	スポーン時に一回だけトリガー
+	TRG_ALWAYS = 7,			//	常にトリガーを続ける
 }
 
 //	DamageContextの結果。これにより演出や後の処理につなぐ

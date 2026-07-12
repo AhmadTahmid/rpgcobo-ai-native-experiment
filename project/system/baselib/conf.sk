@@ -313,7 +313,10 @@ class Module
 		plugs.sort( @( v) v.pluginfo["order"] ?? 9999);
 		//	全て呼び出し。ここで失敗したプラグインは一覧から消去・・・？
 		foreach( plug in plugs){
-			local opts = plugmap[plug.id];
+			local opts = { ...plugmap[plug.id]};
+			foreach( i, v in plug.pluginfo["props"]){
+				if( !(v["pid"] in opts)) opts[v["pid"]] <- v["defval"];	//	デフォルト値を入れる
+			}
 			try{
 				plug.loadPlugin( ::arguments, opts);
 			}catch( ex){

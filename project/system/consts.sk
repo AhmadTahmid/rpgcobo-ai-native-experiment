@@ -211,7 +211,7 @@ enum ModifiersMask
 	META_MASK = 4
 	ALT_MASK = 8
 	ALT_GRAPH_MASK = 16
-	BUTTPN0_MASK = 32		//	TouchPad down
+	BUTTON0_MASK = 32		//	TouchPad down
 	BUTTON1_MASK = 64
 	BUTTON2_MASK = 128
 	BUTTON3_MASK = 256
