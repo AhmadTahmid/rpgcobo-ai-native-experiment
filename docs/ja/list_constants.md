@@ -2,7 +2,7 @@
 
 このドキュメントは、RPG-Cobo の `project` 配下の `.sk` ファイルから抽出した `enum` と `const` の一覧です。
 
-***このドキュメントには、RPG-Cobo ツール、 SKStudioで使用されている定数は含まれていません。***
+***このドキュメントには、RPG-Cobo ツール、 SKStudioで定義されている定数は含まれていません。***
 
 ## system/ui/SKViewProperty.sk
 
