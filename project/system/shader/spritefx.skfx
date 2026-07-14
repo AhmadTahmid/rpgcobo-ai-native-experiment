@@ -634,30 +634,30 @@ fs wave
 		return (fbm( pos.xy, pos.z) * 2.0 - 1.0);
 	}
 
-	highp vec2 GetGradient( highp vec2 intPos, highp float t) {
-		float rand = fract( sin( dot( intPos, vec2(12.9898, 78.233))) * 43758.5453);;
-		float angle = 6.283185 * rand + 4.0 * t * rand;
-		return vec2(cos(angle), sin(angle));
-	}
+	// highp vec2 GetGradient( highp vec2 intPos, highp float t) {
+	// 	float rand = fract( sin( dot( intPos, vec2(12.9898, 78.233))) * 43758.5453);;
+	// 	float angle = 6.283185 * rand + 4.0 * t * rand;
+	// 	return vec2(cos(angle), sin(angle));
+	// }
 
-	highp float Pseudo3dNoise( highp vec3 pos) {
-		vec2 i = floor( pos.xy);
-		vec2 f = pos.xy - i;
-		vec2 blend = f * f * (3.0 - 2.0 * f);
-		float noiseVal = 
-			mix(
-				mix(
-					dot(GetGradient(i + vec2(0, 0), pos.z), f - vec2(0, 0)),
-					dot(GetGradient(i + vec2(1, 0), pos.z), f - vec2(1, 0)),
-					blend.x),
-				mix(
-					dot(GetGradient(i + vec2(0, 1), pos.z), f - vec2(0, 1)),
-					dot(GetGradient(i + vec2(1, 1), pos.z), f - vec2(1, 1)),
-					blend.x),
-			blend.y
-		);
-		return noiseVal / 0.7; // normalize to about [-1..1]
-	}
+	// highp float Pseudo3dNoise( highp vec3 pos) {
+	// 	vec2 i = floor( pos.xy);
+	// 	vec2 f = pos.xy - i;
+	// 	vec2 blend = f * f * (3.0 - 2.0 * f);
+	// 	float noiseVal = 
+	// 		mix(
+	// 			mix(
+	// 				dot(GetGradient(i + vec2(0, 0), pos.z), f - vec2(0, 0)),
+	// 				dot(GetGradient(i + vec2(1, 0), pos.z), f - vec2(1, 0)),
+	// 				blend.x),
+	// 			mix(
+	// 				dot(GetGradient(i + vec2(0, 1), pos.z), f - vec2(0, 1)),
+	// 				dot(GetGradient(i + vec2(1, 1), pos.z), f - vec2(1, 1)),
+	// 				blend.x),
+	// 		blend.y
+	// 	);
+	// 	return noiseVal / 0.7; // normalize to about [-1..1]
+	// }
 
 	void main(){
 		highp float z = p1[0].x * 4.0, su = p1[0].y, sv = p1[0].z, fu = p1[0].w, fv = p1[1].x;
@@ -665,7 +665,7 @@ fs wave
 		mediump vec4 pix;
 		highp float s = Pseudo3dNoise2( vec3( uv*fu, z));
 		highp float t = Pseudo3dNoise2( vec3( uv*fv, -z));
-		pix = vec4( texture( coltex1, uv+vec2( su*s, sv*t)*0.3));
+		pix = vec4( texture2D( coltex1, uv+vec2( su*s, sv*t)*0.3));
 		fragcolor = pix;
 	}
 }

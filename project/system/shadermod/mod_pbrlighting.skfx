@@ -67,7 +67,7 @@ fs pbrlighting
 		return atten;
 	}
 	
-	Light pointLight( const uint i, const G g, float mul) {
+	Light pointLight( const uint i, const G g, float mul, const vec4 sss) {
 		highp vec4 a = texelFetch( litprmtex, ivec2( 0, i), 0);
 		highp vec4 b = texelFetch( litprmtex, ivec2( 1, i), 0);
 		highp vec4 c = texelFetch( litprmtex, ivec2( 2, i), 0);
@@ -80,7 +80,7 @@ fs pbrlighting
 		li.NoL = clamp( dot( g.n, li.l), 0.0, 1.0);
 		li.atten = distatten( length( d), a.w) * spotatten( li.dir, li.l, b.w, c.w);
 		li.ch = int( fract( c.w) * 255.0) & 3;
-		$( COLORTEX1) li.atten *= texture( ssstex, g.uv)[li.ch];
+		li.atten *= sss[li.ch];
 		return li;
 	}
 
@@ -109,15 +109,17 @@ fs pbrlighting
 			highp float viewz = -wvp.z, coff = shadow[0].w, lightz = -dot( pos, shadow[1]);
 			highp vec2 uv;
 			#define SHADOWUV( I) uv = vec2( dot( pos, shadow[3+I]), dot( pos, shadow[4+I])); highp vec4 zv = shadow[5+I]; highp float texz = float( texture( shadowtex, uv).x) * (1.0/65535.0) * zv.x + zv.y - ZOFFS;
-			$( SHADOWMAP == 1){
-				SHADOWUV( 0)
-			} : {
-				$( SHADOWMAP == 2){
-					mediump int i = 3*int( step( shadow[2].x, viewz)); SHADOWUV( i)
-				} : {
-					mediump int i = 3*int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz)); SHADOWUV( i)
-				}
-			}
+			//	XXXXXXX TOO slow with Angle compiler
+			// $( SHADOWMAP == 1){
+			// 	const mediump int i = 0;
+			// } : {
+			// 	$( SHADOWMAP == 2){
+			// 		mediump int i = 3*int( step( shadow[2].x, viewz));
+			// 	} : {
+					mediump int i = 3*int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz));
+			// 	}
+			// }
+			SHADOWUV( i)
 			highp float rate = clamp( exp( -coff * -(lightz - texz)), 0.0, 1.0);
 			highp float dark = clamp( mix( shadow[0].x+blk, 1.0, pow( viewz*shadow[0].y, 4.0)), 0.0, 1.0);
 			return mix( dark, 1.0, rate);
@@ -258,14 +260,31 @@ fs pbrlighting
 	//	shading macros
 
 	#define DIRLIT( SHADING_FUNC, mul) SHADING_FUNC( g, dirLight( g, mul), Fd, Fr);
-	#define PNTLIT1( I, SHAD, mul) { mediump uint i = I; if( i==0u){ break; } else { SHAD( g, pointLight( i, g, mul), Fd, Fr); } }
-	#define PNTLIT( SHAD, mul) \
-	highp uvec2 u2 = texture( litidxtex, vec3( g.uv, g.wvp.z*dirlit[2].w+dirlit[3].w)).xy; \
-	for(;;){ \
-		PNTLIT1( u2[0]&1023u, SHAD, mul); PNTLIT1((u2[0]>>10u)&1023u, SHAD, mul); PNTLIT1( u2[0]>>20u, SHAD, mul); \
-		PNTLIT1( u2[1]&1023u, SHAD, mul); PNTLIT1((u2[1]>>10u)&1023u, SHAD, mul); PNTLIT1( u2[1]>>20u, SHAD, mul); \
-		break; \
+
+	//	XXXXXXX TOOOOOOO slow with Angle compiler
+	// #define PNTLIT1( I, SHAD, mul) { mediump uint i = I; if( i==0u){ break; } else { SHAD( g, pointLight( i, g, mul), Fd, Fr); } }
+	// #define PNTLIT( SHAD, mul) \
+	// highp uvec2 u2 = texture( litidxtex, vec3( g.uv, g.wvp.z*dirlit[2].w+dirlit[3].w)).xy; \
+	// for(;;){ \
+	// 	PNTLIT1( u2[0]&1023u, SHAD, mul); PNTLIT1((u2[0]>>10u)&1023u, SHAD, mul); PNTLIT1( u2[0]>>20u, SHAD, mul); \
+	// 	PNTLIT1( u2[1]&1023u, SHAD, mul); PNTLIT1((u2[1]>>10u)&1023u, SHAD, mul); PNTLIT1( u2[1]>>20u, SHAD, mul); \
+	// 	break; \
+	// }
+
+	vec4 ssshadow( highp vec2 uv){
+		return $(COLORTEX1){ texture( ssstex, uv)} : {vec4( 1.0)};
 	}
+
+	#define PNTLIT( SHAD, mul) \
+		highp uvec2 u2 = texture( litidxtex, vec3( g.uv, g.wvp.z*dirlit[2].w+dirlit[3].w)).xy; \
+		mediump vec4 sss = ssshadow( g.uv); \
+		uint ids[6] = uint[6]( u2[0] & 1023u, (u2[0] >> 10u) & 1023u, u2[0] >> 20u, u2[1] & 1023u, (u2[1] >> 10u) & 1023u, u2[1] >> 20u ); \
+		for( int k = 0; k < 6; k++) { \
+			uint i = ids[k]; \
+			if( i == 0u) break; \
+			Light li = pointLight( i, g, mul, sss); \
+			SHAD( g, li, Fd, Fr); \
+		} \
 	
 	vec4 lighting_error( const G g){
 		mediump vec3 col = vec3( 1.0, 0.0, 0.0);

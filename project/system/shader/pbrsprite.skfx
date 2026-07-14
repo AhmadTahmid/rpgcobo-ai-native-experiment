@@ -446,7 +446,7 @@ fs ssao
 	}
 
 	highp vec3 wvpos( highp vec2 wvpxy){
-		return reconstructWVP( wvpxy, texture( uztex, wvpxy*vec2(0.5,0.5)+0.5).x, p0[3]);
+		return reconstructWVP( wvpxy, texture( uztex, wvpxy*vec2(0.5,0.5)+0.5+0.0002).x, p0[3]);	//	0.0002 : nearest offset
 	}
 
 	vec2 aosteps( const highp vec2 pos0, const highp vec2 vec, const highp float stepr, const float voffs, const highp float attnscale, const highp float tickdecay, const highp vec3 vpos, const highp vec3 vdir){
@@ -596,7 +596,7 @@ param ssaoblur
 
 fs ssaoblur
 {
-	const float R = 5;
+	const float R = 5.0;
 	const float SIGMA = R * 0.7;
 	const float FALLOFF = 1.0 / (2.0*SIGMA*SIGMA);
 	const float SHARPEN = 10.0;
@@ -774,7 +774,7 @@ fs ssshadow
 			// float distScene = length( scenePos - wvp); if( distScene < t - 0.03) {	//	damekore
 			if( scenePos.z > samplePos.z+0.04 && scenePos.z < samplePos.z+2.0){
 				highp uint u1 = texture( gtex1, suv).x, u2 = texture( gtex2, suv).x;	//	自己発光チェック 2sample...
-				shadow = float( (u1>>29u)==0 && ((u2&0xff00u)>(4u<<8u)) ) * 1.0;	//	u1->mtype, u2->emit
+				shadow = float( (u1>>29u)==0u && ((u2&0xff00u)>(4u<<8u)) ) * 1.0;	//	u1->mtype, u2->emit
 				// shadow = 0.0;
 				break;
 			}

@@ -4,12 +4,12 @@ fs bayer
 {
 	//	0.0  0.5
 	//	0.75 0.25
-	mediump float bayer2( mediump vec2 fp){
+	mediump float bayer2( highp vec2 fp){
 		fp = mod( floor( fp), 2.0);
 		return fract( dot( fp, vec2( 0.5, 0.75)) );
 	}
 	
-	mediump float bayer4( mediump vec2 fp){
+	mediump float bayer4( highp vec2 fp){
 		$( APILV >= 30){
 			mediump ivec2 ip = ivec2( fp) & 3;
 			const mediump mat4 m = mat4(
@@ -104,7 +104,7 @@ fs reconstwvp
 	}
 
 	highp vec3 reconstructWVPtex( mediump usampler2D ztex, highp vec2 uv, highp vec4 v){
-		return reconstructWVP( (uv-0.5)*vec2(2.0,-2.0), texture( ztex, uv).x, v);
+		return reconstructWVP( (uv-0.5)*vec2(2.0,-2.0), texture( ztex, uv+0.0002).x, v);	//	0.0002 : nearest offset
 	}
 }
 
