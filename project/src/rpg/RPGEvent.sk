@@ -719,8 +719,20 @@ class RPGEventRunner
 
 	//	アニメーション再生
 	function startAnime( cmd){
-		local rp3d = cmd.who["rp3d"] || (cmd.who=="player" ? stage.player3d : (stage.getEvent( cmd.who)["rp3d"] || rp3d));
-		rp3d?.anime2( cmd.ani);
+		local rp3d = getWho3D( cmd["who"]);
+		if( rp3d){
+			local al = rp3d.anime2( cmd.ani);
+			if( al){
+				local al0 = rp3d.animlayers.layers[0];
+				if( al0) al0.locked = 0;	//	古いアニメーションのロックを解除
+				if( al["loop"]){
+					al.locked = 1;	//	ループのアニメはイベント終了までロック。
+					_setstopfunc( "anime"..rp3d, @(){ al.locked = 0; });
+				}else{
+					al.locked = @() al.animating;	//	非ループのアニメはアニメーション中はロック。終了したらロック解除
+				}
+			}
+		}
 	}
 
 	//	向き合う。

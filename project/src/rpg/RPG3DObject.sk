@@ -8,6 +8,7 @@ local m_1 = Matrix(), r_1 = Rect3D(), q_1 = Quaternion(), q_2 = Quaternion(), a_
 
 AnimationLayer.id <- null;
 AnimationLayer.part <- null;
+AnimationLayer.locked <- 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 //	
@@ -400,10 +401,11 @@ class RPG3DObject extends SK3DObject
 	function anime2( t){	//	anime( { id, spd, part, })	//	パラメータ引数
 		local aid = t.id, at = animemap[aid];
 		if( !at) return;	//	アニメIDが存在しない！
+		local layers = animlayers.layers, al = layers[0];
+		if( fget( al, "locked")) return;	//	ロック中はアニメを変更しない
 		//	ループアニメ中の場合は同じIDが来たら再生をしない。速度は変化可能
 		local st = at.st, m1 = at["m1"]??st, en = at["en"]??st, m2 = at["m2"]??en, loop = at["loop"];
 		local part = t["part"]||0, spd = (t["spd"]||1.0) * at.spd;
-		local layers = animlayers.layers, al = layers[0];
 		if( aid==al["id"] && part==al["part"] && at["replay"]==false){	//	リピート不可アニメ
 			al.setSpeed( spd);
 			return al;
