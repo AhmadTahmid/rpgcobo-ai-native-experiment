@@ -831,6 +831,7 @@
 	"setting_playermodel"				: {"ja":"プレイヤーの表示モデル", "en":"Player Model"}
 	"setting_ctrmode"					: {"ja":"操作可能状態", "en":"Controllable State"}
 	"setting_walkspd"					: {"ja":"歩行の速度", "en":"Walking Speed"}
+	"setting_jumph"						: {"ja":"ジャンプの高さ", "en":"Jump Height"}
 	"setting_menuopenable"				: {"ja":"メニュー開閉可能", "en":"Menu Open Enabled"}
 	"setting_randomencount"				: {"ja":"ランダムエンカウント", "en":"Radom Encounter"}
 	"setting_saveable"					: {"ja":"セーブ可能", "en":"Save Enabled"}

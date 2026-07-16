@@ -60,6 +60,18 @@ settingprops .. {
 
 settingprops .. {
 	part = "basic",
+	proptype = "status",
+	pid = "jumph",
+	lbl = "$T.setting_jumph",
+	type = SCALAR,
+	ui = "bar",
+	range = (0.0,10.0),
+	q = 10
+	defval = 2.0,
+};
+
+settingprops .. {
+	part = "basic",
 	pid = "jxptype",
 	lbl = "$T.setting_jxptype",
 	type = LIST,

@@ -56,12 +56,19 @@ class PlayerMoveAction
 		return cdir && ((cdir<=3||cdir>=15) ? 1 : (cdir>=7&&cdir<=11)? -1 : 0);
 	}
 
+	function getJumpHeight(){
+		local h = (::rpgstat.settingmap["jumph"] ?? 2);
+		if( !h) return 0.0;
+		//	初速の計算。ジャンプの最高点で速度0になるので、落下加速度をgとすると、v^2=2ghでv=sqrt(2gh)
+		return Math.sqrt( 2.0 * 0.03 * (h*0.5) * 1000.0);
+	}
+
 	function updateAction( dt){
 		if( !rpgstage) return;
 		lastpos << rp3d.pos;
 		//	アクションが指定されていれば優先的に使用してその間コントロール移動は行わない。
 		if( mvfunc && (mvfunc = mvfunc( dt))) return;
-		
+		//	
 		//	それぞれのキー入力に対する処理。コントロールロック中やメインイベント中は通さないように
 		if( !(ctrlock=Math.max( ctrlock-dt, 0))){
 			ctr.setActive( !rpgstage.mainevent && !rpgstage.ctrlock && rpgstage.stat.statmap.ctrmode!=0);	//	
@@ -75,8 +82,11 @@ class PlayerMoveAction
 					break;
 				case CTRL_JUMP:
 					if( v && landed && !crimbing){
-						landed = false;
-						vec.y = 7.0;
+						local vy = getJumpHeight();
+						if( vy){	// vy==0の時はジャンプ禁止
+							landed = false;
+							vec.y = vy;
+						}
 					}
 					break;
 				case CTRL_SEARCH:
