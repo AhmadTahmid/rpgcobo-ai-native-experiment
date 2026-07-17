@@ -233,13 +233,13 @@ class SKStudio extends SKView
 			break;
 		}
 		case NOTIFY_ERROR:	//	表示するべきエラー
-		try{
-			e.consume();
-			Popups.showErrorTrace( e.actioncmd);
+			try{
+				e.consume();
+				Popups.showErrorTrace( e.actioncmd);
+			}catch( ex){	//	ここでthrowしちゃうと無限ループしちゃう
+				printexception( ex);
+			}
 			break;
-		}catch( ex){	//	ここでthrowしちゃうと無限ループしちゃう
-			printexception( ex);
-		}
 		}
 		if( !e.consumed) editor?.rootevent( e);
 	}

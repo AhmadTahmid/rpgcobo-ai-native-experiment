@@ -531,7 +531,7 @@ class RPGEventRunner
 	}
 	
 	static tmplmap = {
-		"name":1, "text":1, "desc":1, "msg":1, "title":1, "texts":1, "text0":1, "text1":1, "text2":1, "text3":1, "text4":1, "text5":1, "text6":1, "text7":1, 
+		"name":1, "text":1, "desc":1, "msg":1, "title":1, "texts":1, "text0":1, "text1":1, "text2":1, "text3":1, "text4":1, "text5":1, "text6":1, "text7":1, "lbl":1,
 	};
 
 	function replaceTemplate( cmd){
@@ -1228,7 +1228,7 @@ class RPGStageEventRunner extends RPGEventRunner
 		}catch( ex){
 			printf( "EventRunner ERROR!!!\n");
 			printexception( ex);
-			RPGMain.showUI( { key="message_log", text="\uf800 EventRunner ERROR!!! Check a log file."});
+			::rootview.postErrorEvent( {type="updateFuncs", error=ex, msg = "\uf800 EventRunner ERROR!!! Check a log file."});
 			sleep( 1000);
 		}
 		if( rpgstage.mainevent==this) rpgstage.mainevent = null;

@@ -228,6 +228,7 @@ class VariableBehavior
 		minval.setBarRange( -100, 100, 1);
 		maxval.setBarRange( -100, 100, 1);
 		view.addEventListener( ACTION_EVENT, actionevent);
+		view.addEventListener( TEXT_EVENT, textevent);
 	}
 
 	function setVar( v){
@@ -298,6 +299,58 @@ class VariableBehavior
 		}
 	}
 
+	//	
+	static function setVarView( var, varlbl, typeicon){
+		switch( typeof( var)){
+		case SS_INTEGER: case SS_FLOAT:
+			numval.setValue( var);
+			typeicon?.setText( "\ue0bc");
+			break;
+		case SS_STRING:	//	\tXXXX ならスクリプト、 'XXXX なら文字列、 .XXXX ならデータID
+			switch( var[0]){
+			case '\t':
+				varlbl.setText( var.substring( 1));
+				typeicon?.setText( "\ueb8e");
+				break;
+			case '\'':
+				varlbl.setText( var.substring( 1));
+				typeicon?.setText( "\ue167");
+				break;
+			case '.':
+				local dataid = var.substring( 1), data = rpgdata[dataid];
+				local s = sprintf( "[C][b]%S\n[O][i][#def][-2]%S", dataid, data.name);
+				local rt = RichText( s);
+				varlbl.setText( rt);
+				typeicon?.setText( data["icon"] || "\uf120");
+				break;
+			case '\r':
+			{
+				local i = var.indexOf( ','), mi = int( var.substring( 5, i)), ma = int( var.substring( i+1));
+				varlbl.setText( sprintf( "Rand(%d,%d)", mi, ma-1));
+				typeicon?.setText( "\ueb40");
+				break;
+			}
+			default:
+				local vi = ::RPGVarAccessor.getVarInfo( var);
+				local n = length( vi.key)>=3 ? "\n":" ";
+				local s = sprintf( "[C][b]%S%S[O][i][#def][-2]%S", vi.key, n, vi.name);
+				local rt = RichText( s);
+				varlbl.setText( rt);
+				typeicon?.setText( vi["icon"] ||"\ue322");
+				break;
+			}
+			break;
+		case SS_TABLE:	//	便宜上anytype
+			break;
+		case SS_BOOL:
+		default:				//	他のタイプの場合はboolにしちゃったらいいかな
+			// (var?onbtn:offbtn).setSelected( true);
+			// (!var?onbtn:offbtn).setSelected( false);
+			typeicon?.setText( "\ue9f6");
+			break;
+		}
+	}
+
 	function setTab( t){
 		foreach( i,v in g){
 			if( i==t) v.layerflags |= 1; else v.layerflags &= ~1;
@@ -324,6 +377,21 @@ class VariableBehavior
 
 	function checkScript(){
 
+	}
+
+	function textevent( e){
+		switch( e.src["name"]){
+		case "scpedit":
+			e.consume();
+			var = "\t" .. e.src.getText();
+			view.postActionEvent( var);
+			break;
+		case "textedit":
+			e.consume();
+			var = "'" .. e.src.getText();
+			view.postActionEvent( var);
+			break;
+		}
 	}
 	
 	function actionevent( e){

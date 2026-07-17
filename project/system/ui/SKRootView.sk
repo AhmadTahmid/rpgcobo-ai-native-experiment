@@ -159,7 +159,15 @@ class SKRootView extends SKView
 		foreach( v in updatefuncs){
 			local f = v.updateFunc;
 			if( typeof( f) == SS_ARRAY){
-				foreach( c in f){ if( !c( dt)) removei; }
+				foreach( c in f){
+					try{
+						if( !c( dt)) removei;
+					}catch( ex){
+						printexception( ex);
+						postErrorEvent( {type="updateFuncs", error=ex, msg = "\uf800 SKView.updateFunc ERROR!!! Check a log file."});
+						removei;
+					}
+				}
 				if( !length( f) && v.updateFunc == f){ v.updateFunc = null; removei; }
 			}else{
 				if( f) v.updateFunc( dt); else removei;
