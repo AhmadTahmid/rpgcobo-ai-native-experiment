@@ -20,7 +20,7 @@ reqchk .. {
 		constbits = 0, varbits = 1|2|4|8|16
 	}
 	rvar = {
-		constbits = 1|2|4|8, varbits = 1|2|4|8|16|32
+		constbits = 1|2|4|8|16, varbits = 1|2|4|8|16|32
 	}
 
 	func = ::varcmp

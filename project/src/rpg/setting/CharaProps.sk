@@ -416,7 +416,7 @@ local findprop( props, pid){
 //	LV : エネミーのLVは特に使われない (スタティックプロパティ)
 //	
 local varprop( prop){
-	return { ...prop, type=VARIABLE, varbits=0, constbits=2|8 };
+	return { ...prop, type=VARIABLE, varbits=0, constbits=2|8|16 };
 }
 
 enemyprops .. varprop( {

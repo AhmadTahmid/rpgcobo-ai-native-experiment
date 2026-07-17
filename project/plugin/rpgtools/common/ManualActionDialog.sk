@@ -54,7 +54,7 @@ class ManualActionDialog extends UndoableDialog
 		{	//	ウェイトコマンド
 			act="wait", name="$T.lbl_wait", icon="\ue034", 
 			props = [
-				{ pid="time", lbl="$T.lbl_time", type=VARIABLE, constbits=2|8, varbits=1|2|4 },
+				{ pid="time", lbl="$T.lbl_time", type=VARIABLE, constbits=2|8|16, varbits=1|2|4 },
 				{ pid="stand", lbl="$T.lbl_standani", type=BOOL }
 			],
 			defval={ time=100, stand=true },

@@ -815,7 +815,7 @@ RPGSystem.skilltype .. {
 			}
 		},
 		spdrateprop,
-		{ pid="warg", lbl="$T.lbl_macroarg: W", type=VARIABLE, varbits=2|4|8|16, constbits=1|2|4, datatype="all", nullable=1, defval=null },
+		{ pid="warg", lbl="$T.lbl_macroarg: W", type=VARIABLE, varbits=2|4|8|16, constbits=1|2|4|8|16, datatype="all", nullable=1, defval=null },
 		//	
 		efxhead,
 		aimaniprop,

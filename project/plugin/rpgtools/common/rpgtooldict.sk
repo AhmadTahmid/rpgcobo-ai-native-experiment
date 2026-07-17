@@ -744,6 +744,7 @@
 	"lbl_input_script"					: {"ja":"スクリプト", "en":"Script"}
 	"lbl_input_var"						: {"ja":"変数の選択", "en":"Select Variable"}
 	"lbl_input_dataid"					: {"ja":"データID", "en":"Data ID"}
+	"lbl_input_random"					: {"ja":"乱数", "en":"Random"}
 	"lbl_lvcurve"						: {"ja":"レベルカーブ", "en":"Lv Curve"}
 	"lbl_battleai"						: {"ja":"バトルAI", "en":"Battle AI"}
 	"lbl_contturns"						: {"ja":"継続ターン", "en":"Continuous Turns"}
@@ -929,6 +930,7 @@
 	"lbl_pararun"						: {"ja":"並列実行", "en":"Parallel Run"}
 	"lbl_link_var"						: {"ja":"変数とリンク", "en":"Link to Variable"}
 	"lbl_unlink_var"					: {"ja":"変数のリンクを解除", "en":"Unlink to Variable"}
+	"lbl_dontlink_var"					: {"ja":"変数にリンクしない", "en":"Do not link to Variable"}
 	"lbl_errorop"						: {"ja":"エラー時の処理", "en":"Operation on Error"}
 	"lbl_op"							: {"ja":"操作", "en":"Operation"}
 	"lbl_remap"							: {"ja":"マップの再配置", "en":"Restore Map"}

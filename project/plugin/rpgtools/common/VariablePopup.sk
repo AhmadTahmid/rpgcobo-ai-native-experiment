@@ -175,8 +175,9 @@ class VariableVarPopup extends Popup
 class VariableBehavior
 {
 	view = null;
+	prop = null;
 
-	constbits = 15;				//	
+	constbits = 31;				//	
 	varbits = 63;				//	
 	nullable = 0;				//	
 	anytype = 0;
@@ -194,11 +195,14 @@ class VariableBehavior
 	scpedit = null;
 	scpchk = null;				//	scpeditで入力されたテキストがコンパイルを通るかチェック
 	fpchk = null;
+	minval = null;
+	maxval = null;
 
 	var = null;					//	結果の代入用var
 
 	constructor( v, prop){
 		view = v;
+		this.prop = prop;
 		constbits = prop["constbits"] || 0;
 		varbits = prop["varbits"] || 0;
 		datatype = prop["datatype"] || null;
@@ -209,7 +213,7 @@ class VariableBehavior
 		typeicon = v.findChild( "typeicon");
 		varlbl = v.findChild( "varlbl");
 		g = [];
-		for( local l = 0;l < 4;l ++) g .. v.findChild( "g"..l);
+		for( local l = 0;l < 5;l ++) g .. v.findChild( "g"..l);
 		varbtn = v.findChild( "varbtn");
 		offbtn = v.findChild( "offbtn");
 		onbtn = v.findChild( "onbtn");
@@ -217,6 +221,12 @@ class VariableBehavior
 		textedit = v.findChild( "textedit");
 		scpedit = v.findChild( "scpedit");
 		fpchk = v.findChild( "fpchk");
+		minval = createNumInputBehavior( v.findChild( "minval"));
+		maxval = createNumInputBehavior( v.findChild( "maxval"));
+		minval.setRange( -99999999, 99999999, 1);
+		maxval.setRange( -99999999, 99999999, 1);
+		minval.setBarRange( -100, 100, 1);
+		maxval.setBarRange( -100, 100, 1);
 		view.addEventListener( ACTION_EVENT, actionevent);
 	}
 
@@ -241,22 +251,33 @@ class VariableBehavior
 			typeicon.setText( "\ue0bc");
 			break;
 		case SS_STRING:	//	\tXXXX ならスクリプト、 'XXXX なら文字列、 .XXXX ならデータID
-			if( var[0] == '\t'){
+			switch( var[0]){
+			case '\t':
 				setTab( 3); scpedit.setText( var.substring( 1)); checkScript();
 				typeicon.setText( "\ueb8e");
-			}else
-			if( var[0] == '\''){
+				break;
+			case '\'':
 				setTab( 2); textedit.setText( var.substring( 1));
 				typeicon.setText( "\ue167");
-			}else
-			if( var[0] == '.'){
+				break;
+			case '.':
 				setTab( -1);
 				local dataid = var.substring( 1), data = rpgdata[dataid];
 				local s = sprintf( "[C][b]{ %S }\n[O][i][#def][-2]%S", dataid, data.name);
 				local rt = RichText( s);
 				varlbl.setText( rt);
 				typeicon.setText( data["icon"] || "\uf120");
-			}else{
+				break;
+			case '\r':
+			{
+				setTab( 4);
+				local i = var.indexOf( ','), mi = int( var.substring( 5, i)), ma = int( var.substring( i+1));
+				minval.setValue( mi);
+				maxval.setValue( ma-1);
+				typeicon.setText( "\ueb40");
+				break;
+			}
+			default:
 				setTab( -1);
 				local vi = ::RPGVarAccessor.getVarInfo( var);
 				local n = length( vi.key)>=3 ? "\n":" ";
@@ -264,6 +285,7 @@ class VariableBehavior
 				local rt = RichText( s);
 				varlbl.setText( rt);
 				typeicon.setText( vi["icon"] ||"\ue322");
+				break;
 			}
 			break;
 		case SS_BOOL:
@@ -272,47 +294,6 @@ class VariableBehavior
 			(var?onbtn:offbtn).setSelected( true);
 			(!var?onbtn:offbtn).setSelected( false);
 			typeicon.setText( "\ue9f6");
-			break;
-		}
-	}
-
-	static function setVarView( var, varlbl, typeicon){
-		switch( typeof( var)){
-		case SS_INTEGER: case SS_FLOAT:
-			numval.setValue( var);
-			typeicon?.setText( "\ue0bc");
-			break;
-		case SS_STRING:	//	\tXXXX ならスクリプト、 'XXXX なら文字列、 .XXXX ならデータID
-			if( var[0] == '\t'){
-				varlbl.setText( var.substring( 1));
-				typeicon?.setText( "\ueb8e");
-			}else
-			if( var[0] == '\''){
-				varlbl.setText( var.substring( 1));
-				typeicon?.setText( "\ue167");
-			}else
-			if( var[0] == '.'){
-				local dataid = var.substring( 1), data = rpgdata[dataid];
-				local s = sprintf( "[C][b]%S\n[O][i][#def][-2]%S", dataid, data.name);
-				local rt = RichText( s);
-				varlbl.setText( rt);
-				typeicon?.setText( data["icon"] || "\uf120");
-			}else{
-				local vi = ::RPGVarAccessor.getVarInfo( var);
-				local n = length( vi.key)>=3 ? "\n":" ";
-				local s = sprintf( "[C][b]%S%S[O][i][#def][-2]%S", vi.key, n, vi.name);
-				local rt = RichText( s);
-				varlbl.setText( rt);
-				typeicon?.setText( vi["icon"] ||"\ue322");
-			}
-			break;
-		case SS_TABLE:	//	便宜上anytype
-			break;
-		case SS_BOOL:
-		default:				//	他のタイプの場合はboolにしちゃったらいいかな
-			// (var?onbtn:offbtn).setSelected( true);
-			// (!var?onbtn:offbtn).setSelected( false);
-			typeicon?.setText( "\ue9f6");
 			break;
 		}
 	}
@@ -387,6 +368,13 @@ class VariableBehavior
 			var = "'" .. e.src.getText();
 			view.postActionEvent( var);
 			return;
+		case "minval":
+		case "maxval":
+			e.consume();
+			local a = (minval.getValue(),maxval.getValue()).sort();
+			var = "\rrnd(%d,%d)" % (a[0], a[1]+1);
+			view.postActionEvent( var);
+			return;
 		case "scpedit":
 			e.consume();
 			var = "\t" .. e.src.getText();
@@ -403,35 +391,57 @@ class VariableBehavior
 	}
 
 	function selectType( e){
-		local bits = constbits | (varbits?16:0) | (datatype?32:0) | (anytype?64:0) | (nullable?128:0);
-		local menudata = [
-			{ val=0, lbl="$T.lbl_input_bool", icon="\ue9f6"},
-			{ val=1, lbl="$T.lbl_input_number", icon="\ue0bc"},
-			{ val=2, lbl="$T.lbl_input_string", icon="\ue167"},
-			{ val=3, lbl="$T.lbl_input_script", icon="\ueb8e"},
-			{ val=4, lbl="$T.lbl_input_var", icon="\ue322"},
-			{ val=5, lbl="$T.lbl_input_dataid", icon="\uf120"},
-			{ val=6, lbl="$T.lbl_anytype", icon="\ue41d"},
-			{ val=7, lbl="$T.lbl_notset", icon="\ue15d"},
-		].filter( @( v) (1<<v.val) & bits );
-		local ret = e? MenuPopup.pulldown( menudata, varbtn) : MenuPopup.run( menudata);
-		switch( ret["val"]){
-		case 0: setVar( true); return true;
-		case 1: setVar( 1); return true;
-		case 2: setVar( "'ABC"); return true;
-		case 3: setVar( "\tW"); return true;
-		case 4: 
-			local v = (varbits&1) ? "W" : (varbits&2) ? "A" : (varbits&4) ? "G000" : "MONEY";
-			v = VariableVarPopup.run( e, varbits, v);
-			if( v){ setVar( v); return true; }
-			break;
-		case 5:
-			local v = DataSelectPopup.run( e, { datatype=datatype, filter=datafilter}, "I000");
-			if( v){ setVar( "."..v); return true; }
-			break;
-		case 6: setVar( {}); return true;
-		case 7: setVar( null); return true;
+		local v1 = showTypeMenu( prop, e?varbtn : null, var);
+		if( v1 != undefined){
+			setVar( v1);
+			return true;
 		}
-		return false;
+	}
+
+	static function showTypeMenu( prop, cv, v0){
+		local constbits = prop["constbits"];
+		local varbits = prop["varbits"];
+		local datatype = prop["datatype"];
+		local nullable = prop["nullable"];
+		local anytype = prop["anytype"];
+		local bits = constbits | (varbits?256:0) | (datatype?512:0) | (anytype?1024:0) | (nullable?2048:0);
+		local menudata = [
+			{ val=0, lbl="$T.lbl_input_bool", icon="\ue9f6", checked=typeof( v0)==SS_BOOL},
+			{ val=1, lbl="$T.lbl_input_number", icon="\ue0bc", checked=typeof( v0)<=SS_FLOAT},
+			{ val=2, lbl="$T.lbl_input_string", icon="\ue167", checked=v0[0]=='\''},
+			{ val=4, lbl="$T.lbl_input_random", icon="\ueb40", checked=v0[0]=='\r'},
+			{ val=3, lbl="$T.lbl_input_script", icon="\ueb8e", checked=v0[0]=='\t'},
+			//
+			{ val=8, lbl="$T.lbl_input_var", icon="\ue322", checked=v0[0] && !".'\t\r".contains( v0[0])},
+			{ val=9, lbl="$T.lbl_input_dataid", icon="\uf120", checked=v0[0]=='.'},
+			{ val=10, lbl="$T.lbl_anytype", icon="\ue41d", checked=typeof( v0)==SS_TABLE},
+			{ val=11, lbl="$T.lbl_notset", icon="\ue15d", checked=v0==null},
+		].filter( @( v) (1<<v.val) & bits );
+		if( prop["unlinkmenu"]){
+			menudata[0] <- { val=-1, lbl="$T.lbl_dontlink_var", icon="\ue16f", checked=v0==undefined};
+			menudata[1] <- "-";
+		}
+		local ret = cv ? MenuPopup.pulldown( menudata, cv) : MenuPopup.run( menudata);
+		switch( ret["val"]){
+		case -1: return "***DONOTLINK***";
+		case 0: return ( true);
+		case 1: return ( 1);
+		case 2: return ( "'ABC");
+		case 3: return ( "\tW");
+		case 4: return ( "\rrnd(0,100)");
+		//
+		case 8: 
+			local v = (varbits&1) ? "W" : (varbits&2) ? "A" : (varbits&4) ? "G000" : "MONEY";
+			v = VariableVarPopup.run( {src=::getMousePos( 0)}, varbits, v);
+			if( v) return ( v);
+			break;
+		case 9:
+			local v = DataSelectPopup.run( {src=::getMousePos( 0)}, { datatype=datatype, filter=prop["datafilter"]}, "I000");
+			if( v) return ( "."..v);
+			break;
+		case 10: return ( {});
+		case 11: return ( null);
+		}
+		return undefined;
 	}
 }

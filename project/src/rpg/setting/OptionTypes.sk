@@ -70,7 +70,7 @@ local userateprop = {
 	pid = "rate",
 	lbl = "$T.lbl_userate"
 	type = VARIABLE,
-	constbits=2|8, varbits=0,
+	constbits=2|8|16, varbits=0,
 	defval = 1.0
 };
 
@@ -78,7 +78,7 @@ local successrateprop = {
 	pid = "successrate",
 	lbl = "$T.lbl_successrate"		//	ステータスを比較して成功率を変化させるためにスクリプトも有効
 	type = VARIABLE,
-	constbits=2|8, varbits=0,
+	constbits=2|8|16, varbits=0,
 	defval = 1.0
 };
 
@@ -86,7 +86,7 @@ local dmgrateprop = {
 	pid = "dmgrate",
 	lbl = "$T.lbl_dmgrate"
 	type = VARIABLE,
-	constbits=2|8, varbits=0,
+	constbits=2|8|16, varbits=0,
 	defval = 1.0
 };
 
@@ -94,7 +94,7 @@ local dmgvalprop = {
 	pid = "dmgval",
 	lbl = "$T.lbl_dmgval"
 	type = VARIABLE,
-	constbits=2|8, varbits=0,
+	constbits=2|8|16, varbits=0,
 	defval = 1
 };
 
@@ -128,7 +128,7 @@ local totalrateprop = {
 	pid = "totalrate",
 	lbl = "$T.lbl_dmggainrate"
 	type = VARIABLE,
-	constbits=2|8, varbits=0,
+	constbits=2|8|16, varbits=0,
 	defval = 10
 };
 

@@ -39,6 +39,46 @@ class PropertyEditPopupV extends PropertyEditPopup
 	function actionevent( e){
 		return super.actionevent( e);
 	}
+
+	function showVarMenu( e){
+		local cmd = e.actioncmd, pid = cmd.prop.pid, data = this.data;
+		local prop = clone cmd.prop;
+		if( !("constbits" in prop)) prop.constbits <- 8;
+		if( !("varbits" in prop)) prop.varbits <- 1|2|4;
+		prop.unlinkmenu <- true;
+		//
+		local v0 = data["_var"][pid];
+		local v1 = VariableBehavior.showTypeMenu( prop, null, v0);
+		if( v1 == undefined) return;
+		if( v1 == "***DONOTLINK***") v1 = undefined;
+		local self = this;
+		local defval = cmd.prop["defval"];	//	defvalを定義しとけば元値のdeleteが可能
+		local redo = [@(){
+			if( v1 == undefined){
+				delete data["_var"][pid];
+				if( !length( data["_var"])) delete data["_var"];
+				if( defval != undefined) data[pid] <- defval;
+			}else{
+				if( !data["_var"]) data._var <- {};
+				data._var[pid] <- v1;
+			}
+			self.setupProperties();
+			self.updateViewSize();
+		}];
+		local undo = [@(){
+			if( v0 == undefined){
+				delete data["_var"][pid];
+				if( !length( data["_var"])) delete data["_var"];
+			}else{
+				if( !data["_var"]) data._var <- {};
+				data._var[pid] <- v0;
+				if( defval != undefined) delete data[pid];
+			}
+			self.setupProperties();
+			self.updateViewSize();
+		}];
+		submitOp( redo, undo, null);
+	}
 	
 	function propevent( e){
 		e.consume();
@@ -47,7 +87,9 @@ class PropertyEditPopupV extends PropertyEditPopup
 			local pid = cmd.prop.pid;
 			if( cmd.prop.variable == 2) return;
 			local data = this.data;
-			local defval = cmd.prop["defval"];	//	defvalを定義しとけば消すことが可能
+			local defval = cmd.prop["defval"];	//	defvalを定義しとけば元値のdeleteが可能
+			showVarMenu( e);
+			/*
 			if( pid in data["_var"]){
 				if( MenuPopup.run( [{ lbl="$T.lbl_unlink_var", icon="\ue16f", val=0, }])){
 					local self = this, oldvar = data._var[pid];
@@ -88,6 +130,7 @@ class PropertyEditPopupV extends PropertyEditPopup
 					submitOp( redo, undo, null);
 				}
 			}
+			*/
 		}else
 		if( cmd.cmd == "prop"){
 			setParamOp( cmd.prop, cmd.val);
@@ -96,7 +139,7 @@ class PropertyEditPopupV extends PropertyEditPopup
 
 	function setParamOp( prop, val){
 		local self = this;
-		local data = this.data, oldval = ::getProperty( prop, data);
+		local data = this.data, oldval = data["_var"][prop.pid] ?? ::getProperty( prop, data);
 		local makefn = @( v, d) @(){
 			if( prop["varchk"]){
 				data._var[prop.pid] = v;
@@ -219,7 +262,7 @@ class OVFXPropertyEditPopupV extends PropertyEditPopupV
 		preview = CanvasBehavior( v.findChild( "preview"), null);
 		preview.view.renderer.setEnvironment( ::RenderSettings.getEnvironment( "pbr_fw"));
 		
-		rp3d = RPG3DObject.create3DObject( ref || { mdlid="CV000" });
+		rp3d = RPG3DObject.create3DObject( { mdlid= fget( propdef, "mdlid") || "CV000" });
 		rp3d.setDir( Math.PI);
 		preview.scn.addObject( rp3d);
 
@@ -255,5 +298,64 @@ class OVFXPropertyEditPopupV extends PropertyEditPopupV
 			break;
 		}
 	}
-
 }
+
+
+//	汎用3Dプレビュー用。
+//	
+//	
+class SK3DPropertyEditPopupV extends PropertyEditPopupV
+{
+	static POPUPUIPATH = srcdir .. "/ui/ovfxproppopup.ui";
+
+	preview = null;
+	camwork = null;		//	preview.camwork
+
+	bw = null;			//	BlockWorld: nullの場合はマッププレビューなしでグリッド表示
+	bw3d = null;		//	SK3DBlockWorld
+	
+	constructor( v, p, d){
+		super( v, p, d);
+		preview = CanvasBehavior( v.findChild( "preview"), null);
+		preview.view.renderer.setEnvironment( ::RenderSettings.getEnvironment( "pbr_fw"));
+		camwork = preview.camwork;
+		
+		preview.view.addEventListener( MOUSE_EVENT, previewevent);
+		preview.view.addEventListener( KEY_EVENT, previewevent);
+	}
+
+	function shown(){
+		preview.view.requestFocus();
+	}
+
+	function reset3d(){
+		fget( propdef, "reset3d", this, data, propdef);
+	}
+
+	function startPreview(){
+		fget( propdef, "start3d", this, data, propdef);
+	}
+
+	function propevent( e){
+		super.propevent( e);
+		reset3d();
+	}
+
+	function previewevent( e){
+		switch( e.id){
+		case MOUSE_PRESSED:
+			if( e.isMouseDown( BUTTON1_MASK)){
+				startPreview();
+				preview.view.requestFocus();
+			}
+			break;
+		case KEY_PRESSED:
+			if( e.keycode == VK_SPACE){
+				startPreview();
+			}
+			break;
+		}
+	}
+}
+
+

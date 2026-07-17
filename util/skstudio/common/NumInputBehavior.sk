@@ -22,6 +22,8 @@ class NumInputBase
 	
 	mousein = false;
 
+	barrange = null;
+	
 	constructor( v){
 		view = v;
 		tf = v.findChild( "numedit");
@@ -32,7 +34,11 @@ class NumInputBase
 		v.addEventListener( MOUSE_EVENT, mouseevent);
 		changed = v.findChild( "changed");
 	}
-
+	
+	function setBarRange( mi, ma, r=1.0){
+		barrange = {mi=mi, ma=ma, r=r, w=ma-mi};
+	}
+	
 	static function numfilter( c){
 		return "0123456789.-".contains( c) ? c : false;
 	}
@@ -230,7 +236,7 @@ class NumInputBehaviorV extends NumInputBase
 	
 	function startVRangeBar( e){
 		local pp = VRangeBarPopup( ::loadSKView( VRANGEUIPATH));
-		pp.ninput = this;
+		pp.setNumInput( this);
 		pp.val = val;
 		local y = pp.vtoy( val);
 		pp.movecurs( y);
@@ -245,9 +251,25 @@ class NumInputBehaviorV.VRangeBarPopup extends Popup
 	val = 0.0;
 	vchanged = false;
 
+	mi = 0;
+	w = 100;
+	r = 1;
+
 	function init( v){
 		super.init( v);
 		knob = view.findChild( "knob");
+	}
+
+	function setNumInput( ni){
+		ninput = ni;
+		if( ninput.barrange){
+			mi = ninput.barrange.mi;
+			w = ninput.barrange.w;
+			r = ninput.barrange.r;
+		}else{
+			mi = ninput.minval;
+			w = ninput.maxval-mi;
+		}
 	}
 
 	function adjustBounds( view, posview, root){
@@ -298,13 +320,13 @@ class NumInputBehaviorV.VRangeBarPopup extends Popup
 	}
 
 	function vtoy( v){
-		local w = Math.saturate( (v-ninput.minval) * 1.0 / (ninput.maxval-ninput.minval));
-		return (1.0-w)*(view.bnd.h-6) + 3;
+		local t = Math.saturate( (v-mi) * 1.0 / (w));
+		return (1.0-t)*(view.bnd.h-6) + 3;
 	}
 
 	function ytov( y){
-		local w = 1.0-Math.saturate( (y-3)/(view.bnd.h-6));
-		return w * (ninput.maxval-ninput.minval) + ninput.minval;
+		local t = 1.0-Math.saturate( (y-3)/(view.bnd.h-6));
+		return t * (w) + mi;
 	}
 
 	function movecurs( y){
@@ -320,16 +342,10 @@ class NumInputBehaviorH extends NumInputBase
 	
 	val0 = -1;
 
-	barrange = null;
-
 	constructor( v){
 		super( v);
 		bar = v.findChild( "bar");
 		bar.addEventListener( MOUSE_EVENT, mouseevent);
-	}
-	
-	function setBarRange( mi, ma, r=1.0){
-		barrange = {mi=mi, ma=ma, r=r, w=ma-mi};
 	}
 
 	function setValue( v){

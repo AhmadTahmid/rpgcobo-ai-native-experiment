@@ -645,7 +645,7 @@ function getvar( var, self){
 	if( typeof( var) == SS_STRING){
 		switch( var[0]){
 		case '.': case '\'': return var.substring( 1);
-		case '\t': return ~(compilescript( var), self);		//	functionを実行
+		case '\t': case '\r': return ~(compilescript( var), self);		//	functionを実行
 		default: return self[var];	//	変数の値取得
 		}
 	}else{
