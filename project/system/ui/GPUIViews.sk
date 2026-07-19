@@ -768,7 +768,7 @@ class GPUIScrollGroup extends GPUIGroup
 		}
 		case MOUSE_PAN:
 			if( !e.isShiftDown()){
-				local _ori = e.dx?1:0;
+				local _ori = e.dx*e.dx>e.dy*e.dy?1:0;
 				if( _ori != ori){
 					if( hasParentList( _ori)) break;
 					local tmp = e.dx; e.dx = e.dy; e.dy = tmp;

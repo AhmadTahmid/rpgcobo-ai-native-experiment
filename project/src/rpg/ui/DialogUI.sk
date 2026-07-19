@@ -338,7 +338,7 @@ RPGSystem.ui ..
 		local cando = sell ? @( n){	//	所持数チェック
 			return rpgstat.countItems( itemid) >= n;
 		} : @( n){	//	スタック数、所持金のチェック
-			return rpgstat.countItems( itemid)+n <= stacknum;
+			return rpgstat.countItems( itemid)+n <= stacknum && rpgstat.money >= pr1*n;
 		};
 		local view = RPGMain.showView({
 			uipath = "dialog_buyitem.ui"

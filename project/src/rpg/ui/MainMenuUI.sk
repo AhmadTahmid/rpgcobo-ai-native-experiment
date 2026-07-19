@@ -159,7 +159,11 @@ BACK_TO_CHARASEL:
 			::rpgstage.screenfx.screenEffectOff( { sfxbits=2, time=400});
 			return true;
 		}
-		goto BACK_TO_CHARASEL;
+		if( menuitem.ui["charasel"]){
+			goto BACK_TO_CHARASEL;
+		}else{
+			goto BACK_TO_MENUSEL;
+		}
 	}
 }
 

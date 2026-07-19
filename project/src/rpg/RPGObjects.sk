@@ -260,6 +260,10 @@ class RPGCharaBase extends RPGObject
 		foreach( id, lim in limits){
 			if( id in scoremap) scoremap[id] = Math.min( scoremap[id], lim);
 		}
+		//	HP,MP,TPの上限を超えていたら補正する
+		HP = Math.clamp( HP, 0, MAXHP);
+		MP = Math.clamp( MP, 0, MAXMP);
+		TP = Math.clamp( TP, 0, MAXTP);
 	}
 	
 	function updateOptions(){

@@ -73,7 +73,7 @@ class ToolCamerawork
 
 
 	static function getZoomScale( i){
-		return Math.pow( 2.0, (zoomi-20)*0.2) * 10.0;
+		return Math.pow( 2.0, (i-20)*0.2) * 10.0;
 	}
 
 	static function getZoomIndex( z){
@@ -304,8 +304,9 @@ class ToolCamerawork
 			}
 			break;
 		case MOUSE_PINCH:
-			zoomi = Math.clamp( zoomi+e.dx/100, 0, 50);
-			zoom = getZoomScale( zoomi);
+			zoom = Math.clamp( zoom/(e.dx*0.01+1.0), getZoomScale(0), getZoomScale(50));
+			printf( "zpoom %S\n", zoom);
+			zoomi = getZoomIndex( zoom);
 			e.consume();
 			view.repaint();
 			break;

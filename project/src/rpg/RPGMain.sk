@@ -55,6 +55,7 @@ import GamepadStateID;
 		::virtualpad = VirtualPad( root.findChild( "virtualpad"));	//	バーチャルパッドを作る
 		if( !::["gpui"]) GPUI();
 		//	UIループ用のリスナー
+		root.addPostEventListener( NOTIFY_EVENT, appevent);
 		root.addPostEventListener( GPUI_EVENT, uiloopevent);
 		root.addPostEventListener( ACTION_EVENT, uiloopevent);
 		root.addPostEventListener( MOUSE_EVENT, uiloopevent);
@@ -730,6 +731,19 @@ import GamepadStateID;
 		case GPUI_GAMEPAD_NOTICE:
 			RPGMain.showUI( { key="message_log", text=`\uf830 $T.gamepad_x`});
 			buttonhelp( _btnhelp);
+			break;
+		}
+	}
+
+	function appevent( e){
+		switch( e.id){
+		case NOTIFY_ERROR:	//	表示するべきエラー
+			try{
+				e.consume();
+				RPGMain.showUI( { key="message_log", text=e.actioncmd["msg"] || "no message"});
+			}catch( ex){	//	ここでthrowしちゃうと無限ループしちゃう
+				printexception( ex);
+			}
 			break;
 		}
 	}

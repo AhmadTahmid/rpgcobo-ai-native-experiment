@@ -35,7 +35,7 @@ reqchk .. {
 		datatype = ["item","weapon","armor"]
 	}
 
-	func = @( req, self) ::rpgstat.getItemNum( ::getvar( req.rvar, self))>0
+	func = @( req, self) ::rpgstat.countItems( ::getvar( req.rvar, self))>0
 }
 
 reqchk .. {

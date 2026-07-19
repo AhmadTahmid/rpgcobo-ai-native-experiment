@@ -176,6 +176,17 @@ playerprops .. {
 	defval = 20
 };
 
+//	MAXTP : 最大TP (スコアプロパティ)
+//	MAXTPは100固定で編集無し。オプションで変更することは可能
+playerprops .. {
+	proptype = "score"
+	pid = "MAXTP"
+	lbl = "${T.MAXTP}"			//	ツール上での表示名
+
+	type = NOEDITOR
+	defval = 100
+};
+
 //	PATK : 物理攻撃力 (スコアプロパティ)
 //	
 playerprops .. {
@@ -413,12 +424,12 @@ local findprop( props, pid){
 ///////////////////////////////////////////////////////////////////////////////////////
 //	エネミー
 
-//	LV : エネミーのLVは特に使われない (スタティックプロパティ)
-//	
+//	エネミーは各ステータスに計算式を入れることが出来る。スコアプロパティ限定
 local varprop( prop){
 	return { ...prop, type=VARIABLE, varbits=0, constbits=2|8|16 };
 }
 
+//	LV : エネミーのLVは特に使われないが、計算の起点には出来る (スタティックプロパティ)
 enemyprops .. varprop( {
 	proptype = "score"
 	pid = "LV"
@@ -430,8 +441,9 @@ enemyprops .. varprop( {
 
 //	プレイヤーの戦闘系のプロパティをエネミーにも追加
 enemyprops .. { ...varprop( findprop( playerprops, "MAXHP")), range=(1,999999), };
+enemyprops .. { ...findprop( playerprops, "MAXMP"), type=NOEDITOR, defval=9999 };	//	MP,TPはエネミーにはいらないが、無いと無いで不要なエラーが出るので追加しておく
+enemyprops .. { ...findprop( playerprops, "MAXTP"), type=NOEDITOR, defval=9999 };
 
-// enemyprops .. findprop( playerprops, "MAXMP");	//	MP,TPはエネミーにはいらない
 enemyprops .. varprop( findprop( playerprops, "PATK"));
 enemyprops .. varprop( findprop( playerprops, "PDEF"));
 enemyprops .. varprop( findprop( playerprops, "MATK"));

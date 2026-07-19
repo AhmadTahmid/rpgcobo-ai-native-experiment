@@ -1394,7 +1394,7 @@ class RPGMacroEventRunner extends RPGEventRunner
 		for(;;){
 			mode = 1;
 			try{
-				if( eventTriggerable() && ::reqchk( data.reqs, this)){
+				if( eventTriggerable() && ::reqchk( data["runreqs"], this)){
 					return run_running();
 				}
 			}catch( ex){

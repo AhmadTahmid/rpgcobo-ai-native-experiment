@@ -1425,7 +1425,7 @@ RPGSystem.option .. {
 		if( id!="walk" || (cnt%opd.cnt)) return;
 		local v = ::getvar( opd.dmgval, opd);
 		if( opd.relative) v *= self.MAXHP * 0.01;
-		self.addPoint( "HP", -v);
+		self.addPoint( DamageTypePID[opd.dmgtype], v*(opd.dmgtype&2?1:-1));
 		self.updateDead();
 		if( opd["efx"]){
 			::rpgstage.player3d.effect( opd.efx);

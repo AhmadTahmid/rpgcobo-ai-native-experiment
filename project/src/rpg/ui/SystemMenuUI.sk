@@ -610,3 +610,47 @@ RPGSystem.ui ..
 		goto BACK_TO_ITEMSEL;
 	}
 };
+
+
+RPGSystem.ui ..
+{
+	key = "menu_exitgame"
+	lbl = "$T.exitgame"
+	type = "submenu"		//	mainmanu, submenu, choose, dialog, message, info, debug, misc, 
+	nochange_menuui = true
+	topinfo = "$T.exitgame"
+	icon = "\ue30a"
+
+	props = [
+	],
+
+	defval = {
+	}
+
+	function uifunc( prms){
+		local menu_main = ::rootview.findChild( "menu_main");
+		menu_main?.action( "darken");
+		local ret = RPGMain.showUI( { key="dialog_choices", text0="$T.back", text1="$T.gotitle", text2="$T.exitgame", backop=2 });
+		menu_main?.action( "lighten");
+		switch( ret){
+		case 1:
+			playSound( "SE011");
+			::fadeoutBGM( 1000);
+			RPGMain.showUI( { key="wipe", show="show", wait=1});
+			sleep( 500);
+			RPGMain.goTitle();
+			return false;
+		case 2:
+			playSound( "SE011");
+			::fadeoutBGM( 1000);
+			RPGMain.showUI( { key="wipe", show="show", wait=1});
+			sleep( 500);
+			skExit( 0);
+			return false;
+		default:
+			playSound( "SE004");
+			break;
+		}
+		return true;
+	}
+};

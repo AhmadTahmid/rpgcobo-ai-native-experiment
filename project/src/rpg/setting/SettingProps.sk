@@ -290,6 +290,16 @@ settingprops .. {
 	defval = 3
 };
 
+settingprops .. {
+	part = "ui",
+	proptype = "status",
+	pid = "menu_exitgame",
+	lbl = @() (T.format_view % T.exitgame),
+	type = LIST,
+	list = RPGProperties.uivisiblelist,
+	defval = 3
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 //	ステージ設定
 //	以下のプロパティはステージの保存時に保存される。また、mapedit=trueの場合はマップエディタで初期設定を設定可能。
