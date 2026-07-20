@@ -7,6 +7,112 @@ import RPGPropertyType;
 
 local srcdir = dirname( callee().getSourceName());
 
+class ResEditorPic extends ResEditor
+{
+	function init( v){
+		super.init( v);
+		addEventListener( DROPTARGET_EVENT, dndevent);
+	}
+
+	function showItemContextMenu( e){
+		local respath = selitem.data["pic"]||selitem.data["pic3d"];
+		local cbdata = getClipboard( "resitem");	//	開くたびにクリップボード取得しちゃうけどまーだいじょぶかな
+		local menudata = [
+			{ id="copy", lbl="$T.menu_edit_copy", icon="\ue14d" },
+			{ id="paste", lbl="$T.menu_edit_paste", icon="\ue14f", disable=!isPastable( cbdata)},
+			{ id="delete", lbl="$T.lbl_delete", icon="\ue872", disable=!isValidData( selitem["data"])},
+			"-",
+			{ id="sort", lbl="$T.lbl_idsort", icon="\ue240"},
+			{ id="dir", lbl="$T.lbl_openresdir", icon="\ue89e", disable=!respath },
+			{ id="import", lbl="$T.lbl_import_file", icon="\ue675"},
+		];
+		local ret = MenuPopup.run( menudata);
+		switch( ret["id"]){
+		case "copy": return copy();
+		case "paste": return paste( cbdata);
+		case "delete": return deleteItem( selitem);
+		case "sort": return showIDSortDialog();
+		case "dir": return skOpenURL( "dir://"..skGetCurrentDir().."/project"..respath);
+		case "import":
+			local imgpath = skstudio.showFileOpen( { filter=["*.png","*.webp","*.jpg"], abspath=true, pathgroup="pic" });
+			if( imgpath){
+				local f = FileRef( imgpath);
+				showImportImage( f);
+			}
+			break;
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	//	dnd
+
+	function acceptDrag( e){
+		return false;
+	}
+	
+	function isDropable( f){
+		local n = f.name; n = n.substring( n.lastIndexOf( "."+1)).toLowerCase();
+		return (#["png","webp","jpg",]).contains( n);
+	}
+
+	function acceptDrop( ds, x, y){
+		if( ds instanceof FileDragSource){
+			local a = ds.filelist;
+			foreach( f in a){
+				if( isDropable( f)) return true;
+			}
+		}
+		return false;
+	}
+
+	function dndevent( e){
+		switch( e.id){
+		case TARGET_DRAG_ENTER:
+		case TARGET_DRAG_OVER:
+			break;
+		case TARGET_DRAG_EXIT:
+			break;
+		case TARGET_DROP:
+			skMoveScreen( { flags=MoveScreenFlags.MOVESCREEN_FRONT });	//	ドロップ時にはウィンドウは奥にあるので手前に移動
+			local f = e.dragsrc.filelist[0];
+			showImportImage( f);
+			break;
+		}
+	}
+	
+	//	ファイルを指定してインポートダイアログ表示
+	//	※undo不可
+	function showImportImage( f){
+		local fn = f.name.toLowerCase();
+		local imgbb = f.load();
+		local outpath = resdirpath.."/"..fn;
+		if( fn.endsWith( ".png")){
+			local size0 = f.size;
+			local pngimg = skLoadImage( imgbb);
+			local webpbb = pngimg.encodeWebp( 100);	//	ロスレスでwebpに変換
+			local size1 = webpbb.size;
+			local ret = Dialogs.confirm( {msg="$T.confirm_importimg\n%S" % f.path, check="$T.check_convert_webp … size %S ⇒ %S" % (sizestr( size0), sizestr( size1)), checksel=1, needcheck=false, });
+			if( ret){
+				if( ret == 2){
+					webpbb.pos = 0;
+					imgbb = webpbb;
+					outpath = outpath.substring( 0, outpath.lastIndexOf( "."))..".webp";
+				}
+			}else{
+				return;
+			}
+		}else{
+			if( Dialogs.confirm( {msg="$T.confirm_importimg\n%S" % f.path, })){
+			}else{
+				return;
+			}
+		}
+		Popups.showInfo( "$T.pop_imgimport\n%S" % outpath.substring( outpath.lastIndexOf( "/")+1));
+		FileRef( outpath).save( imgbb);
+		::skstudio.fileview.refreshDir( picdirpath);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //	
 //	ResEditorEnemyPic : 敵ピクチャの編集
@@ -14,7 +120,7 @@ local srcdir = dirname( callee().getSourceName());
 //	
 
 //	
-class ResEditorEnemyPic extends ResEditor
+class ResEditorEnemyPic extends ResEditorPic
 {
 	static props = [
 		{ pid="name", lbl="$T.lbl_name", type=LANGSTRING, defval=null}
@@ -39,6 +145,7 @@ class ResEditorEnemyPic extends ResEditor
 	];
 
 	static titlelbl = "$T.lbl_resedit : $T.side_res_enemy_pic";
+	static picdirpath = "/resource/enemy_pic";
 	
 	function init( path){
 		super.init( path);
@@ -180,7 +287,7 @@ class ResEditorEnemyPic.ResPreview extends ResEditor.ResPreview
 //	
 
 //	
-class ResEditorEventPic extends ResEditor
+class ResEditorEventPic extends ResEditorPic
 {
 	static props = [
 		{ pid="name", lbl="$T.lbl_name", type=LANGSTRING, defval=null}
@@ -194,9 +301,11 @@ class ResEditorEventPic extends ResEditor
 	];
 
 	static titlelbl = "$T.lbl_resedit : $T.side_res_event_pic";
+	static picdirpath = "/resource/event_pic";
 	
 	function init( path){
 		super.init( path);
+		resdirpath = ::resroot.file.path .. picdirpath;
 	}
 
 	function isValidData( d){

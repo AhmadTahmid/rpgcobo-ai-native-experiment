@@ -592,6 +592,7 @@ class ResourceFileSelectDialog extends Dialog
 		if( p["showpartstree"]) previewlist.showpartstree = true;
 		view.findChild( "selallbtn").setVisible( false);
 		view.findChild( "tablist").setVisible( false);
+		view.findChild( "btn_import").setVisible( false);
 
 		//	setup list
 		switch( p.restype){

@@ -471,7 +471,7 @@ class RPGCharaBase extends RPGObject
 	//	指定したコンディションを解除することができるかを返す。
 	function canRemoveCondition( condid){
 		local cond = conds.find( @( v) v.dataid==condid);
-		if( !cond || isDead() && cond.data["deadtype"]!=2) return false;	//	死亡時は死亡タイプのコンディションのみ解除可能
+		if( !cond || (isDead() && cond.data["deadtype"]!=2)) return false;	//	死亡時は死亡タイプのコンディションのみ解除可能
 		return true;
 	}
 	
@@ -536,9 +536,9 @@ class RPGCharaBase extends RPGObject
 	//	指定したコンディションを解除することができるかを返す。
 	function canPutAnyCondition( bits){
 		if( !bits) return false;
-		foreach( c in conds){
-			local i = int( c.dataid.substring( 1));
-			if( ::bitget( bits, i) && canPutCondition( c.dataid)) return true;
+		local a = ::bitlist( bits);
+		foreach( v in a){
+			if( canPutCondition( "K%03d" % v)) return true;
 		}
 		return false;
 	}

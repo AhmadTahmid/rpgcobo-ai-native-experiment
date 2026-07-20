@@ -1267,6 +1267,7 @@ eventcmd .. {
 				{ pid="pos", lbl="$T.lbl_position", type=VEC2, range=[-1280,2560], variable=1 },
 				{ pid="scale", lbl="$T.lbl_scale", type=SCALAR, range=[0,1000], ui="bar", barrange=(0,400,10), variable=1 },
 				{ pid="rot", lbl="$T.lbl_rotation", type=SCALAR, range=[-3600,3600], ui="bar", barrange=(-360,360,5), variable=1 },
+				{ pid="flipx", lbl="$T.lbl_flipx", type=BOOL, defval=false, variable=1, },
 				{ pid="col", lbl="$T.lbl_color", type=RGBA, defval=0xffffffff, variable=1, }
 			];
 		}
@@ -1277,7 +1278,7 @@ eventcmd .. {
 	}
 	
 	defval = {
-		idx=0, picid="PC000", pos=[640,360], scale=100, rot=0, op=0, fade=0, wait=true, easing=0, aniid=null
+		idx=0, picid="PC000", pos=[640,360], scale=100, rot=0, op=0, fade=0, flipx=false, wait=true, easing=0, aniid=null
 	}
 	
 	cmdinfo = @( cmd){

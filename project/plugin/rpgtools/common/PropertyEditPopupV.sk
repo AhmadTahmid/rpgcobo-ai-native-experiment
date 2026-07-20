@@ -200,6 +200,7 @@ class PicPropertyEditPopupV extends PropertyEditPopupV
 			if( v.picid != pic.picid) pic.setPicID( v.picid);
 			pic.pos( v.pos[0], v.pos[1], 0);
 			pic.scale( v.scale*0.01);
+			if( v["flipx"]) pic.scale.x *= -1.0;
 			pic.rot.z = v.rot * Math.DTOR;
 			pic.matdirty = true;
 			pic.repaint();
@@ -213,7 +214,7 @@ class PicPropertyEditPopupV extends PropertyEditPopupV
 		super.propevent( e);
 		local cmd = e.actioncmd;
 		switch( cmd["prop"]["pid"]){
-		case "picid": case "pos": case "scale": case "rot": case "color":
+		case "picid": case "pos": case "scale": case "rot": case "color": case "flipx":
 			updatePicture();
 			break;
 		}

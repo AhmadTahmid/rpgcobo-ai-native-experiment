@@ -1054,6 +1054,9 @@
 	"dlg_sndimport"						: {"ja":"サウンドのインポート", "en":"Import Sound"}
 	"pop_sndimport"						: {"ja":"効果音ファイルをインポートしました", "en":"Imported a Sound file"}
 	"pop_bgmimport"						: {"ja":"BGMファイルをインポートしました", "en":"Imported a BGM file"}
+	"pop_imgimport"						: {"ja":"イメージをインポートしました", "en":"Imported an Image file"}
+	"confirm_importimg"					: {"ja":"イメージをインポートしますか？", "en":"Do you want to import an image?"}
+	"check_convert_webp"				: {"ja":"WebPに変換(推奨)", "en":"Convert to WebP (recommended)"}
 
 	"lbl_baseui"						: {"ja":"ベースとなるUI", "en":"Base UI"}
 	"lbl_langui"						: {"ja":"使用するUIの選択(言語ごと)", "en":"Select UI to use (by language)"}
