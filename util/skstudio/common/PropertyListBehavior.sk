@@ -2115,6 +2115,110 @@ class PropertyBehaviors.RotHPB extends PropertyBehaviors.Vec3
 	}
 }
 
+class PropertyBehaviors.Range extends PropertyBehavior
+{
+	static proptype = RANGE;
+	static uipath = "range.ui"
+
+	numedit0 = null;	//	GPUITextEdit
+	numedit1 = null;	//	GPUITextEdit
+	bar = null;			//	SKGroupView
+	barimg = null;		//	SKImageView
+	qua = 100;			//	1,10,100
+
+	val = null;			//	(min,max)
+
+	dragi = 0;			//	0|1
+	
+	function init(){
+		super.init();
+		numedit0 = view.findChild( "numedit0");
+		numedit1 = view.findChild( "numedit1");
+		bar = view.findChild( "bar");
+		bar.addEventListener( MOUSE_EVENT, mouseevent);
+		barimg = view.findChild( "barimg");
+		barimg.imagealign = -1;
+		bar.addEventListener( BROADCAST_EVENT, broadevent);
+		local self = this;
+		bar.addUpdateFunc( @(){ self.updatebar(); });
+		qua = fget( prop, "q", prop) ?? 100;
+	}
+
+	function getParam(){
+		return val;
+	}
+	
+	function setParam( v){
+		val = (
+			(Math.round( v[0]*qua)|0) / float( qua),
+			(Math.round( v[1]*qua)|0) / float( qua)
+		);
+		numedit0.setText( val[0]);
+		numedit1.setText( val[1]);
+		updatebar();
+	}
+	
+	function paramevent( e){
+		if( e.id==ACTION_PERFORMED ){
+			local v = (float( numedit0.getText()), float( numedit1.getText())).sort();
+			setParam( v);
+			postActionEvent( true);
+		}
+	}
+	
+	function updatebar(){
+		local sp = barimg.sp;
+		local w = barimg.bnd.w, h = barimg.bnd.h;
+		local min = val[0], max = val[1];
+		local r = prop["range"] || #(0.0,1.0);
+		local p0 = (min-r[0])/(r[1]-r[0]);
+		local p1 = (max-r[0])/(r[1]-r[0]);
+		sp.bnd.set( p0*w, 0, (p1-p0)*w, h);
+		barimg.repaint();
+	}
+
+	function broadevent( e){
+		local bc = e["actioncmd"];
+		switch( bc["cmd"]){
+		case "screen_resized":
+			updatebar();
+			break;
+		}
+	}
+
+	function xtov( x){
+		local r = prop["range"] || #(0.0,1.0);
+		return Math.saturate( x/barimg.bnd.w)*(r[1]-r[0]);
+	}
+
+	function vtox( v){
+		local r = prop["range"] || #(0.0,1.0);
+		return Math.saturate( (v-r[0])/(r[1]-r[0]))*barimg.bnd.w;
+	}
+
+	function mouseevent( e){
+		switch( e.id){
+		case MOUSE_PRESSED:
+			e.computeLocal( barimg.getInvMatrix());
+			local dv0 = Math.abs( xtov( e.lx)-val[0]);
+			local dv1 = Math.abs( xtov( e.lx)-val[1]);
+			dragi = (dv0<dv1) ? 0 : 1;
+			// fall throuth
+		case MOUSE_DRAGGED:
+			e.computeLocal( barimg.getInvMatrix());
+			local v = xtov( e.lx);
+			val[dragi] = xtov( e.lx);
+			setParam( val);
+			break;
+		case MOUSE_RELEASED:
+			setParam( val.sort());
+			postActionEvent( true);
+			break;
+		}
+	}
+}
+
+
 
 ::proptextfuncmap <- {
 	[LIST] = @( prop, data){

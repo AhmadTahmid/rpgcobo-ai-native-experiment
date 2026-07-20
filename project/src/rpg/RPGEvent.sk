@@ -774,7 +774,7 @@ class RPGEventRunner
 
 	//	キャラを移動
 	function moveChara( cmd){
-		local rp3d = cmd.who["rp3d"] || (cmd.who==1 ? stage.player3d : (stage.getEvent( cmd.who)["rp3d"] || rp3d));
+		local rp3d = getWho3D( cmd.who);// cmd.who["rp3d"] || (cmd.who==1 ? stage.player3d : (stage.getEvent( cmd.who)["rp3d"] || rp3d));
 		if( rp3d){
 			local vec;
 			if( typeof( cmd.pos) <= SS_STRING){	//	数値が入っている場合はZ方向への移動とみなす
@@ -787,7 +787,8 @@ class RPGEventRunner
 			case 1: d = rp3d.dir; break;
 			case 2: d = rpgstage.camdir; break;
 			case 3:
-				d = Math.atan2( this.rp3d.pos.x-stage.player3d.pos.x, -(this.rp3d.pos.z-stage.player3d.pos.z)) * (rp3d==this.rp3d?-1:1);
+				local fc3d = rp3d==stage.player3d ? this.rp3d : stage.player3d;
+				d = Math.atan2( rp3d.pos.x-fc3d.pos.x, -(rp3d.pos.z-fc3d.pos.z)) * -1.0;
 				break;
 			}
 			if( d) vec.rotate( q_1.setHPB( d, 0, 0));
@@ -803,8 +804,10 @@ class RPGEventRunner
 	}
 	//	キャラを回転
 	function rotateChara( cmd){
-		local rp3d = cmd.who["rp3d"] || (cmd.who==1 ? stage.player3d : (stage.getEvent( cmd.who)["rp3d"] || rp3d));
+		local rp3d = getWho3D( cmd.who);
 		if( rp3d){
+			local fc3d = rp3d==stage.player3d ? this.rp3d : stage.player3d;
+			cmd = { ...cmd, fc3d=fc3d, };
 			rp3d.modifyRotate( cmd);
 			if( cmd["wait"] && cmd["fade"]){
 				sleep( cmd.fade);

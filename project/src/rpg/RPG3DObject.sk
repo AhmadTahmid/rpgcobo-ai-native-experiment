@@ -585,9 +585,11 @@ class RPG3DObject extends SK3DObject
 		case 2:
 			dir1 = dir + deltadir( dir, dir1+rpgstage.camdir);	//	正規化しないと回転おかしくなる…
 			break;
-		case 3:	//	プレイヤーとの向き
-			local d = Math.atan2( pos.x-stage.player3d.pos.x, -(pos.z-stage.player3d.pos.z)) * (stage.player3d==this?1:-1);
-			dir1 = dir + Math.mod2( dir, dir1+d);	//	正規化しないと回転おかしくなる…
+		case 3:	//	対面するキャラとの向き
+			local p = t["fc3d"];
+			if( !p) break;
+			local d = Math.atan2( pos.x-p.pos.x, -(pos.z-p.pos.z)) * -1;
+			dir1 = dir + deltadir( dir, dir1+d);	//	正規化しないと回転おかしくなる…
 			break;
 		}
 		if( t["fade"]){

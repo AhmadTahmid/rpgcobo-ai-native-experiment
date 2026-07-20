@@ -23,6 +23,7 @@ enum PropertyType
 	BOOL1				= 17		//	省スペースBOOL
 	ROT_HEAD			= 18
 	ROT_HPB				= 19
+	RANGE				= 20
 
 	//	special property type
 	TEXTSTYLE			= 100
