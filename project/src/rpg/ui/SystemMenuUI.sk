@@ -129,6 +129,15 @@ RPGSystem.ui ..
 	defval = {
 	}
 
+	//	メニューの表示状態を返す。0=非表示、1=空白、2=グレーアウト、3=選択可能1
+	function menustat(){
+		local stat = ::rpgstat.settingmap["menu_save"] ?? RPGSystem.settingprops.find( @( p) p.pid=="menu_save")["defval"];
+		if( stat == 3){
+			if( !(::rpgstage.stat.statmap["saveable"] ?? true)) return 2;	//	ステージ設定でセーブ不可の時はグレーアウト
+		}
+		return stat;
+	}
+
 	function uifunc( prms){
 		local list = slotlistfn();
 		local ii= "slot"..list.findi( @( v) v.idx==::rpgstat.saveslot);
@@ -400,10 +409,11 @@ local quaconf = {		//	描画品質。5段階
 		t.quality <- val;
 		t ... ClientConfig.renderhints[val];
 		::renderhint.set( t);
+		printf( "RENDERHINT CHANGED: %S\n", encodeJSON( t, 5));
 		
 		if( ::rpgstage){
 			local r = ::rpgstage.view3d.renderer;
-			r.mainpass.updateRenderHint( r);	//	PBRDeferredRendererPass
+			r.updateRenderHint( ::renderhint);	//	PBRDeferredRendererPass
 		}
 	}
 };

@@ -21,12 +21,12 @@ local runmodelist = [
 
 class DBEditorMacro extends DBEditor
 {
-	//	スキルの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
+	//	マクロの基本パラメータ。基本拡張はできない。が、プラグインでここ拡張することは可能。
 	static baseprops = [
 		RPGProperties.nameprop,
 		RPGProperties.descprop,
 		{ pid="runmode", lbl="$T.lbl_runmode", type=LIST, list=runmodelist, defval=0 },
-		{ pid="runatmenu", lbl="$T.lbl_runatmenu", type=BOOL, defval=false, hide=@( pl) pl.getParam( "runmode")!=1 },
+		{ pid="runrepeat", lbl="$T.lbl_runrepeat", type=BOOL, defval=false, hide=@( pl) !pl.getParam( "runmode") },
 		{ pid="runreqs", lbl="$T.lbl_runreqs", type=REQUIREMENTS, defval=[], cnt="cnt6.ui", hide=@( pl) !pl.getParam( "runmode") },
 	];
 	

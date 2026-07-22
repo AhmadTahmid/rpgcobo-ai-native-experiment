@@ -199,7 +199,7 @@ class SK3DWeathers.mist extends SK3DWeather
 		calcUVDelta( r.camera, 0.006);
 		m.miscmat0.set(
 			r.env.timer0 * spd[0], r.env.timer0 * spd[1], r.env.timer0 * modspd * 5.0, 0.0,
-			dens, scale, xscale, 0.0,
+			dens*w, scale, xscale, 0.0,
 			c[0], c[1], c[2], c[3],
 			duv[0], duv[1], 0.0, 0.0
 		);

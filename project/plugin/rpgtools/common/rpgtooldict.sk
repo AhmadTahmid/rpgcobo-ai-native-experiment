@@ -919,6 +919,7 @@
 	"lbl_runmode"						: {"ja":"実行モード", "en":"Run Mode"}
 	"lbl_runatmenu"						: {"ja":"メニュー時にも実行", "en":"Run at Menu"}
 	"lbl_runreqs"						: {"ja":"実行条件", "en":"Requirements to run"}
+	"lbl_runrepeat"						: {"ja":"繰り返し実行", "en":"Repeat run"}
 	"lbl_pagereqs"						: {"ja":"ページ選択条件", "en":"Requirements"}
 	"lbl_pagetest"						: {"ja":"ページのテスト", "en":"Page Test"}
 	"lbl_addcmd"						: {"ja":"コマンド挿入", "en":"Insert Command"}

@@ -758,7 +758,9 @@ class GPUI
 
 	function isButtonDown( vb){
 		if( (gpdevice||vpdevice)?.isButtonDown( vb)) return true;
-		return Table.find( vkvbmap, @( v, i) v==vb);	//	キーボード検索。ちょい遅
+		// return Table.find( vkvbmap, @( v, i) v==vb);	//	キーボード検索。ちょい遅
+		local vk = Table.findi( vkvbmap, @( v, i) v==vb);	//	キーボード検索。ちょい遅
+		return vk && skIsKeyPressed( vk);
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////

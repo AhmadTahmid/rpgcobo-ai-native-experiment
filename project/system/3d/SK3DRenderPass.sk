@@ -732,9 +732,8 @@ class reg.SSAOPass extends reg.ImagePassBase
 	//	Thickness = 1.0f			Range( 0, 1.0f )		-> aotick
 	//	FadeStart = 100.0f									-> aofade(100,50)
 	//	FadeLength = 50.0f;
-	aoreso = VP_HALF;
-	aotec = "pbrsprite.ssao_normal";
 	//	
+	aoreso = VP_HALF;
 	aopow = 1.0;			//	prop 0.0~1.0
 	aoradius = 3.0;			//	prop 0.1~10.0
 	aoexp = 1.4;			//	
@@ -747,20 +746,25 @@ class reg.SSAOPass extends reg.ImagePassBase
 	function setPassSetting( p){
 		super.setPassSetting( p);
 		aofade = (100.0, 50.0);
-		if( aoreso == VP_HALF){	//	half + Cross-Bilateral Upsampling
-			aotec = "pbrsprite.ssao_quality";
-			m1 = createMaterial( "pbrsprite.ssaoupsample");
-		}else{	//	full + Bilateral blur
-			aotec = "pbrsprite.ssao_normal";
-			m1 = createMaterial( "pbrsprite.ssaoblur");
-		}
-		m1.miscmat0 = Matrix();
-		m0 = createMaterial( aotec);
-		m0.miscmat0 = Matrix();
+		
+		local h = ::renderhint;
+		createMaterials( h.ssao_reso, h.ssao_qua);
+		
 		aopow = p.aopow;
 		aoradius = p.aoradius;
 		aobias = p.aobias;
 		aoexp = p.aoexp;
+	}
+
+	function createMaterials( reso, qua){
+		aoreso = reso ? VP_FULL : VP_HALF;
+		local aotec, blurtec;
+		aotec = ( qua ) ? "pbrsprite.ssao_quality" : "pbrsprite.ssao_normal";
+		blurtec = ( reso == VP_HALF) ? "pbrsprite.ssaoupsample" : "pbrsprite.ssaoblur";
+		m0 = createMaterial( aotec);
+		m0.miscmat0 = Matrix();
+		m1 = createMaterial( blurtec);
+		m1.miscmat0 = Matrix();
 	}
 	
 	function setupPass( r){
@@ -768,6 +772,12 @@ class reg.SSAOPass extends reg.ImagePassBase
 		local p = {w:aoreso,h:aoreso,fmt:SK_R8};
 		midtex = r.findTempTarget( 100+p.fmt+p.w, p);
 		target = r.findRenderTarget( "aotex");
+	}
+	
+	//	RenderHint設定が変わったら呼ばれる。
+	function updateRenderHint( h, r){
+		createMaterials( h.ssao_reso, h.ssao_qua);
+		setupPass( r);
 	}
 
 	//	misc0mat = {
@@ -1913,8 +1923,10 @@ class reg.PBRDeferredRendererPass extends SK3DRenderPass
 
 	//	renderhintが更新されたのでそれを反映する。
 	//	初期化しなおしちゃうと画面効果なんかもリセットされてしまうので、個別に頑張る
-	function updateRenderHint( r){
-		printf( "WARN: updateRenderHint() is not implemented yet.\n");
+	function updateRenderHint( h, r){
+		
+		ssaopass?.updateRenderHint( h, r);
+		pbrpostpass.updateRenderHint( h, r);
 	}
 
 	function targetsResized( r){

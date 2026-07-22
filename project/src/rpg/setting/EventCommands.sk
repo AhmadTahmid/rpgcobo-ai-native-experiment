@@ -659,6 +659,7 @@ local settinginfo( cmd, props){
 	local lbl = fget( prop, "lbl") ?? cmd.pid;
 	prop.pid = "val";
 	local val = getPropertyText( prop, cmd);
+	if( typeof( val) == SS_TABLE) val = ::lang( val);
 	return {
 		info = sprintf( "%S = %S", lbl, encodeESC( string( val)));
 	}
@@ -775,7 +776,7 @@ eventcmd .. {
 		{ pid="charaid", lbl="$T.side_dbview_player", type=DATAID, datatype="player", variable=1, hide=@( pl) pl.getParam( "cmdtgt")!=TGT_PARTY_SINGLE }	//	↑で個人の場合の対象プレイヤー。データIDもしくはワーク、イベント、グローバル変数
 		{ pid="pid", lbl="HP $T.lbl_op", type=LIST, list=hpmppidlist, }
 		hpmpprop
-		{ pid="val", lbl="$T.lbl_value", type=VARIABLE, varbits=1|2|4|8|16, constbits=8|16 },
+		{ pid="val", lbl="$T.lbl_value", type=VARIABLE, varbits=1|2|4|8|16, constbits=2|8|16 },
 		{ pid="hp1", lbl="$T.lbl_hp1", type=BOOL, variable=1, hide=@( pl) pl.getParam( "pid")!="HP"}
 	]
 

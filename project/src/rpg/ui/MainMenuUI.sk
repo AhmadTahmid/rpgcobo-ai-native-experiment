@@ -72,13 +72,14 @@ local showMainMenuUI( prms){
 		binds = {
 			//	メニューリスト。システム状態で非表示にしたりグレーアウトしたりも。
 			menulist = RPGSystem.ui._list.filter( @(v) v.type=="submenu").map( @(v, i){	//	"submenu"タイプのUIのみ
-				local stat = ::rpgstat.settingmap[v.key] ?? RPGSystem.settingprops.find( @( p) p.pid==v.key)["defval"];
+				local stat = fget( v, "menustat") ?? (::rpgstat.settingmap[v.key] ?? RPGSystem.settingprops.find( @( p) p.pid==v.key)["defval"]);
 				if( !stat) return undefined;
-				//	menu_save時にステージ設定でセーブ不可だったらグレーアウトに。。。
+				//	stat=0 非表示、1 空白、2 グレーアウト、3 選択可能
 				local _name="menu"..i;
+				local disable = false;
 				return {
-					_name=_name, lbl=v.lbl, key=v.key, stat=stat, ui=v,
-					grayout=@() (~grayptr && ~menuptr!=_name) ? "on" : "off"
+					_name=_name, lbl=(stat==1)?"":v.lbl, key=v.key, stat=stat, ui=v, disable=stat!=3,
+					grayout= (stat==2) ? "on" : @() (~grayptr && ~menuptr!=_name) ? "on" : "off"
 				}
 			}),
 			//	メンバーリスト。メニュー項目にはまずキャラ選択をするメニューがあり、それの対応で選択可能なリストになる
@@ -95,6 +96,7 @@ BACK_TO_MENUSEL:
 	//	メニュー選択
 	local menuitem = RPGMain.uiLoop( {
 		"action" : @( e){
+			if( e.item["disable"]){ ::playSound( "SE002"); return; }
 			::playSound( "SE001");
 			return e.item;
 		}

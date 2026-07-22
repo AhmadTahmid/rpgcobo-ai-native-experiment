@@ -127,6 +127,7 @@ class SK3DRenderer
 		temptargets = {};
 		camera = s.maincamera;
 		bgpass = PassRegistory.ColorBackgroundPass();
+		rtreso = ::renderhint.maxreso;	//	renderhintはグローバル設定。。。
 	}
 	
 	function setCamera( c){
@@ -221,6 +222,15 @@ class SK3DRenderer
 		}
 	}
 
+	function updateRenderHint( h){
+		//	maxreso を適用する。
+		if( rtreso != h.maxreso){
+			rtreso = h.maxreso;
+			updateRenderResolution( finalvp);
+		}
+		mainpass.updateRenderHint( h, this);
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////
 	//	depth query
 
@@ -257,20 +267,23 @@ class SK3DRenderer
 
 	function render( vp){
 		currenttarget = finaltarget = skGetRenderTarget();
-		if( finaltarget){
-			oldvp[0] = finaltarget.width; oldvp[1] = finaltarget.height;
-		}else{
-			skGetScreenSize( oldvp);
+		{	//	skip out of screen
+			local scw, sch;
+			if( finaltarget){
+				scw = finaltarget.width; sch = finaltarget.height;
+			}else{
+				skGetScreenSize( oldvp); scw = oldvp[0]; sch = oldvp[1];
+			}
+			if( vp[0] >= scw || vp[1] >= sch || vp[0]+vp[2] <= 0 || vp[1]+vp[3] <= 0) return;
 		}
-		if( vp[0] >= oldvp[0] || vp[1] >= oldvp[1] || vp[0]+vp[2] <= 0 || vp[1]+vp[3] <= 0) return;
 		//	prepare render
+		finalvp.set( vp[0], vp[1], vp[2], vp[3]);
 		skGetViewport( oldvp);
 		skSetViewport( vp);
 		skPushMatrix( 0, 1, 2);
 		skPushRenderStates();
 		updateRenderResolution( vp);
 		if( mainpass.needsetup) mainpass.setupPass( this);
-		foreach( i, v in vp) finalvp[i] = v;
 		local cam = camera;
 		cam.setViewport( vp);
 		prepareDisplayList( displist, cam, -1);	//	maindisplistは最初に作る。prepassでも要る場合がある。
@@ -393,6 +406,9 @@ class SK3DRenderPass
 	}
 	function targetsResized( r){}
 	function performPass( r){}
+
+	//	RenderHint設定が変わったら呼ばれる。
+	function updateRenderHint( h, r){}
 
 	static function createMaterial( tecname){
 		local m1 = Material();

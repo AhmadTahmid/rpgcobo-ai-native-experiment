@@ -1417,7 +1417,10 @@ class RPGMacroEventRunner extends RPGEventRunner
 		finishEventRunning();
 		mode = 0;
 		suspend();
-		// return run_scout();	//	scoutモードには移行しない（ない）。このまま実行終了。
+		if( data["runrepeat"]){
+			return run_scout();	//	繰り返し実行する場合は再びスカウトモードに戻る
+		}
+		//	scoutモードには移行しない（ない）。このまま実行終了。
 	}
 	
 	function eventTriggerable(){

@@ -131,6 +131,9 @@ class RPGStage
 		local env = ::RenderSettings.getEnvironment( stat.statmap.rsetid);
 		view3d.renderer.setEnvironment( env);
 		view3d.renderer.bgpass = createBackground( map["bg"]);
+		if( stat.statmap["weather"]){
+			view3d.renderer.setWeather( stat.statmap["weather"]);
+		}
 		encinc = calcEnc();
 		//	3Dサウンド設定
 		local sndmanager = SK3DSoundManager( scn);
@@ -298,12 +301,18 @@ class RPGStage
 		applyStageSetting( pid, val);
 	}
 
+	//	ステージ設定が変更された場合、その変更を反映するために呼び出す。
 	function applyStageSetting( pid, val){
-		switch( pid){
-		case "playervisible":
-			setPlayerVisible( val);
-			break;
+		local prop = RPGSystem.stageprops.find( @( v) v.pid==pid);
+		if( prop["func"]){
+			prop.func( this, val);
 		}
+	}
+
+	//	ステージ設定のレンダー環境を変更する。フェードできると良いんだけどなかなかむずい。。。
+	function changeRenderSetting( rsetid){
+		local env = ::RenderSettings.getEnvironment( rsetid);
+		view3d.renderer.setEnvironment( env);
 	}
 	
 	/////////////////////////////////////////////////////////////////////////
@@ -365,25 +374,20 @@ class RPGStage
 	}
 	
 	//	操作キャラの表示を切り替える。位置等は元のもの。
-	//	先頭キャラ、任意のモデルID、など。
+	//	dbのプレイヤーIDを指定する。未指定の場合は先頭の生きているキャラを表示する。
 	//	
-	function changePlayer3D( val){
-		local pc = rpgstat.members.find( @( v) v);
-		switch( val){
-		case -1: //	生きた先頭キャラ
+	function changePlayer3D( dataid){
+		local old = player3d;
+		local pc = rpgstat.members.find( @( v) v && !v.isDead());
+		if( dataid){
+			pc ??= rpgstat.playermap[dataid];
+		}else{
 			pc ??= rpgstat.members.find( @( v) v && !v.isDead());
-			break;
-		case 0: case 1: case 2: case 3: case 4: case 5: //	指定した隊列のキャラ
-			if( rpgstat.members[val]) pc = rpgstat.members[val];
-			break;
-		default:	//	stringで直接指定
-			pc ??= rpgstat.playermap[val];
-			break;
 		}
+		if( pc == old["rpgobj"]) return;	//	同じキャラなら何もしない
+		//
 		local vis = stat.statmap["playervisible"] ?? true;
-		if( player3d){
-			player3d.kill();
-		}
+		old?.kill();
 		player3d = RPG3DObject.create3DObject( pc.data);
 		player3d.rpgobj = pc;
 		player3d.mainaction = PlayerMoveAction();
@@ -399,7 +403,10 @@ class RPGStage
 			view3d.addChild( searchpop);
 			searchpop.inneranime( -10);
 		}
-		// searchpop.setTarget( player3d);
+		if( old){	//	元のプレイヤーの位置を引き継ぐ。エフェクトとかアクション状態などは引き継がない。
+			player3d.pos( old.pos);
+			player3d.setDir( old.dir);
+		}
 	}
 
 	//	ブロック座標系の位置をプレイヤーにセットする。
@@ -471,7 +478,8 @@ class RPGStage
 		//	
 		local w = Math.cos( skGetTime( envcoltime)*0.01)*0.3+0.7;
 		view3d.renderer.env.envcolor = Math.lerpcolor( 0, 0x33ffffff, w);
-
+		view3d.renderer.env.timer0 += dt*0.001;
+		//
 		::voxmtl.updateFrame( dt);
 	}
 

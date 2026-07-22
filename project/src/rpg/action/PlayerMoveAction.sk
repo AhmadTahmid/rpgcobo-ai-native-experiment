@@ -96,7 +96,10 @@ class PlayerMoveAction
 					}
 					break;
 				case CTRL_MENU:
-					if( v && landed && ::rpgstage.stat.statmap["menuopenable"]){
+					if( v && landed){
+						if( !::rpgstage.stat.statmap["menuopenable"]){	//	メニュー開閉不能
+							::playSound( "SE002"); break;
+						}
 						rpgstage.mainevent = 100;
 						rpgstage.setTimeScale( 0.0);
 						ctr.setActive( false);
