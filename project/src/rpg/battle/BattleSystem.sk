@@ -251,6 +251,8 @@ class SkillCommand
 		act( skill["useact"])?.wait();
 		//	マクロ実行。終わるまで待つ。
 		local wvar = clone RPGEventRunner.iniwvar;
+		local warg = skill["warg"];
+		if( warg != null && warg != undefined) wvar.W = warg;	//	W 代入
 		local m = ::rpgstage.startMacro( skill.macroid_battle, false, wvar);
 		while( m["mode"] == 2){
 			suspend();

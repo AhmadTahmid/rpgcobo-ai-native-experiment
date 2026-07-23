@@ -169,27 +169,34 @@ class ScreenEffect.Quake
 	quake = null;		//	CameraQuake
 
 	function start( stage, sfx, cmd){
-		local q = quake = CameraQuake();
+		local q = quake;
+		if( !q){
+			q = quake = CameraQuake();
+			q.id = rnd( 1, 10000);
+			stage.scn.addQuake( q);
+		}
 		q.pow = cmd.pow * 0.1;
 		q.freq = float( cmd.freq);
 		q.vert = cmd.vert;
 		local t = cmd.time;
 		if( sfx["oneshot"]){	//	連続以外の画面揺れはこっち
 			q.timeatten = 1.0 / Math.max( t, 1);
-			w = 1.0;
+			q.w = 1.0;
 		}else{
 			if( t > 0){
 				q.timeatten = -1.0 / t;
-				w = 0.0001;
+				q.w = 0.0001;
 			}else{
 				q.timeatten = 0.0;
-				w = 1.0;
+				q.w = 1.0;
 			}
 		}
 	}
 
 	function end( stage, time){
-		quake.timeatten = Math.max( quake.timeatten, 1.0 / Math.max( time, 1));
+		if( quake){
+			quake.timeatten = Math.max( quake.timeatten, 1.0 / Math.max( time, 1));
+		}
 	}
 
 	function update( stage, dt){
@@ -201,7 +208,6 @@ class ScreenEffect.Quake
 	
 	function finish( stage){
 		quake.w = 1.0;
-		quake.spd = 0.0;
 		quake = null;
 	}
 }
@@ -320,6 +326,8 @@ class ScreenEffect.Brightness
 //	
 class ScreenEffect.Flash
 {
+	static cm_1 = Matrix();
+
 	//	パラメータ
 	+cmat = Matrix();
 	color = 0xffffffff;		//	加算カラー。cmdから指定可能
@@ -336,7 +344,7 @@ class ScreenEffect.Flash
 		cmat[13] = ((c>>>16)&255)/255.0 * 1.5;
 		cmat[14] = ((c>>>8)&255)/255.0 * 1.5;
 		spd = 1000.0 / cmd.time;
-		num = sfx.num;
+		num = cmd.num;
 	}
 	
 	//	※呼ばれない
@@ -352,13 +360,16 @@ class ScreenEffect.Flash
 		//	フラッシュを適用
 		local dpass = stage.view3d.renderer.mainpass.drawpass;	//	pbr_dfならある
 		local cmat0 = cfademat;
-		dpass.m.colormat = cmat0.lerp( cmat, 1.0-_w, #Matrix());
+		// dpass.m.colormat = cmat0.lerp( cmat, 1.0-_w, #Matrix());
+		dpass?.setColorMatrix( cmat0.lerp( cmat, 1.0-_w, cm_1));
 		return this;
 	}
 
 	function finish( stage){
 		local dpass = stage.view3d.renderer.mainpass.drawpass;	//	pbr_dfならある
-		dpass.m.colormat = null;	//	この一瞬はカラーフェードも一緒にはがれちゃう
+		if( dpass["cmat"] == cm_1){
+			dpass?.setColorMatrix( null);
+		}
 	}
 }
 
@@ -697,7 +708,7 @@ local sepiamat = Matrix( 0.393, 0.349, 0.272, 0.0,  0.769, 0.686, 0.534, 0.0,  0
 
 local colorprop = { pid="color", lbl="$T.lbl_color", type=RGB, defval=0xffffffff };
 local numprop = { pid="num", lbl="$T.lbl_count", type=SCALAR, range=(1,9), defval=1 };
-local timeprop = { pid="time", lbl="$T.lbl_time", type=SCALAR, range=(0,3000), ui="bar", barrange=(0,3000,100), defval=400};
+local timeprop = { pid="time", lbl="$T.lbl_time", type=SCALAR, range=(0,30000), ui="bar", barrange=(0,3000,100), defval=400};
 local powprop = { pid="pow", lbl="$T.lbl_power", type=SCALAR, range=(1,20), ui="bar", defval=3};
 local freqrop = { pid="freq", lbl="$T.lbl_freq", type=SCALAR, range=(1,100), ui="bar", defval=40};
 local vertprop = { pid="vert", lbl="$T.lbl_vertquake", type=BOOL, defval=false};
