@@ -209,7 +209,7 @@ class GamepadMappingDialog extends UndoableDialog
 		proplist.ref = this;
 		gpstat = view.findChild( "gpstat");
 
-		data = deepclone( conf._resource.gamepad);
+		data = deepclone( conf._gamepad);
 
 		syncgp();
 	}
@@ -224,7 +224,7 @@ class GamepadMappingDialog extends UndoableDialog
 		if( !gp) return;
 		mapping = data[gp.id];
 		if( !mapping){
-			mapping = (data[gp.id] <- { type=1, axes=[0,1,2,3,4,5], btns=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,-1,-1]});
+			mapping = (data[gp.id] <- { type=1, axes=[0,1,2,3,4,5], axflip=0, btns=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,-1,-1]});
 		}
 		printf( "GAMEPAD %S %S   %S\n", gp.name, gp.id, encodeJSON( mapping));
 		view.setValue( "gpname", "ID: %S" % (gp.id, gp.name));
@@ -311,6 +311,12 @@ class GamepadMappingDialog extends UndoableDialog
 					{ pid="a5", lbl="\uee29 R-Trigger", trig=true, },
 				],
 			].map( @( v) editfunc( v)),
+			{ pid="axflip", lbl="Axis flip", type=CHECKBITS, list=[
+				{lbl="L-Stick LR", icon="\uee22",val=0},
+				{lbl="L-Stick UD", icon="\uee20",val=1},
+				{lbl="R-Stick LR", icon="\uee26",val=2},
+				{lbl="R-Stick UD", icon="\uee24",val=3},
+			] }
 		];
 		proplist.bindProperties( props);
 		proplist.setParameters( mapping);
@@ -346,10 +352,16 @@ class GamepadMappingDialog extends UndoableDialog
 		if( cmd["cmd"] == "prop"){
 			local prop = cmd.prop;
 			local a, i;
-			if( prop.pid == "type"){
+			switch( prop.pid){
+			case "type":
 				a = mapping; i = "type";
-			}else{
+				break;
+			case "axflip":
+				a = mapping; i = "axflip";
+				break;
+			default:
 				a = mapping[prop.pid[0]=='a' ? "axes":"btns"]; i = int( prop.pid.substring( 1), 16);
+				break;
 			}
 			local val = cmd.val, oldval = a[i];
 			local self = this;
@@ -371,11 +383,12 @@ class GamepadMappingDialog extends UndoableDialog
 			break;
 		case "savebtn":
 			printf( "save Gamepad Mapping ... %S\n", encodeJSON( data, 5));
-			conf._resource.gamepad = deepclone( data);
-			local f = ::getResource( "/resource/gamepad.json").file;
-			local bb = encodeJSON( data, ByteBuffer()); bb.pos = 0;
+			conf._map._gamepad = deepclone( data);
+			local f = ::getResource( "/conf/gamepad.json").file;
+			local bb = encodeJSON( data, 5, ByteBuffer()); bb.pos = 0;
 			f.save( bb);
 			op.markSaved();
+			Popups.showInfo( "Gamepad Mapping Saved!");
 			break;
 		}
 		super.actionevent( e);

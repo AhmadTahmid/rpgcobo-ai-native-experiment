@@ -10,10 +10,11 @@ function preloaShaders( glob=null){
 	//
 	local cdir = FileRef( skGetCacheDir().."/shaderbin");
 	cdir.mkdirs();
-	local skfxload = decodeJSON( r.loadData());
+	local apilv = skGetAPILevel();
+	local skfxload = decodeJSON( r.loadData()), tecbits = skfxload[apilv];
 	local t0 = skGetTime(), t1 = t0;
 	local tmpbb = TempBuffer( 256*1024);
-	foreach( tecname, passes in skfxload){
+	foreach( tecname, passes in tecbits){
 		if( glob && !globMatch( glob, tecname)) continue;
 		local tec = skFXFindTechnique( tecname);
 		if( !tec) continue;
@@ -31,7 +32,7 @@ function preloaShaders( glob=null){
 				}
 				local st0 = skGetTime();
 				//	キャッシュヒットチェック。1つずつ別ファイルなのは非効率か
-				local fn = sprintf( "%S-%S-%S.bin", tecname, i, bits);
+				local fn = sprintf( "%d-%S-%S-%S.bin", apilv, tecname, i, bits);
 				local cf = FileRef( cdir, fn);
 				if( cf.exists()){
 					local cbuf = cf.load( tmpbb);

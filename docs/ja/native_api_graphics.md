@@ -57,6 +57,11 @@ OpenGL/OpenGL ES/WebGLベースの3Dグラフィックス描画、シェーダ�
 
 ### システム情報
 
+#### `skGetAPILevel()`
+サポートされているOpenGLのAPIレベルを取得します。skCreateScreen()をしていない場合は0
+
+**戻り値**: int
+
 #### `skGetSupportedTextureFormats()`
 サポートされているテクスチャ圧縮フォーマットのリストを取得します。
 
@@ -144,6 +149,14 @@ skClearScreen(cp);
 
 **引数**:
 - `clearParam` (ClearParam): クリアパラメータ
+
+#### `skInvalidateFrameBuffer(bits)`
+レンダーターゲットのフレームバッファを無効化します。  
+bitsは、0-8ビット目がカラーバッファ、9ビット目がデプスバッファ、10ビット目がステンシルバッファを表します。  
+設定されたビットは次のskSetRenderTarget呼び出しでクリアされます。
+
+**引数**:
+- `bits` (int): 無効化するバッファのビットマスク
 
 #### `skSetRenderTarget(renderTarget)`
 レンダーターゲットを設定します。`null`を指定すると画面（スワップチェーン）に戻ります。
