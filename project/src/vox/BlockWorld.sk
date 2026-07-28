@@ -204,6 +204,8 @@ class SK3DBlockWorld extends SK3DObject
 	lastcam = null;			//	Camera
 	vchunkmap = null;		//	
 	vchunklist = null;		//	chunkmapでカメラ内の描画対象となっているものをリスト化
+
+	mtl = null;				//	ワールドで一つのマテリアル。
 	
 	vs = 63;				//	
 	rembottom = true;		//	Y=0の下面を張らない
@@ -222,6 +224,7 @@ class SK3DBlockWorld extends SK3DObject
 		visiblemask = SK_VISIBLE_OPAQUE|SK_VISIBLE_SELECTOR|SK_VISIBLE_SHADOW_CASTER|SK_VISIBLE_SHADOW_RECEIVER;
 		lights = [];
 		lightmap = {};
+		mtl = ::getVoxelMeshMaterial( null);
 		if( w) setBlockWorld( w);
 	}
 
@@ -427,13 +430,8 @@ class SK3DBlockWorld extends SK3DObject
 	function getMaterials( cache=true){
 		local ma = materials;
 		if( !materials){
-			ma = [];
+			ma = [mtl];
 			if( cache) materials = ma;
-			foreach( ch in vchunkmap){
-				foreach( f in ch.mesh["face"]){
-					ma .. f.m;
-				}
-			}
 		}
 		return ma;
 	}
@@ -470,11 +468,10 @@ class SK3DVoxelChunk extends SK3DRenderNode
 		gbnd.set( 0,0,0, -10000,-10000,-10000).transform( gmat);
 		visiblemask = 0;
 	}
-
-	//	hash,lightsもvmdにある！
+	
 	function setMesh( vmd){
 		purge();
-		mesh = vmd.createPolygonMesh();
+		mesh = vmd.createPolygonMesh( null, skbw.mtl);	//	共通のマテリアルでメッシュ生成
 		hash = vmd.hash;
 		vmd.dispose();
 		skbw.gmat.mult34( mat, gmat);

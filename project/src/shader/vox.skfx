@@ -212,6 +212,7 @@ param depth
 fs depth
 {
 	void main(){
+		$(ALPHATEST) if( alpharef < bayer4( gl_FragCoord.xy)) discard;
 		fragcolor = vec4( v_wvp.z);
 	}
 }
@@ -294,7 +295,7 @@ technique base
 	//	mode shaders
 
 	pass(depth) {
-		using transform, depth;
+		using transform, bayer, depth;
 		BLEND = OFF;
 		
 		param = vox;
@@ -303,7 +304,7 @@ technique base
 	}
 	
 	pass(shadow) {
-		using transform, depth;
+		using transform, bayer, depth;
 		BLEND = OFF;
 		
 		param = vox;

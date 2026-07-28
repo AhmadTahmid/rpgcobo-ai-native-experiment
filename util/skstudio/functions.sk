@@ -24,6 +24,7 @@
 
 ::translationkeys <- {
 	"name":1, "text":1, "desc":1, "msg":1, "title":1, "texts":1, "text0":1, "text1":1, "text2":1, "text3":1, "text4":1, "text5":1, "text6":1, "text7":1, 
+	"searchtext":1,
 };
 
 function defaultTranslationRule( t, i, v, langcode){

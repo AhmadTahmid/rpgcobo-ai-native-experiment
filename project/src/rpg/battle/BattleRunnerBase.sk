@@ -56,7 +56,6 @@ class BattleRunnerBase
 	result = null;					//	戦闘結果。1:勝利、-1:敗北、0:中止（逃げ、時間切れ等）、あとはエラーかな
 	forceend = null;				//	強制終了フラグ。
 	
-	battlerunning = false;			//	バトルが
 	turn = 0;
 	cmdqueue = null;				//	実行コマンド配列。battleTurn内で使用されるが、マクロでコマンド入れ替えとかする時に可視にする必要あり。
 	
@@ -65,6 +64,10 @@ class BattleRunnerBase
 	cmdchr = null;					//	コマンド選択中のキャラ。
 
 	stoleitems = null;				//	盗みでゲットしたアイテム
+
+	isauto = false;					//	オートバトル ON
+	xbtn = false;					//	オートバトルのボタン状態
+
 
 	//	
 	constructor( st, bd){
@@ -88,6 +91,11 @@ class BattleRunnerBase
 		while( stage.mainevent){
 			suspend();
 		}
+	}
+
+	//	
+	function update( dt){
+		updateAutoBattle( dt);
 	}
 
 	/////////////////////////////////////////////////////////////////////////
@@ -360,6 +368,7 @@ class BattleRunnerBase
 		if( forceend != null){
 			result = forceend;
 			printf( "FORCE END................ %S\n", result);
+			stage.scn.timescale = 1.0;
 			throw "battleend";	//	endfunc( this);
 		}
 		//	先に味方の全滅をチェック
@@ -375,12 +384,14 @@ class BattleRunnerBase
 				foreach( v in chara3ds) v.manuaction?.wait();
 				sleep( 1000);
 			}
+			stage.scn.timescale = 1.0;
 			throw "battleend";	//	endfunc( this);
 		}else{
 			//	敵の全滅をチェック
 			local victory = !enemies.find( @( v) !v.isDefeated());
 			if( victory){
 				result = 1;
+				stage.scn.timescale = 1.0;
 				showVictoryUI();		//	戦闘勝利パネルの表示。これを表示しないと経験値等は入らない。ラスボスとかはここすっ飛ばす。
 				printf( "VICTORY!!!!!!!!!!!!!!!\n");
 				throw "battleend";	//	endfunc( this);
@@ -407,6 +418,10 @@ class BattleRunnerBase
 			if( cmd) cmds = [cmd];
 		}else{
 			//	aiない場合は攻撃？オートだと前回の行動かも
+			local skill = pc.getAttackSkill();
+			local dst = chooseRandomTarget( pc, skill.cmdtgt);
+			local cmd = SkillCommand( pc, skill, [dst]);
+			cmds = [cmd];
 		}
 		return cmds;
 	}
@@ -680,5 +695,43 @@ class BattleRunnerBase
 			}
 		}
 		stage.envcoltime = skGetTime();
+	}
+
+	/////////////////////////////////////////////////////////////////////////
+	//	オートバトル
+
+	function updateAutoBattle( dt){
+		local x = ::gpui.isButtonDown( GamepadButtonCode.BTN_X);
+		if( x && !xbtn){
+			setAutoBattle( !isauto);
+		}
+		xbtn = x;
+	}
+
+	function setAutoBattle( b){
+		isauto = b;
+		if( b){
+			local lbls = #[
+				rtf( "[b][-]▷▷ $T.autobattle"),
+				rtf( "[b][-]　▷ $T.autobattle"),
+				rtf( "[b][-]　　 $T.autobattle"),
+				rtf( "[b][-]▷　 $T.autobattle"),
+			];
+			local t0 = skGetTime();
+			//	
+			local view = RPGMain.showView({
+				uipath = "info_toplr.ui"
+				layer = "stage"
+				name = "info_auto"
+				binds = { lbl = @() lbls[(skGetTime( t0)/150)%4]; },
+				pos = { top=32, right=80 }
+				action = "show"
+			});
+			if( result==null) stage.scn.timescale = 1.5;
+		}else{
+			local view = ::rootview.findChild( "info_auto");
+			view?.actionAndDie( "hide");
+			if( result==null) stage.scn.timescale = 1.0;
+		}
 	}
 }

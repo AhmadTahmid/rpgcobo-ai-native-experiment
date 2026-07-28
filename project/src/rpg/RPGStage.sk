@@ -168,6 +168,7 @@ class RPGStage
 		//	SK3DBlockWorld、コリジョン生成
 		bw3d = SK3DBlockWorld( bw);
 		bw3d.setVisibleFaceMask( map.vs);
+		bw3d.setGSelectorID( 1);	//	ステージにセレクタIDを指定。ピクセル単位のオブジェクト識別に使用する
 		scn.addObject( bw3d);
 		local bci = BlockColiderInterface( bw);
 		bci.setFlagMask( BLK_SOLID|BLK_PLANT|BLK_BARRIOR|BLK_SOLIDFB);

@@ -344,7 +344,7 @@ class SK3DRenderer
 		local v = #Vector3D();
 		v( weather ? weather.litscale : 1.0);
 		local w = foweather["w"];
-		if( w) v.lerp( (foweather.weather||Weather).litscale, w, v);
+		if( w) v.lerp( (foweather.weather||SK3DWeather).litscale, w, v);
 		return v;
 	}
 

@@ -234,19 +234,25 @@ function VoxelMeshData::createIndexBuffer(){
 	return ibo;
 }
 
-//	VoxelMeshは一つのIndexBufferとVertexBufferに対してPolygonFaceが複数で、オフセット、レングス、VertexBufferに対するオフセットがそれぞれ入る。
-//	この構造で65536を超えるインデックスと、ボクセル以外の構造のメッシュに両方対応することができる
-function VoxelMeshData::createPolygonFace( pal){
-	local ib = createIndexBuffer();
-	//	
+//	VoxelMeshの基本となるマテリアルを生成して取得する。
+function getVoxelMeshMaterial( pal){
 	local _mtl = #Material(){
 		tec = skFXFindTechnique( "vox.basic");	//	vox.patternでパターンボクセル
 		visiblemask = SK_VISIBLE_OPAQUE|SK_VISIBLE_SELECTOR|SK_VISIBLE_SHADOW_CASTER|SK_VISIBLE_SHADOW_RECEIVER;
 	};
-	local m = clone _mtl;
-	m.tex0 = voxmtl.mtltex;
-	m.tex1 = voxmtl.ptntex;
-	m.tex2 = pal?.getTexture();
+	local mtl = clone _mtl;
+	mtl.tex0 = voxmtl.mtltex;
+	mtl.tex1 = voxmtl.ptntex;
+	mtl.tex2 = pal?.getTexture();
+	return mtl;
+}
+
+//	VoxelMeshは一つのIndexBufferとVertexBufferに対してPolygonFaceが複数で、オフセット、レングス、VertexBufferに対するオフセットがそれぞれ入る。
+//	この構造で65536を超えるインデックスと、ボクセル以外の構造のメッシュに両方対応することができる
+function VoxelMeshData::createPolygonFace( pal, mtl){
+	local ib = createIndexBuffer();
+	//	渡されたmtlが無い場合のみmtlを生成。
+	if( !mtl) mtl = ::getVoxelMeshMaterial( pal);
 	//	
 	local fa = [], vmf = #(0,0,0,0);
 	for( local l = 0; getFaceInfo( l, vmf); l++){
@@ -256,19 +262,19 @@ function VoxelMeshData::createPolygonFace( pal){
 		f.offs  = vmf[1];
 		f.len   = vmf[2];
 		f.voffs = vmf[3];
-		f.m     = m;
+		f.m     = mtl;
 		fa .. f;
 	}
 	return fa;
 }
 
 //	パレットを指定した場合には32bitカラーではなくRをパレットインデックスとする。
-function VoxelMeshData::createPolygonMesh( pal=null){
+function VoxelMeshData::createPolygonMesh( pal=null, mtl=null){
 	local pm = PolygonMesh();
 	pm.vtx = createVertexBuffer( null, getVertexData());
 	// pm.vtx[0].describe();
 	pm.bnd = getSubBounds().toRect3D() * VOX_SCALE;
-	local f = createPolygonFace( pal);
+	local f = createPolygonFace( pal, mtl);
 	pm.face = f;
 	return pm;
 }

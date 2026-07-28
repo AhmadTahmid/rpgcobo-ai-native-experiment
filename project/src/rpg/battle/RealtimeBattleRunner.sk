@@ -51,11 +51,12 @@ class RealtimeBattleRunner extends BattleRunnerBase
 	//	1. コマンドゲージを貯めていく、溜まったらコマンド入力開始or自動入力。
 	//	2. 実行待ちコマンドのorderを減らしていく。0になったコマンドはbattleTurn()で順に実行されていく。
 	function update( dt){
+		super.update( dt);
 		thread.wakeup( dt);
 		//	アクティブバトルの場合はここでゲージを進め、プレイヤーが溜まったらコマンド入力をして
 		//	エネミーが溜まったらAIでコマンド入力。エネミーの場合はスキル実行タイミングをランダムでずらす
 		if( gaugeactive){
-			local dg = dt * gaugespeed;
+			local dg = dt * gaugespeed * (isauto?2.0:1.0);
 			foreach( chr in charas){
 				local g = chr.cmdgauge;
 				if( g >= 0.0 && g < 100.0){
@@ -200,16 +201,24 @@ class RealtimeBattleRunner extends BattleRunnerBase
 		cmdchr = pc;
 		try{
 			while( pc){
-				pc.skill = null;
-				pc.selected = true;
-				::playSound( "SE020");
-				local cmd = chooseCommand( pc);
-				pc.selected = false;
-				if( cmd){
-					cmd.order = 2;			//	多少操作からのラグを入れる
+				if( isauto){
+					local cmd = chooseAutoCommands( pc)[0];
 					cmd.flags |= 1;			//	ターン消費コマンドフラグ
-					insertCommand( cmd);	//	
+					pc.setSkill( cmd.skill);
+					insertCommand( cmd);
 					pc.cmdgauge = -1.0;		//	コマンド選択後は-1状態
+				}else{
+					pc.skill = null;
+					pc.selected = true;
+					::playSound( "SE020");
+					local cmd = chooseCommand( pc);
+					pc.selected = false;
+					if( cmd){
+						cmd.order = 2;			//	多少操作からのラグを入れる
+						cmd.flags |= 1;			//	ターン消費コマンドフラグ
+						insertCommand( cmd);	//	
+						pc.cmdgauge = -1.0;		//	コマンド選択後は-1状態
+					}
 				}
 				//	Bで次のキャラに変更可能
 				local i0 = members.indexOf( pc);
@@ -250,6 +259,7 @@ class RealtimeBattleRunner extends BattleRunnerBase
 	function chooseCommand( pc){
 		//////////////////////////////////////////////////////////////
 		//	コマンド選択
+		local self = this;
 		local cmds = pc.getBattleCommandList().map( @( v){
 			return !v.cmddef ? v : { ...v, grayout=@() v.cmddef.isDisabled( v.bcmd, pc)?"on":"off", };
 		});
@@ -277,7 +287,7 @@ class RealtimeBattleRunner extends BattleRunnerBase
 				return "back";
 			}
 			"idle" : @( e){
-				if( !pc.isCommandable()) return "cancel";		//	キャラがコマンド不能になった
+				if( !pc.isCommandable() || self.isauto) return "cancel";		//	キャラがコマンド不能になった。もしくはオートバトルになった
 			}
 		});
 		if( !cmditem || cmditem == "back" || cmditem == "cancel") return null;		//	コマンドのところでbackされたらnullを返す
@@ -303,7 +313,6 @@ class RealtimeBattleRunner extends BattleRunnerBase
 		}else{
 			playSound( "SE013");
 			battleui.action( "showtgt").waitAction();
-			local self = this;
 			local t0 = enableTargetSelect( pc, skill.cmdtgt, false);	//	選択可能なターゲットを指定
 			::rootview.focusTo( t0["tgtview"]["name"]);
 			dst = RPGMain.uiLoop( {
@@ -321,7 +330,7 @@ class RealtimeBattleRunner extends BattleRunnerBase
 					self.selectCommandTargets( dsts);
 				}
 				"idle" : @( e){
-					if( !pc.isCommandable()) return "cancel";
+					if( !pc.isCommandable() || self.isauto) return "cancel";
 					self.enableTargetSelect( pc, skill.cmdtgt, false);
 				}
 			});

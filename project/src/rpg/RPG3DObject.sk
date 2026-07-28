@@ -310,7 +310,7 @@ class RPG3DObject extends SK3DObject
 
 	//	調べるボタンで「調べる」「話す」どっちか
 	function getSearchButtonLabel(){
-		return "$T.btn_search";
+		return event["page"]["searchtext"] ?? event["searchtext"] ?? "$T.btn_search";
 	}
 	
 	/////////////////////////////////////////////////////////////////////////
@@ -1382,11 +1382,9 @@ class RPG3DVoxChara extends RPG3DObject
 		if( boi >= 0) s = s.substring( 0, boi);
 		return s;
 	}
-
 	
-
 	function getSearchButtonLabel(){
-		return (bonetype=="leg2"||bonetype=="leg4") ? "$T.btn_talk" : "$T.btn_search";
+		return event["page"]["searchtext"] ?? event["searchtext"] ?? ((bonetype=="leg2"||bonetype=="leg4") ? "$T.btn_talk" : "$T.btn_search");
 	}
 	
 	/////////////////////////////////////////////////////////////////////////

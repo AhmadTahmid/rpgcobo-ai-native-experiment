@@ -161,9 +161,15 @@ class ResEditorCharaVox extends ResEditor
 	function showItemContextMenu( e){
 		local cbdata = getClipboard( "resitem");	//	開くたびにクリップボード取得しちゃうけどまーだいじょぶかな
 		local d = selitem.data;
+		local motok = d["mot"] && getMotionBlendFile( d.mot).exists();
+		//
 		local menudata = [
 			{ id="editvox", lbl="$T.lbl_editvox", icon="\ue745" },
 			{ id="editmot", lbl="$T.lbl_editmot", icon="\ue566" },
+			{ id="dup", lbl="$T.lbl_duplicate", icon="\ue2bd", submenu=[
+				{ id="dup_voxel", lbl="$T.lbl_voxel - %S"   % (!d["vox"]? "$T.lbl_none"  : d.vox.substring( d.vox.lastIndexOf( "/")+1)), icon="\uf11c", disable=!d.vox },
+				{ id="dup_motion", lbl="$T.lbl_motion - %S" % (!motok? "$T.lbl_disabled" : d.mot.substring( d.mot.lastIndexOf( "/")+1)), icon="\ue566", disable=!motok},
+			]}
 			"-"
 			{ id="copy", lbl="$T.menu_edit_copy", icon="\ue14d" },
 			{ id="paste", lbl="$T.menu_edit_paste", icon="\ue14f", disable=!isPastable( cbdata)},
@@ -187,6 +193,78 @@ class ResEditorCharaVox extends ResEditor
 			local workpath = d.mot.substring( 14, length( d.mot)-4) + ".blend";
 			local f = FileRef( "work/mot/"+workpath);
 			return skOpenURL( "dir://"..f.path);
+		case "dup_voxel": return showDuplicateVoxel( selitem);
+		case "dup_motion": return showDuplicateMotion( selitem);
+		}
+	}
+
+	function showDuplicateVoxel( item){
+		local d = item.data;
+		local vn = d.vox.substring( 0, d.vox.lastIndexOf( ".")), i = 1, vpath;
+		for( ;;i ++){
+			vpath = `$vn-$i`;
+			local f = FileRef( ::resroot.file.path .. vpath .. ".vox");
+			if( !f.exists()) break;
+		}
+		local vdir = vpath.substring( 0, vpath.lastIndexOf( "/"));
+		local propdef = {
+			name = "$T.lbl_duplicate: $T.lbl_voxel", icon = "\uf11c",
+			props = [
+				{ pid="vn", lbl="$T.lbl_file", type=STRING, cnt="cnt.ui", },
+			],
+		}
+		local ret = PropertyEditPopup_OK.run( null, propdef, { vn=vpath.substring( length( vdir)+1)});
+		if( ret){
+			local newvox = `$vdir/${ret.vn}.vox`, oldvox = d.vox, self = this;
+			local f0 = FileRef( ::resroot.file.path .. oldvox);
+			local f1 = FileRef( ::resroot.file.path .. newvox);
+			//	ファイルコピーはundo不能
+			printf( "voxel copy %S => %S\n", f0.path, f1.path);
+			f0.copyTo( f1);
+			::skstudio.fileview.refreshDir( vdir);
+			//	itemのvoxを変更。これはundo操作。
+			local redo = [@(){ d.vox = newvox; self.updateItemView( item.id, d); }];
+			local undo = [@(){ d.vox = oldvox; self.updateItemView( item.id, d); }];
+			submitOp( redo, undo, null);
+			refresh();
+			Popups.showInfo( "$T.pop_vox_copied");
+		}
+	}
+
+	function showDuplicateMotion( item){
+		local d = item.data;
+		local mn = d.mot.substring( 0, d.mot.lastIndexOf( ".")), i = 1, mpath;
+		for( ;;i ++){
+			mpath = `$mn-$i`;
+			local f = FileRef( ::resroot.file.path .. mpath .. ".mot");
+			if( !f.exists()) break;
+		}
+		local mdir = mpath.substring( 0, mpath.lastIndexOf( "/"));
+		local propdef = {
+			name = "$T.lbl_duplicate: $T.lbl_motion", icon = "\ue566",
+			props = [
+				{ pid="mn", lbl="$T.lbl_file", type=STRING, cnt="cnt.ui", },
+			],
+		}
+		local ret = PropertyEditPopup_OK.run( null, propdef, { mn=mpath.substring( length( mdir)+1)});
+		if( ret){
+			local newmot = `$mdir/${ret.mn}.mot`, oldmot = d.mot, self = this;
+			local b0 = getMotionBlendFile( oldmot);
+			local b1 = getMotionBlendFile( newmot);
+			local f0 = FileRef( ::resroot.file.path .. oldmot);
+			local f1 = FileRef( ::resroot.file.path .. newmot);
+			//	ファイルコピーはundo不能。blendも一緒にコピーしないと編集できない。。。
+			printf( "blend copy %S => %S\n", b0.path, b1.path);
+			b0.copyTo( b1);
+			printf( "motion copy %S => %S\n", f0.path, f1.path);
+			f0.copyTo( f1);
+			::skstudio.fileview.refreshDir( mdir);
+			//	itemのvoxを変更。これはundo操作。
+			local redo = [@(){ d.mot = newmot; self.updateItemView( item.id, d); }];
+			local undo = [@(){ d.mot = oldmot; self.updateItemView( item.id, d); }];
+			submitOp( redo, undo, null);
+			refresh();
+			Popups.showInfo( "$T.pop_mot_copied");
 		}
 	}
 
@@ -198,11 +276,15 @@ class ResEditorCharaVox extends ResEditor
 		};
 		Dialogs.launchTool( prm);
 	}
+
+	function getMotionBlendFile( mot){
+		local workpath = mot.substring( 14, length( mot)-4) + ".blend";
+		return FileRef( "work/mot/"+workpath);
+	}
 	
 	function editMotion( item){
 		local d = item["data"];		//"mot":"/resource/mot/leg2_man/man_1.mot",
-		local workpath = d.mot.substring( 14, length( d.mot)-4) + ".blend";
-		local f = FileRef( "work/mot/"+workpath);
+		local f = getMotionBlendFile( d.mot);
 		if( f.exists()){
 			local prm = {
 				name = "Blender"

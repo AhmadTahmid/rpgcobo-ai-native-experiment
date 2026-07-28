@@ -78,6 +78,8 @@
 	"btn_sell":{ "ja":"売る","en":"Sell"},
 	"btn_page":{ "ja":"ページ切り替え", "en":"Change Page"},
 
+	"autobattle":{ "ja":"オートバトル", "en":"Auto Battle"},
+
 	"cursor":{ "ja":"カーソル", "en":"Cursor"},
 	"button":{ "ja":"ボタン", "en":"Button"},
 	"btn_tap":{ "ja":"画面タップ", "en":"Tap Screen"},

@@ -861,6 +861,76 @@ class PropertyBehaviors.List extends PropertyBehavior
 	}
 }
 
+class PropertyBehaviors.ListOrString extends PropertyBehavior
+{
+	static proptype = LISTORSTRING;
+	static uipath = "listorstring.ui"
+
+	menu = null;	//	MenuBehavior
+	smenu = null;	//	
+	itemlist = null;	//	[]
+
+	strg = null;
+	edit = null;
+
+	val = null;		//	
+
+	function init(){
+		menu = MenuBehavior( view.findChild( "listmenu"), null);
+		if( typeof( prop["list"]) != SS_CLOSURE ) updateMenu( null);
+		strg = view.findChild( "strg");
+		edit = view.findChild( "edit");
+	}
+
+	function updateMenu( v){
+		local a = fget( prop, "list", prop, proplist, v);
+		itemlist = (typeof( a[0])==SS_STRING) ? a.map( @( v, i) +{ lbl=v, val=i }) : (clone a);
+		itemlist .. "-" .. { lbl="$T.lbl_custom", val="**custom**", icon="\ue264"};
+		menu.setMenu( itemlist);
+	}
+
+	function getParam(){
+		return val;
+	}
+	
+	function setParam( v){
+		if( typeof( prop["list"]) == SS_CLOSURE ) updateMenu( v);
+		menu.selectItem( @( vv) vv["val"]==v);
+		val = v;
+		if( itemlist.find( @( a) a["val"]==v)){
+			menu.view.setVisible( true);
+			strg.setVisible( false);
+		}else{
+			menu.view.setVisible( false);
+			strg.setVisible( true);
+			edit.setText( v);
+		}
+	}
+	
+	function paramevent( e){
+		if( e.src==menu.view){
+			local v = menu.selitem.val;
+			if( v == "**custom**"){
+				v = fget( prop, "defval") ?? "---";
+			}
+			setParam( v);
+			postActionEvent( true);
+		}else
+		if( e.src==edit){
+			setParam( edit.getText());
+			postActionEvent( true);
+		}else
+		if( e.src["name"] == "stringmenu"){
+			local ret = MenuPopup.run( itemlist, e.src);
+			if( ret && ret["val"] != "**custom**"){
+				setParam( ret.val);
+				postActionEvent( true);
+			}
+		}
+	}
+}
+
+
 class PropertyBehaviors.Bool extends PropertyBehavior
 {
 	static proptype = BOOL;

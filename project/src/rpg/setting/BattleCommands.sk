@@ -12,7 +12,7 @@ local battlecmd = RPGSystem.battlecmd;
 //	バトルのUIで指定したアイテム（スキル）一覧から選択する。
 //	
 function showSkillList( pc, items){
-	local battleui = ::rpgstage.battle.battleui;
+	local battle = ::rpgstage.battle, battleui = battle.battleui;
 	//
 	local savedidx = pc.etc[pc.name] || 0;
 	local list = battleui.findChild( "skilllist");		//	RPGListView
@@ -34,7 +34,7 @@ function showSkillList( pc, items){
 			battleui.bindValue( "skilldesc", ::rtf( v["desc"]));
 			battleui.bindValue( "inforlbl", ::RPGSystem.getConsumeInfo( v["consume"]));
 		},
-		"idle" : @( e){ if( !pc.isCommandable()) return "back"; },	//	コマンド入力不能な場合は"back"を選択とする
+		"idle" : @( e){ if( !pc.isCommandable() || battle.isauto) return "back"; },	//	コマンド入力不能な場合は"back"を選択とする
 	});
 	battleui.action( "hidelist");
 	return selitem["val"] || null;	//	

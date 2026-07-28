@@ -717,6 +717,17 @@ RPGSystem.eventrole .. {
 		{ pid="memo", lbl="$T.lbl_pagememo", type=STRING }
 		moveactionprop, ...RPGSystem.moveaction[cmd["moveaction"]]["props"],
 		triggerprop,
+		{ pid="searchtext", lbl="$T.lbl_searchtext", type=LISTORSTRING, 
+			list = [
+				{ lbl="$T.lbl_auto", icon="\ue65f", val=null, }
+				{ lbl="$T.btn_search", icon="\ueb3f", val="$T.btn_search", }
+				{ lbl="$T.btn_talk", icon="\ue91f", val="$T.btn_talk" }
+			];
+			get = @( prop, data) data[prop.pid] ?? null,
+			set = @( prop, data, val){ val[0] ? data[prop.pid] <- val : delete data[prop.pid]; },
+			hide = @( pl) !((#(1,2)).contains( pl.getParam( "trigger"))),
+			defval = "$T.attack",
+		}
 		{ pid="pararun", lbl="$T.lbl_pararun", type=BOOL}
 		reqsprop,
 	]

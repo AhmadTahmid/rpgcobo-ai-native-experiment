@@ -28,6 +28,7 @@ class SkillTestBattleRunner extends BattleRunnerBase
 
 	//	
 	function update( dt){
+		super.update( dt);
 		thread.wakeup( dt);
 		//	アクティブバトルの場合はここでゲージを進める
 	}

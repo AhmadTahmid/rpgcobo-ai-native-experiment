@@ -50,6 +50,7 @@ class TurnBattleRunner extends BattleRunnerBase
 
 	//	
 	function update( dt){
+		super.update( dt);
 		thread.wakeup( dt);
 		//	アクティブバトルの場合はここでゲージを進める
 	}
@@ -98,6 +99,17 @@ class TurnBattleRunner extends BattleRunnerBase
 		cmdqueue = [];	//	敵味方含めた全てのコマンド配列。2回行動のキャラは2つ入る。ソート時にばらけないように。。。
 		local cmdcharas = members.filter( @( v) v.isCommandable());	//	コマンドを選択するパーティメンバー
 		for( local l = 0; l < length( cmdcharas); ){
+			if( isauto){	//	オートバトルの場合は全味方のコマンドをchooseAutoCommandsで指定。
+				cmdqueue.clear();
+				foreach( pc in cmdcharas){
+					local cmds = chooseAutoCommands( pc);
+					if( cmds){
+						pc.setSkill( cmds[0].skill);
+						cmdqueue ... cmds;
+					}
+				}
+				break;	//	forを抜ける
+			}
 			local pc = cmdcharas[l];
 			pc.skill = null;
 			pc.selected = true;
@@ -178,6 +190,7 @@ class TurnBattleRunner extends BattleRunnerBase
 	function chooseCommand( pc){
 		//////////////////////////////////////////////////////////////
 		//	コマンド選択
+		local self = this;
 		local cmds = pc.getBattleCommandList().map( @( v){
 			return !v.cmddef ? v : { ...v, grayout=@() v.cmddef.isDisabled( v.bcmd, pc)?"on":"off", };
 		});
@@ -205,8 +218,11 @@ class TurnBattleRunner extends BattleRunnerBase
 				playSound( "SE004");
 				return "back";
 			}
+			"idle" : @( e){
+				if( !pc.isCommandable() || self.isauto) return "cancel";
+			}
 		});
-		if( cmditem == "back") return null;		//	コマンドのところでbackされたらnullを返す
+		if( cmditem == "back" || cmditem == "cancel") return null;		//	コマンドのところでbackされたらnullを返す
 		cmdidx = cmds.indexOf( cmditem);
 		//////////////////////////////////////////////////////////////
 		//	スキル／アイテム選択
@@ -246,8 +262,12 @@ class TurnBattleRunner extends BattleRunnerBase
 					local dsts = self.getCommandTargets( pc, e.item.rpgobj, skill.cmdtgt, true);	//	dstsは表示用のもの
 					self.selectCommandTargets( dsts);
 				}
+				"idle" : @( e){
+					if( !pc.isCommandable() || self.isauto) return "cancel";
+				}
 			});
 			enableTargetSelect( pc, 0, false);
+			if( dst == "cancel") return null;		//	キャラがコマンド不能になった
 			if( dst == "back") goto CHOOSE_COMMAND;	//	コマンドのところまで戻るで良い？コマンドで変わるなこれは。。。
 		}
 		local dsts = getCommandTargets( pc, dst, skill.cmdtgt);

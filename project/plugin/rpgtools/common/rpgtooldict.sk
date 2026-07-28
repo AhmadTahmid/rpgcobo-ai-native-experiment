@@ -928,6 +928,7 @@
 	"lbl_noreq"							: {"ja":"条件なし", "en":"None"}
 	"lbl_appearreqs"					: {"ja":"登場条件", "en":"Requirements to appear"}
 	"lbl_pagememo"						: {"ja":"ページのメモ", "en":"Page Memo"}
+	"lbl_searchtext"					: {"ja":"調べるテキスト", "en":"Search Text"}
 	"lbl_pararun"						: {"ja":"並列実行", "en":"Parallel Run"}
 	"lbl_link_var"						: {"ja":"変数とリンク", "en":"Link to Variable"}
 	"lbl_unlink_var"					: {"ja":"変数のリンクを解除", "en":"Unlink to Variable"}
@@ -1014,6 +1015,7 @@
 	"side_res_uimap"					: {"ja":"UI", "en":"UI"}
 	"side_res_chara_etc"				: {"ja":"キャラ一般", "en":"Chara Etc"}
 
+	"lbl_voxel"							: {"ja":"ボクセル", "en":"Voxel"}
 	"lbl_editvox"						: {"ja":"ボクセルを編集", "en":"Edit Voxel"}
 	"lbl_editmot"						: {"ja":"モーションを編集", "en":"Edit Motion"}
 	"lbl_resedit"						: {"ja":"リソースの編集", "en":"Resource Edit"}
@@ -1085,6 +1087,8 @@
 	"pop_import_noimage"				: {"ja":"インポートする画像が見つかりません。", "en":"The image to import is not found."}
 	"tmpl_import_icons"					: {"ja":"$v 個のアイコンが読み込まれました", "en":"$v icons have been loaded."}
 	"pop_ttsgen_faulure"				: {"ja":"ボイスの生成が失敗しました。", "en":"Voice generation failed."}
+	"pop_vox_copied"					: {"ja":"ボクセルファイルが複製されました。", "en":"The voxel file has been copied."}
+	"pop_mot_copied"					: {"ja":"モーションファイルが複製されました。", "en":"The motion files have been copied."}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	//	マップサイドビュー

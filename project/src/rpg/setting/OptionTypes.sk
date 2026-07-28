@@ -388,7 +388,7 @@ RPGSystem.option .. {
 	ownable = true,
 	info = @(){	//	this==opd
 		local data = rpgdata[skillid];
-		return data["name"] || "???";
+		return data ? ((data["icon"]||"")..data["name"]) : ("\uf800"..skillid);
 	}
 	props = [
 		{
@@ -1669,6 +1669,7 @@ RPGSystem.option .. {
 	order = 100,			//	優先度最弱
 	
 	action = @( opd, id, dmg, self){
+		if( ::rpgstage.battle["isauto"] && ::rpgstage.battle["result"]==null) return;		//	オートバトル時にはボイスはならない
 		if( opt_voice_sp?.isPlaying()) return;
 		::opt_voice_sp = null;
 		local vaid = self.data["voiceid"];	;	//	VA000~

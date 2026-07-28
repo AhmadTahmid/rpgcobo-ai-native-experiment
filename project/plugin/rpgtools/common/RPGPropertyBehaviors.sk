@@ -1735,7 +1735,7 @@ class PropertyBehaviors.EnemyGroup extends PropertyBehavior
 		}
 		enemylist.setListItems( v.map( @( v){
 			local data = ::conf.enemy[v.id];
-			return { lbl:"%S:%S" % (v.id,data.name), val:v, }
+			return { lbl:"%S:%S" % (v.id,data["name"] || "NO DATA"), val:v, }
 		}));
 	}
 
@@ -1877,7 +1877,7 @@ class PropertyBehaviors.EnemyGroup.EnemyPic extends SKImageView
 		enemy = e;
 		enemyid = e.id;
 		local data = ::conf.enemy[enemyid];
-		mdlid = data.mdlid;
+		mdlid = data["mdlid"] || "EP000";
 		local restype = RPGResource.getResourceType( mdlid);
 		local res = ::conf._resource[restype][mdlid];
 		local tex = null;

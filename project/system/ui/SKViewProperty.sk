@@ -24,6 +24,7 @@ enum PropertyType
 	ROT_HEAD			= 18
 	ROT_HPB				= 19
 	RANGE				= 20
+	LISTORSTRING		= 21
 
 	//	special property type
 	TEXTSTYLE			= 100
