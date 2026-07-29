@@ -160,8 +160,14 @@ class DBEditorSetting extends DBEditor
 			local oldval = ::getProperty( prop, data);
 			//	
 			local self = this;
-			local redo = [@(){ ::setProperty( prop, data, val); }];
-			local undo = [@(){ ::setProperty( prop, data, oldval); }];
+			local redo = [@(){
+				::setProperty( prop, data, val);
+				if( prop["refresh"]){ self.bindSettingProperties(); self.refresh(); }
+			}];
+			local undo = [@(){
+				::setProperty( prop, data, oldval);
+				if( prop["refresh"]){ self.bindSettingProperties(); self.refresh(); }
+			}];
 			submitOp( redo, undo, trk);
 		}
 	}

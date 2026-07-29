@@ -35,6 +35,7 @@ settingprops .. {
 	type = SCALAR
 	range = (1,6)
 	defval = 4,
+	refresh = 1,
 };
 
 settingprops .. {
@@ -142,7 +143,7 @@ settingprops .. {
 	lbl = "$T.setting_inimembers"
 
 	type = DATAIDS
-	datalist = @() array( ::conf.setting.maxmembers).map(
+	datalist = @() array( ::skstudio.editor["data"]["maxmembers"] ?? ::conf.setting.maxmembers).map(
 		@( _, i){
 			return {
 				head = ""..i,

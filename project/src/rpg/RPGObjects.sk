@@ -1190,7 +1190,7 @@ class RPGState extends Serializable
 
 	//	party
 	<ser_i> money = 0;
-	<ser_o> members = null;			//	[RPGChara * setting.partynum)] : イベントで拡張可能だが、戦闘には先頭からpartynumまで使用
+	<ser_o> members = null;			//	[RPGChara * setting.maxmembers)] : イベントで拡張可能だが、戦闘には先頭からmaxmembersまで使用
 	<ser_o> items = null;			//	[RPGItem * スロット数] : スロット数は無限じゃないと色々面倒ではあるなーーー
 	<ser_o> weapons = null;			//	[RPGItem * スロット数] : スロット数は無限じゃないと色々面倒ではあるなーーー
 	<ser_o> armors = null;			//	[RPGItem * スロット数] : スロット数は無限じゃないと色々面倒ではあるなーーー
@@ -1224,7 +1224,7 @@ class RPGState extends Serializable
 		//	パーティー編成
 		local set = clone ::conf.setting;
 		setDefaultProperties( RPGSystem.settingprops, set);		//	値の入ってない設定があるかもしれない
-		members = array( set.partynum);	//	イベントなどで拡張可能
+		members = array( set.maxmembers);	//	イベントなどで拡張可能
 		money = set.inimoney;
 		items = array( 3);
 		weapons = array( 3);
@@ -1232,7 +1232,7 @@ class RPGState extends Serializable
 		keyitems = array( 3);
 		storage = array( 3);
 		foreach( i, dataid in set.inimembers){
-			members[i] = dataid && playermap[dataid];
+			if( i in members) members[i] = dataid && playermap[dataid];
 		}
 		//	初期システム状態
 		foreach( p in ::RPGSystem.settingprops){

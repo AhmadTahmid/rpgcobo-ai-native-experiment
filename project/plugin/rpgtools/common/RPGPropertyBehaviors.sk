@@ -197,6 +197,10 @@ class PropertyBehaviors.DataIDs extends PropertyBehavior
 
 	function init(){
 		menulist = view.findChild( "LIST");
+		updateDatalist();
+	}
+
+	function updateDatalist(){
 		plist = fget( prop, "datalist", prop, proplist);
 		menulist.setRowCount( length( plist));
 		foreach( i, v in plist){
@@ -216,6 +220,7 @@ class PropertyBehaviors.DataIDs extends PropertyBehavior
 	}
 	
 	function setParam( v){
+		if( typeof( prop["datalist"])==SS_CLOSURE) updateDatalist();
 		datalist = clone v;
 		foreach( i,p in plist){
 			local r = menulist.rows[i];
