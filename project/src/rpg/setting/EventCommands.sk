@@ -618,7 +618,7 @@ eventcmd .. {
 		try{
 			switch( cmd.op){
 			case "new": runner[cmd.avar] = {}; break;
-			case "get": runner[cmd.tvar] = cmd.avar[cmd.key]; break;
+			case "get": runner[cmd.tvar] = runner[cmd.avar][cmd.key]; break;
 			case "ins": runner[cmd.avar][cmd.key] <- ::getvar( cmd.rvar, this); break;
 			case "rem": delete runner[cmd.avar][cmd.key]; break;
 			}

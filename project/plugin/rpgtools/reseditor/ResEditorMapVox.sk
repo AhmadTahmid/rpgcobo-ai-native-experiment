@@ -503,11 +503,11 @@ class ResEditorMapVox extends EditorViewBase
 	function editVox( vcname){
 		local vc = VoxelContainer.getGlobal( vcname);
 		local fn = vc.ref.file.path;
-		fn = fn.substring( fn.lastIndexOf( "/MagicaVoxel/")+13);	//	MagicaVoxelからのパス
+		fn = fn.substring( fn.lastIndexOf( "/resource/vox/")+10);	//	MagicaVoxelからのパス
 		local prm = {
 			name = "MagicaVoxel"
 			exe = FileRef( "tools/magicavoxel_open.ps1")
-			args = vc.ref.file.path
+			args = fn
 		};
 		Dialogs.launchTool( prm);
 	}
