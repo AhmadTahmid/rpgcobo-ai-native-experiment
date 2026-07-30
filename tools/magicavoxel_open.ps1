@@ -27,7 +27,8 @@ if( Test-Path ..\work\MagicaVoxel\vox\3x3x3.vox) {
 Write-Output "SK-OUTPUT popen_launch"
 
 # launch MagicaVoxel
-$proc = Start-Process -FilePath "$TOOL_DIR\MagicaVoxel.exe" -ArgumentList $Arg1 -PassThru
+Set-Location -Path $TOOL_DIR
+$proc = Start-Process -FilePath ".\MagicaVoxel.exe" -ArgumentList $Arg1 -PassThru
 while ($proc.MainWindowHandle -eq 0) {
     Start-Sleep -Milliseconds 20
     $proc.Refresh()

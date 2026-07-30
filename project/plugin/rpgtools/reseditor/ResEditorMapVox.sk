@@ -502,7 +502,8 @@ class ResEditorMapVox extends EditorViewBase
 	//	
 	function editVox( vcname){
 		local vc = VoxelContainer.getGlobal( vcname);
-		local f = vc.ref.file;
+		local fn = vc.ref.file.path;
+		fn = fn.substring( fn.lastIndexOf( "/MagicaVoxel/")+13);	//	MagicaVoxelからのパス
 		local prm = {
 			name = "MagicaVoxel"
 			exe = FileRef( "tools/magicavoxel_open.ps1")

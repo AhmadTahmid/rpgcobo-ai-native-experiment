@@ -269,10 +269,11 @@ class ResEditorCharaVox extends ResEditor
 	}
 
 	function editVox( voxpath){
+		local fn = voxpath.substring( 10);	//	MagicaVoxelからのパス
 		local prm = {
 			name = "MagicaVoxel"
 			exe = FileRef( "tools/magicavoxel_open.ps1")
-			args = FileRef( ::resroot.file, voxpath.substring( 1)).path
+			args = [fn]
 		};
 		Dialogs.launchTool( prm);
 	}
