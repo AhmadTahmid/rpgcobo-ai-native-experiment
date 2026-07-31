@@ -145,6 +145,7 @@ class QueryVarAccessor
 		prefix ??= t["prefix"];
 		type ??= t["type"];
 		key0 = prefix .. dbchar;
+		getfunc = t.getfunc;
 	}
 
 	function makevar( key){
@@ -155,7 +156,7 @@ class QueryVarAccessor
 		local dataid = key.substring( 4);
 		local v = ::conf[dbname][dataid];
 		if( !v) return undefined;
-		return getfunc( key);
+		return getfunc;//( key);
 	}
 
 	//	ツール用。一覧表示するためのリストを表示。
@@ -409,14 +410,18 @@ RPGSystem.varaccs .. SystemVarAccessor();
 RPGSystem.varaccs .. QueryVarAccessor({
 	name: "$T.qvar_item",
 	dbname = "item",
-	getfunc = @( dataid) ::rpgstat.countItems( dataid, true),	//	装備品も合わせたカウント
+	getfunc = @( varname){
+		local dataid = varname.substring( 4);
+		local n = ::rpgstat.countItems( dataid, true);	//	装備品も合わせたカウント
+		return n;
+	}
 });
 RPGSystem.varaccs .. QueryVarAccessor({
 	name: "$T.qvar_enemy",
 	dbname = "enemy",
-	getfunc = @( dataid){
+	getfunc = @( varname){
 		local v = ::rpgstat.globals.collection[dataid];
-		return v ? v.num : 0;
+		return v["num"] || 0;
 	},
 });
 RPGSystem.varaccs .. ButtonVarAccessor();
