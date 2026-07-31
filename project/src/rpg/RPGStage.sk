@@ -567,7 +567,7 @@ class RPGStage
 	function raiseEncounter(){
 		local a = []
 		local ratesum = 0.0;
-		local px = Math.clamp( player3d.pos.x / bw.w, 0.0, 0.999), pz = Math.clamp( player3d.pos.z / bw.d, 0.0, 0.999);
+		local px = Math.clamp( player3d.pos.x / bw.w * 2.0, 0.0, 0.999), pz = Math.clamp( player3d.pos.z / bw.d * 2.0, 0.0, 0.999);
 		foreach( v in map.encount){
 			if( !v.rate) continue;
 			local bb = decodeBASE64( v.area, ByteBuffer());

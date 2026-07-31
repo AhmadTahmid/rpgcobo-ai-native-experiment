@@ -548,7 +548,7 @@ function getModifierKeyName( str){
 //	jsonを通して
 
 function putClipboard( id, data){
-	local cbdata = encodeJSON( { type="skstudio", id=id, data=data });
+	local cbdata = encodeJSON( { type="skstudio", id=id, data=data }, 1);
 	skPutClipboardData( cbdata);
 }
 

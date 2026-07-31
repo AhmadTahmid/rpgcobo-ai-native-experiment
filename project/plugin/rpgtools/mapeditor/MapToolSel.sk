@@ -32,10 +32,6 @@ import PenMode;
 
 local srcdir = dirname( callee().getSourceName());
 
-//	マップでコピペするクリップボード。マップ間、ツール間でも共有される。
-//	{ bw, selmode }
-::clipboard_map <- null;	//	バイナリなのでまだputClipboardとかにもってけない
-
 local cullfacelist = [
 	{ lbl="$T.cullface0", val=63}, 
 	{ lbl="$T.cullface1", val=31}, 
@@ -288,8 +284,11 @@ class MapTools.tool_sel extends MapTool
 			execCopy();
 			return true;
 		case "menu_edit_paste":
-			editor.canvas.toolfunc = execPaste();
+		{
+			local cbdata = getClipboard( "mapsel");
+			if( cbdata) editor.canvas.toolfunc = execPaste( null, cbdata);
 			return true;
+		}
 		case "menu_edit_selall":
 			selectAll();
 			return true;
@@ -298,10 +297,9 @@ class MapTools.tool_sel extends MapTool
 
 	function execCopy(){
 		if( selbox){
-			// printf( "selbox? %S %S %S %S %S %S\n", selbox.x,selbox.y,selbox.z,selbox.w,selbox.h,selbox.d);
-			local subbw = editor.bw.createCopy( selbox), v = { bw=subbw, selmode=selmode};
-			local bb = ObjectOutput.encode( v);
-			::clipboard_map = v;
+			local subbw = editor.bw.createCopy( selbox);
+			local bw64 = encodeBASE64( ObjectOutput.encode( subbw));
+			putClipboard( "mapsel", { bw64=bw64, selmode=selmode});
 		}
 	}
 
@@ -342,17 +340,16 @@ class MapTools.tool_sel extends MapTool
 		return { bw=boxbw, redo=redo, undo=undo, box=box};
 	}
 
-	function execPaste( hb=null){
-		if( ::clipboard_map){
-			local v = ::clipboard_map;
-			hb = hb || guides["pen"]["ref"][3];
-			if( hb){
-				removeGuide( "pen");
-				if( v.selmode == 0){
-					return paste2DStart( hb, v.bw);	//	toolfunc設定！！！！
-				}else{
-					return paste3DStart( hb, v.bw);	//	toolfunc設定！！！！
-				}
+	function execPaste( hb, cbdata){
+		local v = cbdata;
+		hb = hb || guides["pen"]["ref"][3];
+		if( hb){
+			local bw = ObjectInput.decode( decodeBASE64( v.bw64, ByteBuffer()));
+			removeGuide( "pen");
+			if( v.selmode == 0){
+				return paste2DStart( hb, bw);	//	toolfunc設定！！！！
+			}else{
+				return paste3DStart( hb, bw);	//	toolfunc設定！！！！
 			}
 		}
 	}
@@ -471,12 +468,14 @@ class MapTools.tool_sel extends MapTool
 
 	function showContextMenu( e){
 		local hb = rayTest( e, blkflag, true);
+		local cbdata = getClipboard( "mapsel");	//	開くたびにクリップボード取得しちゃうけどまーだいじょぶかな
+
 		local ctxmenu = [
 			{ id="move", lbl="$T.lbl_move", icon="\ue925", modkey="^T", disable=!selbox },
 			"-"
 			{ id="copy", lbl="$T.menu_edit_copy", icon="\ue14d", modkey="^C", disable=!selbox },
 			{ id="cut", lbl="$T.menu_edit_cut", icon="\ue14d", modkey="^X", disable=!selbox },
-			{ id="paste", lbl="$T.menu_edit_paste", icon="\ue14f", modkey="^V", disable=!clipboard_map},
+			{ id="paste", lbl="$T.menu_edit_paste", icon="\ue14f", modkey="^V", disable=!cbdata},
 			"-",
 			{ id="delete", lbl="$T.lbl_delete", icon="\ue872"},
 			"-",
@@ -496,7 +495,7 @@ class MapTools.tool_sel extends MapTool
 			execDelete();
 			break;
 		case "paste":
-			return execPaste( hb);
+			return execPaste( hb, cbdata);
 		case "move":
 			return execMove();
 		case "delete":
