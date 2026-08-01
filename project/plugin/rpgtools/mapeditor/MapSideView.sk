@@ -116,7 +116,7 @@ class MapSideView extends SKView
 			if( m){
 				c.setValue( "pic", "/data/mapdata/%S.webp"%m.id);
 				c.setValue( "id", m.id);
-				c.setValue( "name", m.data.name);
+				c.setValue( "name", m.data["name"] || "No data???");
 				c.ref = m;
 			}
 		}
@@ -443,6 +443,10 @@ class MapSideView extends SKView
 			//	コピー操作！
 			local path = "/.x/map/"..r.mid;
 			::conf.map[r.mid] <- data;
+			if( ::conf.map[r.mid]){
+				local g = ::conf.map._meta.groups.find( @( g) g["maps"]?.contains( r.mid));
+				if( g) g.maps.removeValue( r.mid);
+			}
 			local g = ::conf.map._meta.groups.find( @( v) v.id==r.gid);
 			g.maps .. r.mid;
 			dstbwf.save( srcbwbb);
