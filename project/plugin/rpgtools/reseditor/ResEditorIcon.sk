@@ -142,7 +142,7 @@ class ResEditorIcon extends EditorViewBase
 		idx.sort( @( v) v.cp);
 		local data = ByteBuffer();
 		foreach( v in idx){
-			data.pos = v.offs;
+			emjdata.pos = v.offs;
 			data.putBuffer( emjdata, v.size);
 			v.offs = data.size-v.size;
 		}
