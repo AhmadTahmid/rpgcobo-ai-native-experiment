@@ -13,13 +13,21 @@ import RPGPropertyType;
 
 
 //	メンバーリストに表示させるバインド情報を構築。メインメニュー、キャラ選択などに使う
-function bindMemberList( v){
+function bindMemberList( v, i, disablefn=null){
 	if( typeof( v) == SS_STRING) v = ::rpgstat.playermap[v];
+	else if( v["type"] == "player"){	//	RPGObjectRef
+		v = v.player;
+	}else if( v instanceof RPGPlayer){	//	そのもの
+		// v = v;
+	}else{		//	メンバーリストに設定不能。。。
+		v = null;
+	}
 	return !v ? {
 		grayout = ptr( {hide=true}),
 	} : {
 		_name = v.dataid,			//	_nameはSKView.nameに設定される
 		player = v,
+		dataid = v.dataid,
 		mdl = v,					//	RPGPlayerを直接渡せる
 		name = v.name,
 		job = @() (v.jobs[0]?.iconname()) || "",
@@ -31,6 +39,8 @@ function bindMemberList( v){
 		conds = @() ::RPGSystem.getConditionString( v.conds),
 		sel = @() v.selected ? "on" : "off",
 		formation = @() v["formation"] ? "back" : "front",
+		disable = !disablefn ? false : @() disablefn( v),
+		grayout = !disablefn ? "off" : @() disablefn( v) ? "on" : "off"
 	}
 }
 

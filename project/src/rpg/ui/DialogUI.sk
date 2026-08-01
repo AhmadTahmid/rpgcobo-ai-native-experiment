@@ -251,35 +251,57 @@ RPGSystem.ui ..
 	icon = "\ue8ef"
 	
 	props = @( cmd){
-		local a = [];
+		local a = [
+			{ pid="seltype", lbl="$T.lbl_selectable", type=LIST, list=[{lbl="$T.lbl_anyone",val=0},{lbl="$T.lbl_only_alives",val=1},{lbl="$T.lbl_only_deads",val=2}]}
+			{ pid="selall", lbl="$T.lbl_selall" type=BOOL, }
+		];
 		return a;
 	}
 
 	defval = {
-		msg = "SELECT A CHARA"
-		members = ["C000"]
+		msg = "$T.selchara"
+		seltype = 0
+		selall = false
+		memberlist = null
 	}
 	
 	uifunc = @( prms){
 		local oldc = gpui.backupCursor();
+		local disablefn;
+		//	選択不能
+		switch( prms["seltype"]){
+		case 1: disablefn = @( pc) pc.isDead(); break;
+		case 2: disablefn = @( pc) !pc.isDead(); break;
+		}
+		//	メンバーリスト作成
+		local memberlist = prms["memberlist"];
+		if( !memberlist){	//	プロパティ化
+			memberlist = ::rpgstat.members;
+		}
+		memberlist = memberlist?.map( @( v, i) ::bindMemberList( v, i, disablefn));	//	ここでもうbindしておく
+		//
 		local view = RPGMain.showView({
 			uipath = "dialog_selchara.ui"
 			name = "dialog_selchara"
 			layer = "message"
 			modal = true
 			binds = {
-				titlelbl = prms["titlelbl"]
-				memberlist = prms.members.map( ::bindMemberList),	//	MainMenuUI
+				titlelbl = prms["msg"] || "$T.selchara"
+				memberlist = memberlist,	//	MainMenuUI
 			},
-			focus = prms.members[0]["dataid"] || prms.members[0],	//	RPGPlayer|string
+			focus = memberlist[0]["dataid"],
 			action = "show"
 		});
 		if( prms["selall"]){
-			foreach( v in prms.members) v && v.selected = true;
+			foreach( v in memberlist) if( v["player"] && !fget( v, "disable")) v.player.selected = true;
 		}
 		//	リスト選択
 		local sel = RPGMain.uiLoop( {
 			"action" : @( e){
+				if( fget( e.item, "disable")){
+					::playSound( "SE002");
+					return;
+				}
 				::playSound( "SE001");
 				return e.item;
 			},
@@ -292,9 +314,16 @@ RPGSystem.ui ..
 		view.actionAndDie( "hide");
 		view.waitAction();
 		gpui.restoreCursor( oldc);
-		rpgvar.RESULT = sel=="none" ? null : sel.dataid;
+		//	RESULTにはRPGObjectRefが入る
+		if( sel["dataid"]){
+			local r = rpgvar.RESULT = RPGObjectRef();
+			r.type = "player";
+			r.id = sel.dataid;
+		}else{
+			rpgvar.RESULT = null;
+		}
 		if( prms["selall"]){
-			foreach( v in prms.members) v && v.selected = false;
+			foreach( v in memberlist) if( v["player"] && !fget( v, "disable")) v.player.selected = false;
 		}
 		return rpgvar.RESULT;
 	}
@@ -306,6 +335,120 @@ RPGSystem.ui ..
 //	※アイテムメニュー(MainMenuUI.sk)とは違い、イベント等でアイテムを渡したりする時に使う。
 //	
 
+RPGSystem.ui ..
+{
+	key = "dialog_selitem"
+	lbl = "$T.ui_dialog_selitem"
+	type = "dialog"			//	mainmanu, submenu, choose, dialog, message, info, debug, misc, 
+	icon = "\ue8ef"
+	topinfo = "$T.selitem";
+	
+	props = @( cmd){
+		local a = [
+			{ pid="tabbits", lbl="$T.lbl_selectable", type=CHECKBITS, list=[
+				{lbl="$T.item",icon="\uf24f",val=0},
+				{lbl="$T.weapon",icon="\uf253",val=1},
+				{lbl="$T.armor",icon="\uf810",val=2},
+				{lbl="$T.keyitem",icon="\uf255",val=3}
+			], },
+		];
+		return a;
+	}
+
+	defval = {
+		tabbits = 15,
+	}
+	
+	uifunc = @( prms){
+		local tablist = ["$T.item","$T.weapon","$T.armor","$T.keyitem"].filter( @(v,i) (1<<i)&prms.tabbits);
+		local makelist = @( tab){
+			local tabkey = #["items","weapons","armors","keyitems"];
+			local a = ::rpgstat[tabkey[tab]];
+			return a.map( @( v, i) v ? {
+				lbl=(v.data.icon..v.data.name), _name="i"..i, item=v, id=v.dataid, rlbl=v.num>1 ? v.num : "",
+			} : { lbl="", _name="i"..i, rlbl="", item=null});
+		};
+		local tabptr = ptr( 0);		//	アイテム、武器、防具、キーアイテム。
+		//	アイテムリストを作成
+		//	空の場合は空白を3つ。その他は3の倍数に。アイテムリストはnullが入ってる
+		local ntab = length( tablist);
+		playSound( "SE005");
+		local view = RPGMain.showView({
+			uipath = "menu_item.ui"
+			name = "dialog_selitem"
+			layer = "menu"
+			binds = {
+				//	タブ一覧
+				tablist = tablist.map( @( v, i)({
+					_name = "tab"..i,
+					lbl = v,
+					tgl = @() (i==~tabptr)?10:0,
+				})),
+				//	アイテム一覧
+				itemlist = makelist( ~tabptr);
+			},
+			action = "show"
+			focus = "i0"
+		});
+		local remakelist(){
+			view.setValue( "itemlist", makelist( ~tabptr));
+		}
+	BACK_TO_ITEMSEL:
+		//	使用可能なアイテムを選択
+		local showdesc( i){
+			view.setValue( "desclbl", i? RPGSystem.getDescription( (i instanceof RPGItem) ? i : i.data) : "");
+		}
+		local inctab( d){
+			::playSound( "SE000");
+			tabptr << ((~tabptr+d+ntab) % ntab); remakelist();
+			view.focusTo( "i0");
+		}
+		
+		local selitem = RPGMain.uiLoop( {
+			"action" : @( e){	//	スロット、最強装備、すべて外すが来る
+				switch( e.name){
+				case "tabinc": inctab( 1); break;
+				case "tabdec": inctab( -1); break;
+				case "tab0": case "tab1": case "tab2": case "tab3": case "tab4":  case "tab5": 
+					tabptr << (e.name[3]-'0');
+					remakelist();
+					break;
+				default:
+					local i = e.item["item"];	//	RPGItem
+					if( i){	//	使用可能かチェック。アイテム、キーアイテムのみ使用可。
+						if( !e.item["disable"]){
+							::playSound( "SE001");
+							return e;
+						}else{
+							::playSound( "SE002");
+						}
+					}
+					break;
+				}
+			}
+			"page" : @( e){
+				inctab( e.count);
+			}
+			"select" : @( e){	//	選択時に説明表示
+				if( "item" in e.item){
+					showdesc( e.item.item);
+				}
+			}
+			"back" : @( e){
+				::playSound( "SE004");
+				return "back";
+			}
+			"cancel" : @( e){
+				return "cancel";
+			}
+		});
+		/////////	owari
+		view.actionAndDie( "hide");
+		local id = selitem["item"]["id"];
+		rpgvar.RESULT = id || false;
+		return rpgvar.RESULT;
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 //	アイテム購入又は売却UIを表示。1,4,10個の購入が可能。

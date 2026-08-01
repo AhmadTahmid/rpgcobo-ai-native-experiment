@@ -125,6 +125,7 @@
 	"copysave":{ "ja":"$v0 から $v1 にセーブデータをコピーしますか？", "en":"Do you want to copy save data from $v0 to $v1?"},
 	
 	"selchara":{ "ja":"キャラを選択してください", "en":"Select a Character"},
+	"selitem":{ "ja":"アイテムを選択してください", "en":"Select an Item"},
 	"useitem":{ "ja":"アイテムを使用", "en":"Use the Item"},
 	"useskill":{ "ja":"スキルを使用", "en":"Use the Skill"},
 

@@ -1164,7 +1164,7 @@
 	"editor_map_tool_asset"				: {"ja":"アセットツール", "en":"Asset Tool"}
 	"editor_map_tool_event"				: {"ja":"イベントツール", "en":"Event Tool"}
 
-	"lbl_mapgen"						: {"ja":"マップ生成", "en":"Generate Map"}
+	"lbl_mapgen"						: {"ja":"マップ自動生成", "en":"Generate Map"}
 	"lbl_encountgroup"					: {"ja":"エンカウントグループ", "en":"Encounting Group"}
 	"lbl_battletest"					: {"ja":"バトルのテスト", "en":"Battle Test"}
 	"lbl_encountarea"					: {"ja":"エンカウントの範囲", "en":"Encounting Area"}
@@ -1361,9 +1361,13 @@
 	"ui_dialog_choices"					: {"ja":"選択ダイアログ", "en":"Selection Dialog"}
 	"ui_dialog_confirm"					: {"ja":"確認ダイアログ", "en":"Confirm Dialog"}
 	"ui_dialog_selchara"				: {"ja":"キャラ選択ダイアログ", "en":"Chara Selection Dialog"}
+	"ui_dialog_selitem"					: {"ja":"アイテム選択ダイアログ", "en":"Item Selection Dialog"}
 	"ui_dialog_buyitem"					: {"ja":"アイテム売買ダイアログ", "en":"Item buy/sell Dialog"}
 	//	store
 	"ui_store_item"						: {"ja":"アイテムショップ", "en":"Item Shop"}
 	"ui_store_sellitem"					: {"ja":"アイテムの売却", "en":"Sell Item"}
 	
+	"lbl_anyone"						: {"ja":"誰でも", "en":"Anyone"}
+	"lbl_only_alives"					: {"ja":"生者のみ", "en":"Only alives"}
+	"lbl_only_deads"					: {"ja":"生者のみ", "en":"Only deads"}
 });

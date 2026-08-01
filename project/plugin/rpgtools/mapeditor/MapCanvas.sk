@@ -439,6 +439,11 @@ class MapCanvas extends CanvasBehavior
 			if( hb.blk){
 				local b = hb.blk, bt = ::blks[b&31];
 				sellbl.setText( sprintf( "%d-%d %S", b&31, (b>>5)%length( bt.variations), bt.name));
+			}else
+			if( hb.fbuid){
+				local fb = editor.bw.getFreeBlock( hb.fbuid);
+				local fbt = ::fblks[fb.fbtype], va = fbt.variations[fb.fbparam&0xfff];
+				sellbl.setText( sprintf( "%d-%d %S", fb.fbtype, fb.fbparam&0xfff, fbt["name"]));
 			}
 		}else{
 			poslbl.setText( "-- -- --");
