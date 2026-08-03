@@ -263,7 +263,7 @@ class SystemVarAccessor
 			key = "SHOWTIMER", name = "$T.svar_showtimer", type = VAR_ANY, defval = null,
 		}),
 		makesvar({
-			key = "RESULT", name = "$T.lbl_result($T.lbl_battle)", type = VAR_ANY, defval = 0,
+			key = "RESULT", name = "$T.lbl_result($T.lbl_battle,UI)", type = VAR_ANY, defval = 0,
 		}),
 		makesvar({
 			key = "ERROR", name = "$T.lbl_error", type = VAR_INT, defval = 0,

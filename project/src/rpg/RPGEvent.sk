@@ -378,10 +378,22 @@ class RPGEventRunner
 
 	function itemOp( cmd){
 		::rpgvar.ERROR = 0;
-		if( cmd["op"]==1){
+		switch( cmd.op){
+		case 1:	//	-
 			if( !::rpgstat.reduceItemID( cmd.itemid, cmd.num)) ::rpgvar.ERROR = 1234;
-		}else{
+			break;
+		case 2:	//	=
+			local d = cmd.num - ::rpgstat.countItems( cmd.itemid);
+			if( d > 0){
+				::rpgstat.addItemID( cmd.itemid, d);
+			}else
+			if( d < 0){
+				::rpgstat.reduceItemID( cmd.itemid, -d);
+			}
+			break;
+		default:	//	+
 			::rpgstat.addItemID( cmd.itemid, cmd.num);	//	追加時にはエラーは出ない？
+			break;
 		}
 	}
 	

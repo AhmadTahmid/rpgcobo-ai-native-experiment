@@ -422,6 +422,7 @@
 	"cmd_memberop"						: {"ja":"メンバーの交代", "en":"Member Change"}
 	"cmd_jobop"							: {"ja":"ジョブの操作", "en":"Job Operation"}
 	"cmd_condop"						: {"ja":"コンディションの操作", "en":"Condition Operation"}
+	"cmd_charainfo"						: {"ja":"キャラ情報取得", "en":"Get Chara Info"}
 
 	"cmd_showmsg"						: {"ja":"メッセージ", "en":"Message"}
 	"cmd_choices"						: {"ja":"選択肢", "en":"Choices"}
@@ -495,7 +496,8 @@
 	"cmd_memberop_tips"					: {"ja":"パーティメンバーを加入、離脱します。", "en":""}
 	"cmd_jobop_tips"					: {"ja":"プレイヤーのジョブを変更します。", "en":""}
 	"cmd_condop_tips"					: {"ja":"プレイヤーのコンディションを付与、解除します。", "en":""}
-
+	"cmd_charainfo_tips"				: {"ja":"キャラクターの情報を取得します。", "en":""}
+	
 	"cmd_showmsg_tips"					: {"ja":"会話ウィンドウを表示します。", "en":""}
 	"cmd_choices_tips"					: {"ja":"選択肢を表示し、結果によって処理を分岐します。", "en":""}
 	"cmd_showui_tips"					: {"ja":"標準機能の色々な機能を持つUIを表示します。", "en":""}

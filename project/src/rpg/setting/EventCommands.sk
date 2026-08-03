@@ -773,7 +773,7 @@ eventcmd .. {
 
 	props = [
 		{ pid="cmdtgt", lbl="$T.cmdtgt", type=LIST, list=hpmptgtlist, variable=1, }		//	対象範囲。個人、パーティ、全て
-		{ pid="charaid", lbl="$T.side_dbview_player", type=DATAID, datatype="player", variable=1, hide=@( pl) pl.getParam( "cmdtgt")!=TGT_PARTY_SINGLE }	//	↑で個人の場合の対象プレイヤー。データIDもしくはワーク、イベント、グローバル変数
+		{ pid="charaid", lbl="$T.side_dbview_player", type=DATAID, datatype="player", variable=1, varbits=1|2|4|8, hide=@( pl) pl.getParam( "cmdtgt")!=TGT_PARTY_SINGLE }	//	↑で個人の場合の対象プレイヤー。データIDもしくはワーク、イベント、グローバル変数
 		{ pid="pid", lbl="HP $T.lbl_op", type=LIST, list=hpmppidlist, }
 		hpmpprop
 		{ pid="val", lbl="$T.lbl_value", type=VARIABLE, varbits=1|2|4|8|16, constbits=2|8|16 },
@@ -841,7 +841,7 @@ eventcmd .. {
 	
 	props = [
 		{ pid="cmdtgt", lbl="$T.cmdtgt", type=LIST, list=hpmptgtlist, variable=1, }		//	対象範囲。個人、パーティ、全て
-		{ pid="playerid", lbl="$T.side_dbview_player", type=DATAID, datatype="player", variable=1, hide=@( pl) pl.getParam( "cmdtgt")!=TGT_PARTY_SINGLE }	//	↑で個人の場合の対象プレイヤー。データIDもしくはワーク、イベント、グローバル変数
+		{ pid="playerid", lbl="$T.side_dbview_player", type=DATAID, datatype="player", variable=1, varbits=1|2|4|8, hide=@( pl) pl.getParam( "cmdtgt")==TGT_PARTY_ALL }	//	↑で個人の場合の対象プレイヤー。データIDもしくはワーク、イベント、グローバル変数
 		{ pid="pid", lbl="$T.lbl_param", type=LIST, list=[{lbl="$T.EXP",val="exp"},{lbl="$T.JXP",val="jxp"},], variable=1 },
 		{ pid="amount", lbl="$T.lbl_amount", type=SCALAR, range=(1,99999999), variable=1 },
 		{ pid="ui", lbl="$T.lbl_showui", type=BOOL, variable=1, },
@@ -875,7 +875,7 @@ eventcmd .. {
 	color = color2
 
 	props = [
-		{ pid="itemid", lbl="$T.lbl_item", type=DATAID, datatype=["item","weapon","armor"], variable=true },
+		{ pid="itemid", lbl="$T.lbl_item", type=DATAID, datatype=["item","weapon","armor"], variable=1, varbits=1|2|4|8 },
 		{ pid="op", lbl="$T.lbl_op", type=LIST, list=[{lbl="＋",val=0},{lbl="ー",val=1},{lbl="＝",val=2},], },
 		{ pid="num", lbl="$T.lbl_num", type=SCALAR, range=(1,99), variable=true },
 	]
@@ -908,7 +908,7 @@ eventcmd .. {
 	color = color2
 
 	props = [
-		{ pid="playerid", lbl="$T.side_dbview_player", type=DATAID, datatype=["player"], variable=1 },
+		{ pid="playerid", lbl="$T.side_dbview_player", type=DATAID, datatype=["player"], variable=1, varbits=1|2|4|8 },
 		{ pid="slot", lbl="$T.lbl_slot", type=LIST, list=@(){
 			local a = [
 				{ lbl="$T.lbl_anyslot", val=-1 },
@@ -948,7 +948,7 @@ eventcmd .. {
 	color = color2
 
 	props = [
-		{ pid="playerid", lbl="$T.side_dbview_player", type=DATAID, datatype=["player"], variable=true },
+		{ pid="playerid", lbl="$T.side_dbview_player", type=DATAID, datatype=["player"], variable=1, varbits=1|2|4|8 },
 		{ pid="slot", lbl="$T.lbl_slot", type=LIST, list=@(){
 			local a = [
 				{ lbl="$T.lbl_anyslot", val=-1 },
@@ -986,7 +986,7 @@ eventcmd .. {
 	color = color2
 
 	props = [
-		{ pid="playerid", lbl="$T.side_dbview_player", type=DATAID, datatype=["player"], variable=1 },
+		{ pid="playerid", lbl="$T.side_dbview_player", type=DATAID, datatype=["player"], variable=1, varbits=1|2|4|8 },
 		{ pid="slot", lbl="$T.lbl_slot", type=LIST, list=@(){
 			local a = [
 				{ lbl="$T.lbl_anyslot", val=-1 },
@@ -1040,7 +1040,7 @@ eventcmd .. {
 
 	props = [
 		{ pid="cmdtgt", lbl="$T.cmdtgt", type=LIST, list=hpmptgtlist, variable=1, }		//	対象範囲。個人、パーティ、全て
-		{ pid="charaid", lbl="$T.side_dbview_player", type=DATAID, datatype="player", variable=1, hide=@( pl) pl.getParam( "cmdtgt")!=TGT_PARTY_SINGLE }	//	↑で個人の場合の対象プレイヤー。データIDもしくはワーク、イベント、グローバル変数
+		{ pid="charaid", lbl="$T.side_dbview_player", type=DATAID, datatype="player", variable=1, varbits=1|2|4|8, hide=@( pl) pl.getParam( "cmdtgt")==TGT_PARTY_ALL }	//	↑で個人の場合の対象プレイヤー。データIDもしくはワーク、イベント、グローバル変数
 		{ pid="op", lbl="$T.lbl_op", type=LIST, list=[
 			{lbl="＋",val=0},
 			{lbl="ー",val=1},
@@ -1082,13 +1082,13 @@ eventcmd .. {
 eventcmd .. {
 	category = 2
 	key = "cmd_charainfo"
-	name = "キャラ情報取得"
+	name = "$T.cmd_charainfo"
 	icon = "\ue851"
 	color = color2
 
 	props = @( cmd){
 		local a = [
-			{ pid="charaid", lbl="$T.side_dbview_player", type=DATAID, datatype=["player","enemy"], variable=1, },
+			{ pid="charaid", lbl="$T.side_dbview_player", type=DATAID, datatype=["player","enemy"], variable=1, varbits=1|2|4|8, },
 			{ pid="key", lbl="$T.lbl_info", type=LIST, list=@() RPGSystem.charainfodef._list.map( @(v) +{ lbl=v.lbl, val=v.key}), refresh=1,
 				set = @( prop, data, val){
 					local cidef = RPGSystem.charainfodef[val];
