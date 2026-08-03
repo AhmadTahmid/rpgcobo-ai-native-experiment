@@ -752,6 +752,7 @@ enum MoveScreenFlags
 	MOVESCREEN_RESTORE = 32,
 	MOVESCREEN_HIDE = 40,
 	MOVESCREEN_FRONT = 48,
+	MOVESCREEN_MAXRESO = 52,
 }
 
 enum JsonEncodingBit

@@ -101,14 +101,14 @@ fs pbrlighting
 	
 	float calcshadow( in highp vec3 wvp, in highp float blk, in highp vec3 n){
 		$( SHADOWMAP){
-			#define ZOFFS 0.2
+			const highp float ZOFFS = 0.2;
 			highp float nl = dot( n, shadow[1].xyz)*0.5 + 0.5;
 			blk = pow( nl, 1.2) + blk;
 			//
 			highp vec4 pos = vec4( wvp, 1.0);
 			highp float viewz = -wvp.z, coff = shadow[0].w, lightz = -dot( pos, shadow[1]);
 			highp vec2 uv;
-			#define SHADOWUV( I) uv = vec2( dot( pos, shadow[3+I]), dot( pos, shadow[4+I])); highp vec4 zv = shadow[5+I]; highp float texz = float( texture( shadowtex, uv).x) * (1.0/65535.0) * zv.x + zv.y - ZOFFS;
+			// #define SHADOWUV( I) uv = vec2( dot( pos, shadow[3+I]), dot( pos, shadow[4+I])); highp vec4 zv = shadow[5+I]; highp float texz = float( texture( shadowtex, uv).x) * (1.0/65535.0) * zv.x + zv.y - ZOFFS;
 			//	XXXXXXX TOO slow with Angle compiler
 			// $( SHADOWMAP == 1){
 			// 	const mediump int i = 0;
@@ -116,10 +116,13 @@ fs pbrlighting
 			// 	$( SHADOWMAP == 2){
 			// 		mediump int i = 3*int( step( shadow[2].x, viewz));
 			// 	} : {
-					mediump int i = 3*int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz));
+			//		mediump int i = 3*int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz));
 			// 	}
 			// }
-			SHADOWUV( i)
+			// SHADOWUV( i)
+			mediump int i = 3*int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz));
+			uv = vec2( dot( pos, shadow[3+i]), dot( pos, shadow[4+i])); highp vec4 zv = shadow[5+i]; highp float texz = float( texture( shadowtex, uv).x) * (1.0/65535.0) * zv.x + zv.y - ZOFFS;
+			//	
 			highp float rate = clamp( exp( -coff * -(lightz - texz)), 0.0, 1.0);
 			highp float dark = clamp( mix( shadow[0].x+blk, 1.0, pow( viewz*shadow[0].y, 4.0)), 0.0, 1.0);
 			return mix( dark, 1.0, rate);
@@ -328,18 +331,11 @@ fs pbrlighting
 			Fr = Fr*(sdw*ao);
 		}
 		// direct lighting
-		DIRLIT( shading_standard, sdw*ao);
+		shading_standard( g, dirLight( g, sdw*ao), Fd, Fr);	// DIRLIT( shading_standard, sdw*ao);
 		PNTLIT( shading_standard, ao);
 		vec3 col = Fd + Fr;
 		// fog
 		fog( col, g.wvp);
-
-		// highp vec2 uv = g.uv;
-		// // col = uv.x < 0.2 ? g.vn*0.5+0.5 : uv.x < 0.4 ? g.reflected*0.5+0.5 : uv.x < 0.6 ? vec3( g.NoV,0.0,0.0) : uv.x < 0.8 ? g.dfg : g.vn*0.5+0.5;	//	debug
-		// col = abs( fract( g.reflected*4.0));
-		// // if( uv.y > 0.7) {
-		// // 	col = g.wvp * 0.1 + 0.5;
-		// // }
 		
 		#ifdef OUTGI
 			return vec4( col, packDiffuse( Fd, col));
@@ -412,7 +408,7 @@ fs pbrlighting
 			Fr = Fr*(sdw*ao);
 		}
 		// direct lighting
-		DIRLIT( shading_subsurf, sdw*ao);
+		shading_subsurf( g, dirLight( g, sdw*ao), Fd, Fr);	//	DIRLIT( shading_subsurf, sdw*ao);
 		PNTLIT( shading_subsurf, ao);
 		// fog
 		vec3 col = Fd + Fr;

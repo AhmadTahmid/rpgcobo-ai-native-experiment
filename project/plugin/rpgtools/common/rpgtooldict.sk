@@ -1134,6 +1134,12 @@
 	"lbl_placeportaldoor"				: {"ja":"ポータルドアに変換", "en":"To Portal Door"}
 	"lbl_tomapasset"					: {"ja":"アセットに登録","en":"Register to Assets"}
 	"lbl_tocustomevent"					: {"ja":"カスタムイベントに変換", "en":"To Custom Event"}
+
+	"lbl_abschk"						: {"ja":"高さを指定", "en":"Absolute"}
+	"lbl_planechk"						: {"ja":"同一平面", "en":"Same Plane"}
+	"lbl_blkchk"						: {"ja":"同一ブロック", "en":"Same Block"}
+	"lbl_waterchk"						: {"ja":"水を分離", "en":"Water Group"}
+	"lbl_repchk"						: {"ja":"ブロックを置き換える", "en":"Replace Blocks"}
 	
 	//	マップエディター用メニュー
 	"editor_map_menu_edit_mapsize"		: {"ja":"マップのサイズ変更", "en":"Resize Map"}

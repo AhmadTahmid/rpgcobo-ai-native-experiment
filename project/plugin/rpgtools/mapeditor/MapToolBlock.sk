@@ -1240,7 +1240,7 @@ class MapTools.tool_level extends MapTool
 	penmap = null;
 
 	penid = null;			//	string
-	blkflag = BLK_SOLID;	//	rayTestで使う
+	blkflag = BLK_SOLID | BLK_LIQUID;	//	rayTestで使う
 	blk = 1;				//	選択されたブロック
 
 	mode = 0;				//	高さを直指定
@@ -1248,6 +1248,9 @@ class MapTools.tool_level extends MapTool
 	offsval = null;
 	repchk = null;
 	x2chk = null;
+	planechk = null;
+	blkchk = null;
+	waterchk = null;
 	abschk = null;
 	offschk = null;
 
@@ -1269,6 +1272,10 @@ class MapTools.tool_level extends MapTool
 		repchk = optionview.findChild( "repchk");
 		x2chk = optionview.findChild( "x2chk");
 		x2chk.setSelected( true);
+		planechk = optionview.findChild( "planechk");
+		blkchk = optionview.findChild( "blkchk");
+		waterchk = optionview.findChild( "waterchk");
+		waterchk.setSelected( true);
 		//
 		abschk = optionview.findChild( "abschk");
 		offschk = optionview.findChild( "offschk");
@@ -1413,8 +1420,9 @@ class MapTools.tool_level extends MapTool
 		local blk = repchk.isSelected() ? blk : 0;
 		local offs0 = offsval.getValue(), x2 = x2chk.isSelected();
 		local m = mode, align = align;
+		local flags = (planechk.isSelected() && 1) | (blkchk.isSelected() && 2) | (waterchk.isSelected() && 4);
 		//	最初の描画
-		bop.levelSet({ pen:pen, hb:hb0, blk:blk, newy:m?hb0.by+offs0:offs0, align=align });
+		bop.levelSet({ pen:pen, hb:hb0, blk:blk, newy:m?hb0.by+offs0:offs0, align=align, flags=flags });
 		bop.submit( editor);
 		local nyptr = ptr( 0);
 		//	開始時のtoolfunc
@@ -1436,7 +1444,7 @@ class MapTools.tool_level extends MapTool
 				}
 				if( hb){
 					if( hb && x2){ hb.bx = (hb.bx+1)&~1; hb.bz = (hb.bz+1)&~1; }
-					bop.levelSet({ pen:pen, hb:hb, blk:blk, newy:(m?(hb.by+offs0):offs0)+~nyptr, align=align });
+					bop.levelSet({ pen:pen, hb:hb, blk:blk, newy:(m?(hb.by+offs0):offs0)+~nyptr, align=align, flags=flags });
 					if( bop.len()) bop.merge( editor);
 				}
 				local dh = self.offsval.getValue()+(m?0:-(hb["by"]||0)) + ~nyptr;

@@ -60,7 +60,7 @@ class BlockOperation
 	function _plcfblk( fb, fbpos, fbuid){
 		local _bw = bw, oldfb = _bw.getFreeBlock( fbuid);
 		local fbtype = fb.fbtype, fbparam = fb.fbparam;
-		local pfp = _bw.fblockat( fbpos.x, fbpos.y, fbpos.z);
+		// local pfp = _bw.fblockat( fbpos.x, fbpos.y, fbpos.z);
 		// if( pfp && pfp.fbtype==fbtype && pfp.fbparam==fbparam && pfp.rot==fbpos.rot){
 		// 	return false;
 		// }
@@ -285,14 +285,17 @@ class BlockOperation
 	//	トップブロックが水のときは整地できない。草は持ち上げられる。家みたいなのも基本整地できない。
 	//	pos : 統一の基準位置。
 	//	pen : VoxelData8 底面のみ使う
+	//	flags : 1=同一平面、 2=同一ブロック、 4=水面分離
 	function levelSet( p){
 		local pen = p.pen, blk = p["blk"]||0;
 		local x0 = p.hb.bx-pen.pivot[0], x1 = x0 + pen.w;
 		local basey = p.hb.by, newy = p.newy;
 		local z0 = p.hb.bz-pen.pivot[2], z1 = z0 + pen.d;
 		local align = p.align;
+		local flags = p["flags"]||0;
+		local baseblk = p.hb.blk;
 		for( local z = z0, i = 0; z < z1; z ++) for( local x = x0; x < x1; x ++, i++){
-			if( pen[i]) _lvset( x, z, newy, basey, blk, align);
+			if( pen[i]) _lvset( x, z, newy, basey, blk, align, flags, baseblk);
 		}
 		return this;
 	}
@@ -314,13 +317,13 @@ class BlockOperation
 	function _getfloory( x, z, ty){
 		for( local y = ty; y >= 0; y --){
 			local b = bw.blockat( x, y, z);
-			if( ::Block.isFullOcclude( b)) return y;
+			if( ::Block.isFullOcclude( b) || ::Block.hasFlag( b, BLK_LIQUID)) return y;
 		}
 		return -1;
 	}
 
 	//	levelSetから呼ぶ
-	function _lvset( x, z, y, basey, blk, align, maxd=16){
+	function _lvset( x, z, y, basey, blk, align, flags, baseblk, maxd=16){
 		//
 		local th = Math.max( y-basey, 6);
 		local ty = _gettopy( x, z, basey, th);
@@ -330,7 +333,19 @@ class BlockOperation
 		local dy = Math.clamp( y-fy, -maxd, maxd);	//	+-maxdでクランプ。あまり一気にやらないように。
 		if( dy < 0 && fy+dy < 0) dy = -fy;
 		//
-		if( (dy < 0 && align<=1) || (dy > 0 && align>=1)) _lvsft( x, z, dy ty, blk);
+		if( (dy < 0 && align<=1) || (dy > 0 && align>=1)){
+			local b = bw.blockat( x, fy, z);
+			if( flags & 1){
+				if( fy != basey) return;
+			}
+			if( flags & 2){	//	同一ブロックのみ
+				if( b != baseblk) return;
+			}
+			if( flags & 4){	//	水面分離
+				if( ::Block.hasFlag( baseblk, BLK_LIQUID) != ::Block.hasFlag( b, BLK_LIQUID)) return;
+			}
+			_lvsft( x, z, dy, ty, blk);
+		}
 	}
 
 	function _bottomgndy( x, z, ty, h){
@@ -371,8 +386,17 @@ class BlockOperation
 			_plcblk( pos, srcblk);
 			// local btmfb = bw.fblockat( x, y-dy, z);	//	フリーブロックも
 			// if( btmfb){
-			// 	_plcfblk( btmfb, (x, y, z, btmfb.rot));
+			// 	local fbpos = IPos( x, y, z, btmfb.rot);
+			// 	_plcfblk( btmfb, fbpos, btmfb.fbuid);
 			// }
+		}
+		local r = IRect3D( x, Math.min( gy, ty),z, 1,Math.abs( dy)+1,1);
+		local fba = bw.collectFreeBlocks( r, []);
+		foreach( fb in fba){
+			if( fb.x == x && fb.z == z){
+				local fbpos = IPos( x, fb.y+dy, z, fb.rot);
+				_plcfblk( fb, fbpos, fb.fbuid);
+			}
 		}
 	}
 

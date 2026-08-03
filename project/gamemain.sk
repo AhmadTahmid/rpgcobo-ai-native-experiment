@@ -151,6 +151,10 @@ function preloaShaders( glob=null){
 			local t0 = skGetTime();
 			//	ここで全てのロード。これまでには/systemしか読まれてない
 			runsk( "/load.sk");
+			::soundmanager.setBGMVolume( clientconf.sound.bgmvol * 0.008);	//	BGMはちょっと小さめに。。。
+			::soundmanager.setSEVolume( clientconf.sound.sevol * 0.012);	//	SEは大き目。。。
+			::renderhint.set( ClientConfig.renderhints[clientconf["render"]["quality"]]);	//	保存されたレンダリング品質を設定
+			//	
 			preloaShaders();
 			RPGMain.setupUI();
 			RPGMain.loadSetting();		//	適度にsuspendを挟むように。

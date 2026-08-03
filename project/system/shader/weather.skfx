@@ -8,7 +8,7 @@ param def
 	attribute mediump vec4 in_uv <id=UV1>;
 	
 	uniform lowp sampler2D coltex <id=COLORTEX1, MIN_FILTER=LINEAR, MAG_FILTER=LINEAR>;
-	uniform lowp sampler3D n3tex <id=COLORTEX2, MIN_FILTER=LINEAR, MAG_FILTER=LINEAR>;
+	uniform sampler3D n3tex <id=COLORTEX2, MIN_FILTER=LINEAR, MAG_FILTER=LINEAR>;
 	uniform mediump usampler2D uztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	
 	uniform highp mat4 invpmat <id=ENV2MAT>;

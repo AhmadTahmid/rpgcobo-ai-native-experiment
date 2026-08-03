@@ -786,19 +786,23 @@ fs ssshadow
 		return p;
 	}
 	
-	// #define PNTLIT1( I) { mediump uint i = I; if( i==0u){ break; } else { shadow *= computeSSS( i, wvp); if( shadow < 0.05) break; } }
-	#define PNTLIT1( I) { mediump uint i = I; if( i==0u){ break; } else { shadow *= computeSSS( i, wvp); } }
+	// #define PNTLIT1( I) { mediump uint i = I; if( i==0u){ break; } else { shadow *= computeSSS( i, wvp); } }
 
 	void main(){
-		highp vec3 wvp = reconstructWVPtex( uztex, vec2( v_uv.x, v_uv.y), p0[0]);
+		highp vec3 wvp = reconstructWVPtex( uztex, v_uv.xy, p0[0]);
 		vec2 fuv = abs( v_uv.xy-0.5);
 		float foff = clamp(( max( fuv.x, fuv.y) - 0.45) * 20.0, 0.0, 1.0);
 		vec4 shadow = vec4( 1.0 - foff);
-		highp uvec2 u2 = texture( litidxtex, vec3( v_uv.x, v_uv.y, wvp.z*dirlit[2].w+dirlit[3].w)).xy;
-		for(;;){	//	max 4 lits
-			PNTLIT1( u2[0]&1023u); PNTLIT1((u2[0]>>10u)&1023u); PNTLIT1( u2[0]>>20u); 
-			PNTLIT1( u2[1]&1023u); PNTLIT1((u2[1]>>10u)&1023u); PNTLIT1( u2[1]>>20u); 
-			break;
+		highp uvec2 u2 = texture( litidxtex, vec3( v_uv.xy, wvp.z*dirlit[2].w+dirlit[3].w)).xy;
+		//	XXXXXXX TOO slow with Angle compiler
+		// for(;;){
+		// 	PNTLIT1( u2[0]&1023u); PNTLIT1((u2[0]>>10u)&1023u); PNTLIT1( u2[0]>>20u); 
+		// 	PNTLIT1( u2[1]&1023u); PNTLIT1((u2[1]>>10u)&1023u); PNTLIT1( u2[1]>>20u); 
+		// 	break;
+		// }
+		uint ids[6] = uint[6]( u2[0] & 1023u, (u2[0] >> 10u) & 1023u, u2[0] >> 20u, u2[1] & 1023u, (u2[1] >> 10u) & 1023u, u2[1] >> 20u );
+		for( int k = 0; k < 6; k++) {
+			mediump uint i = ids[k]; if( i==0u){ break; } else { shadow *= computeSSS( i, wvp); }
 		}
 		// shadow = smoothstep( 0.0, 1.0, shadow);
 		fragcolor = vec4( shadow);

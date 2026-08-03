@@ -165,17 +165,19 @@ fs shadow
 			highp float viewz = -wvp.z, coff = shadow[0].w, lightz = -dot( pos, shadow[1]);
 			highp vec2 uv;
 			#define SHADOWUV( I) uv = vec2( dot( pos, shadow[3+3*I]), dot( pos, shadow[4+3*I])); highp float texz = texture2D( shadowtex, uv).x;
-			$( SHADOWMAP == 1){
-				SHADOWUV( 0)
-			} : {
-				$( SHADOWMAP == 2){
-					lowp int i = int( step( shadow[2].x, viewz));
-					SHADOWUV( i)
-				} : {
-					lowp int i = int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz));
-					SHADOWUV( i)
-				}
-			}
+			// $( SHADOWMAP == 1){
+			// 	SHADOWUV( 0)
+			// } : {
+			// 	$( SHADOWMAP == 2){
+			// 		lowp int i = int( step( shadow[2].x, viewz));
+			// 		SHADOWUV( i)
+			// 	} : {
+			// 		lowp int i = int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz));
+			// 		SHADOWUV( i)
+			// 	}
+			// }
+			mediump int i = 3*int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz));
+			SHADOWUV( i)
 			lowp float rate = clamp( exp2( -coff * -(lightz - texz)), 0.0, 1.0);
 			lowp float dark = clamp( mix( shadow[0].x+blk, 1.0, pow( viewz*shadow[0].y, 4.0)), 0.0, 1.0);
 			return mix( dark, 1.0, rate);
