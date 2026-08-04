@@ -497,7 +497,7 @@
 	"cmd_jobop_tips"					: {"ja":"プレイヤーのジョブを変更します。", "en":""}
 	"cmd_condop_tips"					: {"ja":"プレイヤーのコンディションを付与、解除します。", "en":""}
 	"cmd_charainfo_tips"				: {"ja":"キャラクターの情報を取得します。", "en":""}
-	
+
 	"cmd_showmsg_tips"					: {"ja":"会話ウィンドウを表示します。", "en":""}
 	"cmd_choices_tips"					: {"ja":"選択肢を表示し、結果によって処理を分岐します。", "en":""}
 	"cmd_showui_tips"					: {"ja":"標準機能の色々な機能を持つUIを表示します。", "en":""}
@@ -1372,10 +1372,11 @@
 	"ui_dialog_selitem"					: {"ja":"アイテム選択ダイアログ", "en":"Item Selection Dialog"}
 	"ui_dialog_buyitem"					: {"ja":"アイテム売買ダイアログ", "en":"Item buy/sell Dialog"}
 	//	store
-	"ui_store_item"						: {"ja":"アイテムショップ", "en":"Item Shop"}
+	"ui_store_item"						: {"ja":"ストア表示「アイテムショップ」", "en":"Show 'Item Shop' Store"}
+	"ui_store_choices"					: {"ja":"ストア表示「選択肢」", "en":"Show 'Choices' Store"}
 	"ui_store_sellitem"					: {"ja":"アイテムの売却", "en":"Sell Item"}
 	
 	"lbl_anyone"						: {"ja":"誰でも", "en":"Anyone"}
 	"lbl_only_alives"					: {"ja":"生者のみ", "en":"Only alives"}
-	"lbl_only_deads"					: {"ja":"生者のみ", "en":"Only deads"}
+	"lbl_only_deads"					: {"ja":"死者のみ", "en":"Only deads"}
 });

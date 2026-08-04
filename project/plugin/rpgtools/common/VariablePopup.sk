@@ -33,6 +33,7 @@ class VariableVarPopup extends Popup
 	static POPUPUIPATH = srcdir .. "/ui/dataselectpopup.ui";	//	データID選択と同じポップアップui
 
 	varbits = 31;				//	ワーク、イベント、システム、グローバル、クエリー
+	writable = 0;				//	書き込み可能のみ
 	varaccs = null;				//	VarAccsessor[]
 
 	typelist = null;			//	ListBehavior
@@ -48,8 +49,8 @@ class VariableVarPopup extends Popup
 	
 	varkey = null;				//	結果の代入用var
 
-	static function run( e, varbits, var){
-		local p = VariableVarPopup( ::loadSKView( POPUPUIPATH), varbits, var);
+	static function run( e, varbits, var, writable=0){
+		local p = VariableVarPopup( ::loadSKView( POPUPUIPATH), varbits, var, writable);
 		p.show( null, e.src);
 		return p.ret ? p.varkey : null;
 	}
@@ -66,8 +67,9 @@ class VariableVarPopup extends Popup
 	}
 
 	//	
-	constructor( v, varbits, var){
+	constructor( v, varbits, var, wr){
 		super( v);
+		writable = wr;
 		typelist = ListBehavior( v.findChild( "typelist"), []);
 		typelist.setviewfunc = DataSelectPopup.settypeview;
 		typelist.listview.addEventListener( ITEM_EVENT, typeevent);
@@ -110,7 +112,13 @@ class VariableVarPopup extends Popup
 		if( t == "search"){
 			allitems = searchitems;
 		}else{
-			allitems = clone t.va.list();
+			allitems = t.va.list();
+		}
+		if( writable){
+			allitems = allitems.map( @( v){
+				if( v["readonly"]) return undefined;// {...v, disable=true};
+				return v;
+			});
 		}
 		pagenum = (length( allitems)+99) / 100;
 		pager.setPageNum( pagenum);
@@ -181,6 +189,7 @@ class VariableBehavior
 	varbits = 63;				//	
 	nullable = 0;				//	
 	anytype = 0;
+	writable = 0;				//	書き込み可能のみ
 	datatype = null;			//	
 	datafilter = null;			//	
 	
@@ -202,13 +211,7 @@ class VariableBehavior
 
 	constructor( v, prop){
 		view = v;
-		this.prop = prop;
-		constbits = prop["constbits"] || 0;
-		varbits = prop["varbits"] || 0;
-		datatype = prop["datatype"] || null;
-		datafilter = prop["filter"] || null;
-		nullable = prop["nullable"] || 0;
-		anytype = prop["anytype"] || 0;
+		setProperties( prop);
 		//
 		typeicon = v.findChild( "typeicon");
 		varlbl = v.findChild( "varlbl");
@@ -229,6 +232,17 @@ class VariableBehavior
 		maxval.setBarRange( -100, 100, 1);
 		view.addEventListener( ACTION_EVENT, actionevent);
 		view.addEventListener( TEXT_EVENT, textevent);
+	}
+
+	function setProperties( p){
+		prop = p;
+		constbits = prop["constbits"] || 0;
+		varbits = prop["varbits"] || 0;
+		datatype = prop["datatype"] || null;
+		datafilter = prop["filter"] || null;
+		nullable = prop["nullable"] || 0;
+		anytype = prop["anytype"] || 0;
+		writable = prop["writable"] || 0;
 	}
 
 	function setVar( v){
@@ -413,7 +427,7 @@ class VariableBehavior
 				v = DataSelectPopup.run( e, { datatype=datatype, filter=datafilter});
 				if( v) v = "."..v;
 			}else{
-				v = VariableVarPopup.run( e, varbits, var);
+				v = VariableVarPopup.run( e, varbits, var, writable);
 			}
 			if( v && v!=var){
 				setVar( v);
@@ -500,7 +514,7 @@ class VariableBehavior
 		//
 		case 8: 
 			local v = (varbits&1) ? "W" : (varbits&2) ? "A" : (varbits&4) ? "G000" : "MONEY";
-			v = VariableVarPopup.run( {src=::getMousePos( 0)}, varbits, v);
+			v = VariableVarPopup.run( {src=::getMousePos( 0)}, varbits, v, writable);
 			if( v) return ( v);
 			break;
 		case 9:

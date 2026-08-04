@@ -250,7 +250,7 @@ eventcmd .. {
 	
 	props = [
 		{ pid="macroid", lbl="$T.lbl_macro", type=DATAID, datatype = ["macro"] }
-		{ pid="retvar", lbl="$T.cmd_macro_retvar", type=VARIABLE, varbits=1|2, constbits=0, nullable=1 },
+		{ pid="retvar", lbl="$T.cmd_macro_retvar", type=VARIABLE, varbits=1|2|4|8, constbits=0, nullable=1, writable=1, },
 	]
 
 	cmdinfo = @( cmd){

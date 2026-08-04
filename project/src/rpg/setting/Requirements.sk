@@ -20,7 +20,7 @@ reqchk .. {
 		constbits = 0, varbits = 1|2|4|8|16
 	}
 	rvar = {
-		constbits = 1|2|4|8|16, varbits = 1|2|4|8|16|32
+		constbits = 1|2|4|8|16, varbits = 1|2|4|8|16|32, datatype = "all"
 	}
 
 	func = ::varcmp
@@ -106,8 +106,8 @@ reqchk .. {
 	}
 	
 	func = @( req, self){
-		local pid = ::getvar( req.rvar, self);
-		return !!::rpgstat.mapstat[mapid];
+		local mapid = ::getvar( req.rvar, self);
+		return !!::rpgstat.stagemap[mapid];
 	}
 }
 

@@ -96,8 +96,12 @@ RPGSystem.ui ..
 		local list = [];
 		if( prms["list"]){
 			foreach( i, s in prms.list){
-				local lbl = s.contains( "[") ? rtf( s) : s;
-				list .. { lbl:lbl, _name="item"..i, idx=i};
+				if( typeof( s)==SS_TABLE){
+					list .. { ...s, idx=i};
+				}else{
+					local lbl = s.contains( "[") ? rtf( s) : s;
+					list .. { lbl:lbl, _name="item"..i, idx=i};
+				}
 			}
 		}else{
 			for( local l = 0;;l ++){
@@ -128,6 +132,10 @@ RPGSystem.ui ..
 				if( selfunc && selfunc( e)){
 				}else
 				if( e.item){
+					if( e.item["disable"]){
+						playSound( "SE002");
+						return;
+					}
 					playSound( "SE001");
 					sleep( 100);
 					return e.item.idx;

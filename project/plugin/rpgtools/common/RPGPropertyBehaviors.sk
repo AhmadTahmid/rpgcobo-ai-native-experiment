@@ -980,7 +980,6 @@ class PropertyBehaviors.Requirements extends PropertyBehavior
 		}else{
 			noreqs.setVisible( false);
 			reqlist.setVisible( true);
-			reqlist.setRowCount( 0);	//	要素を全部作り直すために一度0個に
 			reqlist.setRowCount( length( reqs));
 			foreach( i, v in reqs){
 				local k = v["key"]||"varcmp";
@@ -988,14 +987,18 @@ class PropertyBehaviors.Requirements extends PropertyBehavior
 				local r = reqlist.rows[i];
 				local op = r.findChild( "op");
 				local lv = r.findChild( "lvar");
+				local rv = r.findChild( "rvar");
 				if( "lvar" in v){
 					VariableBehavior.setVarView( v.lvar, r.findChild( "lvar.lbl"), null);
 				}else{
 					r.setValue( "lvar.lbl", reqdef.lbl);
 				}
-				local rvar = VariableBehavior( r.findChild( "rvar"), reqdef.rvar);	//	rvarは必ずある
-				rvar.setVar( v.rvar);
-				op.ref = MenuBehavior( op, opitems);
+				if( !op.ref){
+					rv.ref = VariableBehavior( rv, reqdef.rvar);	//	rvarは必ずある
+					op.ref = MenuBehavior( op, opitems);
+				}
+				rv.ref.setProperties( reqdef.rvar);
+				rv.ref.setVar( v.rvar);
 				if( v["op"]){
 					op.ref.selectItem( @( a) a.val==v.op)
 				}else{

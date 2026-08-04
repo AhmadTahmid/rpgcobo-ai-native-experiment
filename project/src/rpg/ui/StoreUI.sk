@@ -9,7 +9,7 @@ import RPGPropertyType;
 //	
 
 ////////////////////////////////////////////////////////////////////////////////////
-//	アイテムショップUI
+//	アイテムショップ ストアUI
 //	武器防具は誰かに装備させるようなUIはいるかな？
 //	※storeデータのtype=0
 
@@ -261,3 +261,56 @@ RPGSystem.ui ..
 	}
 };
 
+
+////////////////////////////////////////////////////////////////////////////////////
+//	選択肢UI
+//	※storeデータのtype=3
+
+local choiceslist( sid){
+	return rpgdata[sid].items.map( @( v, i){
+		local b = ::reqchk( v["reqs"]) ? 4 : v["reqfail"];
+		local iname = v.text;
+		if( !b) return undefined;	//	詰めて消去
+		local prms = { val=i, stat=b, _name="i"..i, disable=b!=4 };
+		switch( b){
+		case 1: return { lbl="", ...prms };	//	空欄
+		case 2: return { lbl=rtf("[G]"..iname), ...prms };	//	グレーアウト
+		case 3: return { lbl=rtf("[G]"..iname), ...prms };	//	売り切れ
+		case 4: return { lbl=iname, ...prms };	//	購入可能
+		}
+	});
+}
+
+//	システムに登録。
+RPGSystem.ui ..
+{
+	key = "store_choices"
+	lbl = "$T.ui_store_choices"
+	type = "store"			//	mainmanu, submenu, choose, dialog, message, info, store, debug, misc, 
+	topinfo = @( t){
+		local d = ::conf.store[t["storeid"]];
+		return d ? d.icon..d.name : null;
+	}
+	icon = "\ue54c"
+	
+	props = [				//	
+		{ pid="storeid", lbl="$T.lbl_group", type=DATAID, datatype=["store"], filter=@( v) v.type==3, variable=1 },
+	],
+
+	defval = @() +{
+		storeid = Table.findi( ::conf.store, @( v, i){ return v["type"]==3; }) ?? "R000";
+	}
+
+	uifunc = @( prms){
+		local storeid = prms.storeid;
+		local _list = choiceslist( storeid);
+		local prms = {
+			key = "dialog_choices"
+			list = _list;
+			uipath = null
+			backop = 2
+			focus = "i0"
+		}
+		return RPGMain.showUI( prms);
+	}
+}

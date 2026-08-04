@@ -27,13 +27,15 @@
 	"searchtext":1,
 };
 
+local skipstr = "*$\t";
+
 function defaultTranslationRule( t, i, v, langcode){
 	//	_から始まるフィールド名は無視される
 	if( /*typeof( i)==SS_STRING &&*/ i[0]=='_') return undefined;
 	switch( typeof( v)){
 	case SS_STRING:
 		if( ::translationkeys[i] && !(i in t["_var"])){	//	_varで置き換えるプロパティは無視
-			if( v!="" && v[0] != '*' && v[0] != '$') return v;
+			if( v!="" && !skipstr.contains( v[0])) return v;
 		}
 		break;
 	case SS_TABLE:
