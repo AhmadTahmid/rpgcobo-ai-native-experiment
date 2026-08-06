@@ -61,6 +61,9 @@ class ClientConfig
 		},
 	};
 
+	//	qualityによるスクリーン解像度の制限。Android, iOS, WebGLで使用可能。
+	static screenresos = [ 720, 900, 1080, 1440, 2160, ];
+
 	static renderhints = [
 		{ maxreso= 720, antialias=1, upscale=1, ssao_reso=0, ssao_qua=0, ssgi_reso=0, ssgi_qua=0, shadow_qua=0, blur_qua=0, pbr_qua=0 },
 		{ maxreso= 900, antialias=1, upscale=1, ssao_reso=0, ssao_qua=1, ssgi_reso=0, ssgi_qua=1, shadow_qua=1, blur_qua=1, pbr_qua=1 },
@@ -142,6 +145,14 @@ class ClientConfig
 		local f = FileRef( ::savedir, "client.json");
 		local bb = encodeJSON( ::clientconf, 5, ByteBuffer()); bb.pos = 0;
 		f.save( bb);
+	}
+
+	//	スクリーン解像度の最大縦幅を設定する。(Portfolio時は横幅)
+	//	Android, iOS, WebGL でのみ有効。Windowsのフルスクリーンでもやりたいができる？
+	//	render.qualityが変化したときに呼び出す
+	function setScreenResolutionLimit( h){
+		local w = (h * 16 + 4) / 9;	//	仮に横幅も16:9で設定する
+		skMoveScreen( { flags=MoveScreenFlags.MOVESCREEN_MAXRESO, w=w, h=h});
 	}
 }
 

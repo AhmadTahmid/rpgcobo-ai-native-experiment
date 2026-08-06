@@ -23,6 +23,11 @@ local ownticketlbl(){
 	return "$T.lbl_owntickets  ×%S%S" % (d, 1?" +"+x:"");
 }
 
+local securelvlist = [
+	{ lbl="$T.securelv0", val="permission_lv0"},
+	{ lbl="$T.securelv1", val="permission_lv1"},
+	{ lbl="$T.securelv2", val="permission_lv2"},
+]
 
 local buildtargets = [
 	{
@@ -50,7 +55,8 @@ local buildtargets = [
 					return val;
 				}
 				defval = "rpgexe.exe"
-			}
+			},
+			{ pid="securelv", lbl="$T.securelv", type=LIST, list=securelvlist, defval=@() ::sakana["permission"] },
 		],
 	},
 	{
@@ -77,7 +83,7 @@ local buildtargets = [
 					}
 					return a.join();
 				},
-				deflbl = "com.rpgcobo.${rpgid}",
+				deflbl = "com.rpgcobo.{rpgid}",
 				defval = "",
 			},
 		],
