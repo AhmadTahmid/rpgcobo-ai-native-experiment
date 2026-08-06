@@ -172,7 +172,7 @@ class RPGStage
 		scn.addObject( bw3d);
 		local bci = BlockColiderInterface( bw);
 		bci.setFlagMask( BLK_SOLID|BLK_PLANT|BLK_BARRIOR|BLK_SOLIDFB);
-		bci.setFinMode( 1|2);		//	barrior | water
+		bci.setFinMode( 1 | (stat.statmap["canenter_water"]?0:2) | (stat.statmap["canenter_hole"]?0:4));		//	barrior | water | hole
 		bci.setBarriorMap( bw.bmp);
 		local bcshp = b3Shape.createCustomConcave( bci);
 		bwcol = b3Body( 0, bcshp, bw3d.mat, G_STAGE, G_VIEW|G_CHARA|G_OBJECT);

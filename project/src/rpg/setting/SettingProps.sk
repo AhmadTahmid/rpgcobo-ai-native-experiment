@@ -556,7 +556,7 @@ local exitmappropdef = {
 }
 
 stageprops .. {
-	mapedit=true, pid="exitmap", lbl="脱出先マップ", type=PROPERTYLIST,
+	mapedit=true, pid="exitmap", lbl="$T.setting_exitmap", type=PROPERTYLIST,
 	propdef = exitmappropdef,
 	defval = {dest=null},
 }
@@ -567,6 +567,28 @@ stageprops .. {
 	type = BOOL,
 	defval = true,
 };
+
+stageprops .. {
+	mapedit=true, pid="canenter_water", lbl="$T.setting_canenter_water", type=BOOL//1, cnt="cnt5.ui",
+	defval = false,
+	
+	func = @( stage, val){
+		local bci = stage.bwcol.ref, t = stage.stat.statmap;
+		local b = 1 | (t["canenter_water"]?0:2) | (t["canenter_hole"]?0:4);
+		bci.setFinMode( b);		//	barrior | water | hole
+	}
+}
+
+stageprops .. {
+	mapedit=true, pid="canenter_hole", lbl="$T.setting_canenter_hole", type=BOOL//1, cnt="cnt5.ui",
+	defval = false,
+	
+	func = @( stage, val){
+		local bci = stage.bwcol.ref, t = stage.stat.statmap;
+		local b = 1 | (t["canenter_water"]?0:2) | (t["canenter_hole"]?0:4);
+		bci.setFinMode( b);		//	barrior | water | hole
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //	コンフィグ設定

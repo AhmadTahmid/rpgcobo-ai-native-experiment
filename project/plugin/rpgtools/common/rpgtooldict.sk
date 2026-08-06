@@ -841,6 +841,8 @@
 	"setting_weather"					: {"ja":"天気", "en":"Weather"}
 	"setting_exitmap"					: {"ja":"脱出先マップ", "en":"MapExit Destination"}
 	"setting_mapexitable"				: {"ja":"マップ脱出有効", "en":"MapExit Enabled"}
+	"setting_canenter_water"			: {"ja":"水に進入可能", "en":"Can Enter Water"}
+	"setting_canenter_hole"				: {"ja":"穴に進入可能", "en":"Can Enter Hole"}
 	
 	"setting_jxptype_auto"				: {"ja":"自動分配", "en":"Auto"}
 	"setting_jxptype_manual"			: {"ja":"手動で割り振り", "en":"Manual"}
@@ -1137,6 +1139,7 @@
 	"lbl_tomapasset"					: {"ja":"アセットに登録","en":"Register to Assets"}
 	"lbl_tocustomevent"					: {"ja":"カスタムイベントに変換", "en":"To Custom Event"}
 
+	"lbl_blocks"						: {"ja":"ブロック", "en":"Blocks"}
 	"lbl_abschk"						: {"ja":"高さを指定", "en":"Absolute"}
 	"lbl_planechk"						: {"ja":"同一平面", "en":"Same Plane"}
 	"lbl_blkchk"						: {"ja":"同一ブロック", "en":"Same Block"}
@@ -1196,6 +1199,7 @@
 	"lbl_map_selfblk"					: {"ja":"フリーブロックの選択", "en":"Select FreeBlock"}
 	"lbl_map_mode"						: {"ja":"モード", "en":"Mode"}
 	"lbl_map_pen"						: {"ja":"ペンタイプ", "en":"Pen type"}
+	"lbl_pen"							: {"ja":"ペン", "en":"Pen"}
 	"lbl_map_from"						: {"ja":"開始位置", "en":"From"}
 	"lbl_map_to"						: {"ja":"終了位置", "en":"To"}
 	"lbl_map_offset"					: {"ja":"オフセット", "en":"Offset"}

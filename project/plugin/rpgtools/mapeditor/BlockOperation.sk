@@ -122,12 +122,13 @@ class BlockOperation
 		local x0 = r.x, x1 = x0 + r.w;
 		local y0 = r.y, y1 = y0 + r.h;
 		local z0 = r.z, z1 = z0 + r.d;
+		local nx = p.hb.nx, ny = p.hb.ny, nz = p.hb.nz;
 		//		
 		for( local z = z0, i = 0; z < z1; z ++) for( local x = x0; x < x1; x ++) for( local y = y0; y < y1; y ++, i++){
 			local oldblk = bw.blockat( x, y, z);
 			if( !oldblk && y>0) continue;
-			local upblk = bw.blockat( x, y+1, z);
-			if( upblk) continue;	//	上にブロックがあっても塗らない！
+			local upblk = bw.blockat( x+nx, y+ny, z+nz);
+			if( ::Block.getFlags( upblk) & BLK_SOLID) continue;	//	上にブロックがあっても塗らない！
 			pos.set( x, y, z);
 			_plcblk( pos, blk);
 		}
@@ -250,6 +251,40 @@ class BlockOperation
 		return length( redoop);
 	}
 
+	//	平面限定塗りつぶし。x,y,z
+	//	pos, blk
+	function floodfillBlockPlane( p){
+		local r = bw.w-1, t = bw.h-1, f = bw.d-1;
+		local chk = {};
+		local x0 = p.hb.bx, y0 = p.hb.by, z0 = p.hb.bz, hf = p.hb.f;
+		local nx = p.hb.nx, ny = p.hb.ny, nz = p.hb.nz;
+		local ax = (hf==1||hf==3) ? 2 : (hf==2||hf==4) ? 0 : 1;
+		local blk0 = bw.blockat( x0, y0, z0) & 0x3ff, blk = p.blk;
+		local pos = tp_0;
+		local stk = [x0,y0,z0];	//	一次元配列的に使う
+		local bm = -32, bp = 32;
+		do{
+			local z = stk.pop(), y = stk.pop(), x = stk.pop(), k = y^(x*128)^(z<<20);
+			if( chk[k]) continue;	//	調べたフラグ
+			chk[k] <- 1;
+			local oldblk = bw.blockat( x, y, z) & 0x3ff;
+			if( oldblk == blk0){
+				if( bw.blockat( x+nx, y+ny, z+nz)) continue; //	ブロックが隠れるように配置している場合は打ち止め
+				pos.set( x, y, z);
+				local ok = _plcblk( pos, blk);
+				if( ok){	//	塗りつぶしが成功した時に周りに伝える
+					if( ax!=0 && x-x0 >= bm && x > 0) stk .. (x-1) .. y .. z;
+					if( ax!=0 && x-x0 <= bp && x < r) stk .. (x+1) .. y .. z;
+					if( ax!=1 && y-y0 >= bm && y > 0) stk .. x .. (y-1) .. z;
+					if( ax!=1 && y-y0 <= bp && y < t) stk .. x .. (y+1) .. z;
+					if( ax!=2 && z-z0 >= bm && z > 0) stk .. x .. y .. (z-1);
+					if( ax!=2 && z-z0 <= bp && y < f) stk .. x .. y .. (z+1);
+				}
+			}
+		}while( length( stk));
+		return length( redoop);
+	}
+
 	function getTopY( x, z){
 		for( local y = bw.h-1; y >= 0; y --){
 			if( bw.blockat( x, y, z)) return y;
@@ -345,6 +380,16 @@ class BlockOperation
 				if( ::Block.hasFlag( baseblk, BLK_LIQUID) != ::Block.hasFlag( b, BLK_LIQUID)) return;
 			}
 			_lvsft( x, z, dy, ty, blk);
+		}else
+		if( dy == 0 && blk){
+			local b = bw.blockat( x, fy, z);
+			if( flags & 2){	//	同一ブロックのみ
+				if( b != baseblk) return;
+			}
+			if( flags & 4){	//	水面分離
+				if( ::Block.hasFlag( baseblk, BLK_LIQUID) != ::Block.hasFlag( b, BLK_LIQUID)) return;
+			}
+			_plcblk( (x,y,z), blk);
 		}
 	}
 
@@ -377,19 +422,15 @@ class BlockOperation
 		//	dy>0 上から順に下のものを引き上げていく
 		//	dy<0 下から順に上のものを引き下げていく
 		local y0=0, y1=0, d=0;
-		if( dy > 0){ y0 = ty; y1 = gy; d = -1; } else { y0 = gy+dy; y1 = ty; d = 1; blk=0; }
+		if( dy > 0){ y0 = ty; y1 = gy; d = -1; } else { y0 = gy+dy; y1 = ty; d = 1; }
 		for( local y = y0; y != y1; y += d){
 			local srcblk = bw.blockat( x, Math.max( 0, y-dy), z);
 			local oldblk = bw.blockat( x, y   , z);
 			if( blk&&srcblk) srcblk = blk;
 			pos[1] = y;
 			_plcblk( pos, srcblk);
-			// local btmfb = bw.fblockat( x, y-dy, z);	//	フリーブロックも
-			// if( btmfb){
-			// 	local fbpos = IPos( x, y, z, btmfb.rot);
-			// 	_plcfblk( btmfb, fbpos, btmfb.fbuid);
-			// }
 		}
+		//	フリーブロックも
 		local r = IRect3D( x, Math.min( gy, ty),z, 1,Math.abs( dy)+1,1);
 		local fba = bw.collectFreeBlocks( r, []);
 		foreach( fb in fba){

@@ -2258,7 +2258,7 @@ class PropertyBehaviors.Range extends PropertyBehavior
 
 	function xtov( x){
 		local r = prop["range"] || #(0.0,1.0);
-		return Math.saturate( x/barimg.bnd.w)*(r[1]-r[0]);
+		return Math.saturate( x/barimg.bnd.w)*(r[1]-r[0]) + r[0];
 	}
 
 	function vtox( v){

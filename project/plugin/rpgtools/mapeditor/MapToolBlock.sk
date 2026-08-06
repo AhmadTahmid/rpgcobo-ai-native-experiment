@@ -32,10 +32,11 @@ class MapTools.tool_pen extends MapTool
 	penid = null;			//	string
 	blkflag = BLK_SOLID;	//	rayTestで使う
 	blk = 1;				//	選択されたブロック
-	peng = null;
+	fillplanechk = null;	//	
 
 	static blkflags = (BLK_SOLID|BLK_LIQUID|BLK_DECAL, BLK_SOLID, BLK_SOLID|BLK_LIQUID, BLK_SOLID|BLK_LIQUID, BLK_SOLID|BLK_LIQUID);
 	static isattach = (false, true, false, true, false);
+	static optioofrm = (0,0,0,-1,-2);
 	
 	constructor( e){
 		super( e);
@@ -45,11 +46,11 @@ class MapTools.tool_pen extends MapTool
 		optionview = ::loadSKView( "/plugin/rpgtools/mapeditor/ui/tool_pen.ui");
 		optionview.addEventListener( ACTION_EVENT, optionevent);
 		selblk = SelectBlock( optionview.findChild( "selblock"));
-		selblk.setBlockPages( [1,2,3]);		//	,4,5は今は非表示で。。。
+		selblk.setBlockPages( [2,3,1]);		//	,4,5は今は非表示で。。。
 		blk = 2;
 		selblk.selectBlock( blk);	//	todo どれか
 		selblk.view.addEventListener( ACTION_EVENT, selblkevent);
-		peng = optionview.findChild( "peng");
+		fillplanechk = optionview.findChild( "fillplanechk");
 		//	
 		setMode( 1);
 		optionview.findChild( penid).setSelected( true);
@@ -61,7 +62,7 @@ class MapTools.tool_pen extends MapTool
 		mode = m;
 		local mm = ["$T.penmode_erace","$T.penmode_attach","$T.penmode_paint","$T.penmode_box","$T.penmode_fill"];
 		optionview.findChild( "modelbl").setText( mm[m]);
-		optionview.anime( m<3 ? 0:-1);
+		optionview.anime( optioofrm[m]);
 	}
 
 	function optionevent( e){
@@ -359,9 +360,12 @@ class MapTools.tool_pen extends MapTool
 	//	※blk==0のときは何もしない
 	function fillBlocks( e, hb){
 		if( !hb.blk) return;
-		
 		local bop = BlockOperation( editor.bw);
-		bop.floodfillBlock({ hb:hb, blk:blk });
+		if( fillplanechk.isSelected()){
+			bop.floodfillBlockPlane({ hb:hb, blk:blk });
+		}else{
+			bop.floodfillBlock({ hb:hb, blk:blk });
+		}
 		if( bop.len()) bop.submit( editor);
 	}
 }
@@ -389,7 +393,7 @@ class MapTools.tool_water extends MapTool
 		selblk.selectBlock( blk);
 		selblk.view.addEventListener( ACTION_EVENT, selblkevent);
 	
-		setMode( 0);
+		setMode( 1);
 		optionview.findChild( penid).setSelected( true);
 	}
 
@@ -566,14 +570,14 @@ class MapTools.tool_water extends MapTool
 			case MOUSE_DRAGGED:
 				local hb;
 				hb = self.planeTest( e, hb0);
-				if( hb && (e.modifiers&SHIFT_MASK)){
-					self.adjustPlane( hb0, hb);
-				}
+				// if( hb && (e.modifiers&SHIFT_MASK)){
+				// 	self.adjustPlane( hb0, hb);
+				// }
 				if( hb){
 					local b = makebox( hb0, hb, 0);
 					if( b <> box){
 						self.editor.op.undo();
-						bop.boxPaintWater({ box:b, blk:blk });
+						bop.boxPaintWater({ box:b, blk:blk, hb:hb0 });
 						bop.submit( self.editor, trk);
 						hb1.set( hb);
 						box.set( b);
@@ -1265,8 +1269,8 @@ class MapTools.tool_level extends MapTool
 		optionview = ::loadSKView( "/plugin/rpgtools/mapeditor/ui/tool_level.ui");
 		optionview.addEventListener( ACTION_EVENT, optionevent);
 		selblk = SelectBlock( optionview.findChild( "selblock"));
-		selblk.setBlockPages( [1,2,3]);
-		blk = 33;
+		selblk.setBlockPages( [8,2,3,1]);
+		blk = 2;
 		selblk.selectBlock( blk);	//	todo どれか
 		selblk.view.addEventListener( ACTION_EVENT, selblkevent);
 		repchk = optionview.findChild( "repchk");

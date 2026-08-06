@@ -387,7 +387,7 @@ class MapTools.tool_asset extends MapTool
 }
 
 
-class MapTools.tool_asset.SelectAsset
+class SelectAsset
 {
 	colcnt = 0;
 	view = null;
