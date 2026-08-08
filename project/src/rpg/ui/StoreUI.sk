@@ -271,7 +271,7 @@ local choiceslist( sid){
 		local b = ::reqchk( v["reqs"]) ? 4 : v["reqfail"];
 		local iname = v.text;
 		if( !b) return undefined;	//	詰めて消去
-		local prms = { val=i, stat=b, _name="i"..i, disable=b!=4 };
+		local prms = { val=v["val"], stat=b, _name="i"..i, disable=b!=4 };
 		switch( b){
 		case 1: return { lbl="", ...prms };	//	空欄
 		case 2: return { lbl=rtf("[G]"..iname), ...prms };	//	グレーアウト

@@ -851,7 +851,7 @@ class PropertyBehaviors.List extends PropertyBehavior
 		// foreach( mi in menu.menuitems){
 		// 	if( mi.val == v) return menu.selectItem( mi);
 		// }
-		menu.selectItem( @( vv) vv["val"]==v);
+		menu.selectItem( @( vv) !(vv["val"]<>v));
 	}
 	
 	function paramevent( e){
@@ -1081,8 +1081,15 @@ class PropertyBehaviors.Vec2 extends VecN
 	static uipath = "vec2.ui"
 	
 	static function getUIPath( prop){
-		if( prop["ui"]=="r") return "vec2r.ui";
+		if( prop["ui"]=="r" || prop["ui"]=="x") return "vec2r.ui";
 		return uipath;
+	}
+
+	function init(){
+		super.init();
+		if( prop["ui"]=="x"){
+			view.setValue( "rlbl0", "x");
+		}
 	}
 
 	dim = 2;

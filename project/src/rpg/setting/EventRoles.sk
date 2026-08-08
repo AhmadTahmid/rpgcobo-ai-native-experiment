@@ -89,6 +89,7 @@ local reqsprop = {
 	icon = ""
 	type = REQUIREMENTS
 	cnt = "cnt6.ui"
+	varbits=2|4|8|16,
 
 	defval = null
 }
@@ -100,6 +101,9 @@ local reqs0prop = {
 	icon = ""
 	type = REQUIREMENTS
 	cnt = "cnt6.ui"
+	varbits=2|4|8|16,
+	
+	defval = null
 }
 
 local reqs1prop = { ...reqs0prop, pid="reqs1" }

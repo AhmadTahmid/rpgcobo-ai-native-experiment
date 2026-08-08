@@ -157,8 +157,10 @@ RPGSystem.ui ..
 		view.actionAndDie( "hide");
 		view.waitAction();
 		gpui.restoreCursor( oldc);
-		rpgvar.RESULT = selidx;
-		return rpgvar.RESULT;
+		local res = list[selidx]["val"];
+		if( res==null || res==undefined) res = selidx;
+		rpgvar.RESULT = res;
+		return res;
 	}
 };
 

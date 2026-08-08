@@ -39,10 +39,20 @@ local cullfacelist = [
 	{ lbl="$T.cullface3", val=7}, 
 ]
 
+local camworks = [
+	{ lbl="Field Map", val={"fovy":30,"hpb":[0,38,0],"viewport":15.0,"yoffs":0.5} },
+	{ lbl="Indoor Map", val={"fovy":30,"hpb":[0,30,0],"viewport":13.0,"yoffs":1.0} },
+	{ lbl="Maze Map", val={"fovy":26,"hpb":[0,66,0],"viewport":12.0,"yoffs":0.7} },
+];
+
 local presetcamlist( e){
-	return ::conf.map._meta.camworks.map( @( v, i) +{
-		...v, val = v, lbl=v.name,
-	});
+	return camworks;
+	// return camworks.map( @( v, i) +{
+	// 	val = v, lbl=v.name,
+	// });
+	// return ::conf.map._meta.camworks.map( @( v, i) +{
+	// 	...v, val = v, lbl=v.name,
+	// });
 }
 
 class MapTools.tool_sel extends MapTool
@@ -53,7 +63,6 @@ class MapTools.tool_sel extends MapTool
 		{ pid="desc", lbl="$T.lbl_desc", type=STRING, multiline=4, defval="" },
 		{
 			pid="size", lbl="$T.lbl_size", type=CUSTOMBUTTON, tostring=@( v) sprintf( "(%d, %d)", v[0], v[2])
-			// get = @( prop, data){ local bw = ::skstudio.editor.bw; return ( bw.w, bw.h, bw.d); }
 		},	//	サイズ設定はダイアログ表示で行う
 		{
 			pid="camwork", lbl="$T.camwork", type=PROPERTYLIST,
@@ -63,8 +72,8 @@ class MapTools.tool_sel extends MapTool
 				props = [
 					{ pid="pre", lbl="$T.lbl_presets", type=LIST, list=@( pl) presetcamlist( pl.ref), refresh=1,
 						get=@( prop, data, e){
-							local v = presetcamlist( e).find( @( v) v.fovy==data.fovy && v.viewport==data.viewport && v.yoffs==data.yoffs && !(v.hpb<>data.hpb));
-							return v||null;
+							local v = presetcamlist( e).find( @( v) !(v.val<>data));
+							return v["val"]||null;
 						}
 						set=@( prop, data, val, e){
 							data.fovy <- val.fovy;
@@ -459,6 +468,14 @@ class MapTools.tool_sel extends MapTool
 					return execMove();
 				}
 				break;
+			case VK_D:
+				if( e.isCommandDown() && selbox){
+					local subbw = editor.bw.createCopy( selbox);
+					local bw64 = encodeBASE64( ObjectOutput.encode( subbw));
+					local dupdata = { bw64=bw64, selmode=selmode};
+					return execPaste( null, dupdata);
+				}
+				break;
 			}
 		}
 		if( !e.consumed){
@@ -472,6 +489,7 @@ class MapTools.tool_sel extends MapTool
 
 		local ctxmenu = [
 			{ id="move", lbl="$T.lbl_move", icon="\ue925", modkey="^T", disable=!selbox },
+			{ id="dup", lbl="$T.lbl_duplicate", icon="\ue2bd", modkey="^D", disable=!selbox },
 			"-"
 			{ id="copy", lbl="$T.menu_edit_copy", icon="\ue14d", modkey="^C", disable=!selbox },
 			{ id="cut", lbl="$T.menu_edit_cut", icon="\ue14d", modkey="^X", disable=!selbox },
@@ -496,6 +514,13 @@ class MapTools.tool_sel extends MapTool
 			break;
 		case "paste":
 			return execPaste( hb, cbdata);
+		case "dup":
+		{
+			local subbw = editor.bw.createCopy( selbox);
+			local bw64 = encodeBASE64( ObjectOutput.encode( subbw));
+			local dupdata = { bw64=bw64, selmode=selmode};
+			return execPaste( hb, dupdata);
+		}
 		case "move":
 			return execMove();
 		case "delete":

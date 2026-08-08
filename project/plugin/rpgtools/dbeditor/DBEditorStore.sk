@@ -136,11 +136,12 @@ class DBEditorStore extends DBEditor
 			},
 		},
 		[3] = {	//	選択肢
-			defval = { text="Choice", reqs=null, reqfail=1 }
+			defval = { text="Choice", reqs=null, reqfail=1, dataid=null }
 			props = [
 				{ pid="text", lbl="$T.lbl_text", type=STRING, },
 				reqsprop,
 				reqfailprop,
+				{ pid="val", lbl="$T.lbl_link_dataid", type=DATAID, datatype="all", nullable=1 },
 			],
 			setview = @( la, v, i, idata){
 				local ds = "";

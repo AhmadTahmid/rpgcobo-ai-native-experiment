@@ -155,6 +155,7 @@ class PropertyBehaviors.DataID extends PropertyBehavior
 
 	function init(){
 		menu = view.findChild( "listmenu");
+		setDataIDParam( menu, null, 0);
 	}
 
 	function getParam(){
@@ -1039,7 +1040,8 @@ class PropertyBehaviors.Requirements extends PropertyBehavior
 			local k = ret["key"]||"varcmp";
 			local r = deepclone( fget( ret, "defval"));
 			if( ret["lvar"]){
-				local lvar = VariableVarPopup.run( e, ret.lvar.varbits, reqs[idx]["lvar"]);
+				// local lvar = VariableVarPopup.run( e, ret.lvar.varbits, reqs[idx]["lvar"]);
+				local lvar = VariableVarPopup.run( e, prop["varbits"] ?? ret.lvar.varbits, reqs[idx]["lvar"]);
 				if( !lvar) return;
 				r.lvar = lvar;
 			}
@@ -1055,7 +1057,7 @@ class PropertyBehaviors.Requirements extends PropertyBehavior
 		local a = (clone reqs) || []; a.resize( n);
 		foreach( i, v in a){
 			if( !v){
-				local v = (prop["varbits"]??1)&1 ? "A" : "G000";
+				local v = (prop["varbits"]??1)&1 ? "W" : prop["varbits"]&2 ? "A" : "G000";
 				a[i] = { lvar=v, op="==", rvar=true, }
 			}
 		}
