@@ -1026,6 +1026,7 @@
 	"lbl_resedit"						: {"ja":"リソースの編集", "en":"Resource Edit"}
 	"lbl_plcpush"						: {"ja":"配置プッシュ", "en":"Push Placing"}
 	"lbl_fitfloor"						: {"ja":"床面に張り付け", "en":"Pasted on the floor"}
+	"lbl_deflock"						: {"ja":"デフォルトでロック", "en":"Default Lock"}
 	"lbl_bgm"							: {"ja":"BGM", "en":"BGM"}
 	"lbl_looptest"						: {"ja":"ループをテスト", "en":"Test BGM Loop"}
 	"lbl_centerpos"						: {"ja":"中心位置", "en":"Center Pos"}
@@ -1218,6 +1219,8 @@
 	"lbl_asset"							: {"ja":"アセット", "en":"Asset"}
 	"lbl_eventlist"						: {"ja":"イベントリスト", "en":"Event List"}
 	"lbl_pickheight"					: {"ja":"この高度に設定", "en":"Set to this Height"}
+	"lbl_doorlock"						: {"ja":"ドア開閉: ロック", "en":"Door: Locked"}
+	"lbl_doorunlock"					: {"ja":"ドア開閉: 可能", "en":"Door: Unlocked"}
 
 	"lbl_map_cursize"					: {"ja":"現在のサイズ", "en":"Current Size"}
 	"lbl_map_floorheight"				: {"ja":"床の高さ", "en":"Floor Height"}

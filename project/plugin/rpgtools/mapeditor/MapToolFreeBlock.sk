@@ -54,7 +54,6 @@ class MapTools.tool_fblk extends MapTool
 		optionview = ::loadSKView( OPTIONUIPATH);
 		optionview.addEventListener( ACTION_EVENT, optionevent);
 		selblk = SelectBlock( optionview.findChild( "selblock"));
-		selblk.setBlockPages( [1]);
 		selblk.view.addEventListener( ACTION_EVENT, selblkevent);
 		//	
 		optionview.findChild( "rot0")?.setSelected( true);
@@ -148,6 +147,17 @@ class MapTools.tool_fblk extends MapTool
 
 	function selblkevent( e){
 		e.consume();
+		updateSelBlock();
+	}
+
+	function updateSelBlock(){
+		// local fblk = listfb();	//	オプションビューに開閉ロックを表示する・・・いらんか
+		// local g = optionview.findChild( "statg");
+		// if( fblk?.isClass( "door")){
+		// 	g.anime( 1);
+		// }else{
+		// 	g.anime( 0);
+		// }
 	}
 
 	function listfb(){
@@ -177,6 +187,13 @@ class MapTools.tool_fblk extends MapTool
 			hb = fblk && rayTestFB( e, blkflag, fblk, rot);
 			if( hb && ((1<<hb.f)&(2|4|8|16))) rot = hb.f-1;
 			if( hb){
+				//	ドア配置時にデフォルトの開閉ロックを設定する
+				if( fblk.isClass( "door")){
+					local mapvox = ::conf._resource["map_vox"].door[fblk.fbparam & 0x3ff];	//	ドアの定義
+					if( mapvox["deflock"]){
+						fblk = FreeBlock.create({fbtype:fblk.fbtype, fbparam:fblk.fbparam|0x40000000});
+					}
+				}
 				local fbuid = placeFreeBlock( e, hb, fblk, rot);
 				local fb = editor.bw.getFreeBlock( fbuid);
 				placeFBGizmo( fb, -1);
@@ -437,8 +454,28 @@ class MapTools.tool_fblk extends MapTool
 			"-",
 			...getDefaultContextMenu( e),
 		];
+		if( selgz && selgz.ref.isClass( "door")){
+			local fb = selgz.ref, lock = (fb.fbparam & 0x40000000) != 0;
+			ctxmenu[0] <- { id="lock", lbl=lock?"$T.lbl_doorlock":"$T.lbl_doorunlock", icon=lock?"\ue897":"\ue898", };
+			ctxmenu[1] <- "-";
+		}
 		local m = MenuPopup.run( ctxmenu);
 		switch( m["id"]){
+		case "lock":
+			if( selgz){
+				local fb = selgz.ref;
+				local newfb = FreeBlock.create({fbtype=fb.fbtype, fbparam=(fb.fbparam ^ 0x40000000)});
+				local bop = BlockOperation( editor.bw);
+				bop.placeFreeBlock({fblk:newfb, fbuid:fb.fbuid, pos=(fb.x,fb.y,fb.z), rot=fb.rot});
+				if( bop.len()){
+					local synct = {}, self = this, canvas = canvas;
+					bop.redoop .. @(){ self.syncFBGizmo( synct); }
+					bop.undoop .. @(){ self.restoreFBGizmo( synct); }
+					bop.submit( editor);
+					selgz.setFreeBlock( editor.bw.getFreeBlock( fb.fbuid));
+				}
+			}
+			break;
 		case "dup":
 			if( selgz){
 				local fb = clone selgz.ref;

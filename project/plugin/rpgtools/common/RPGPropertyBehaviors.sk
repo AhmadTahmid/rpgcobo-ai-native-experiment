@@ -263,6 +263,8 @@ class PropertyBehaviors.ResourceID extends PropertyBehavior
 	
 	function init(){
 		menu = view.findChild( "listmenu");
+		menu.setValue( "lbl", "$T.lbl_notset");
+		menu.setValue( "icon", "\ue15b");
 	}
 
 	function getParam(){

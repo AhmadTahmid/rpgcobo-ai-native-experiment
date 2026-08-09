@@ -168,6 +168,8 @@ local rooftypeprop = { pid="rooftype", lbl="$T.lbl_rooftype", type=LIST, list=ro
 local shapeprop = { pid="shape", lbl="$T.lbl_shape", type=LIST, list=shapelist, defval=0 }
 local fitfloorprop = { pid="fitfloor", lbl="$T.lbl_fitfloor", type=BOOL, defval=true }
 local blendprop = { pid="blend", lbl="$T.lbl_blend", type=LIST, list=blendlist, defval=0}
+local opensndprop = { pid="opensnd", lbl="$T.lbl_sound", type=RESID, restype="snd", defval="SE100" };
+local deflockprop = { pid="deflock", lbl="$T.lbl_deflock", type=BOOL, defval=false };	//	ドアの初期状態がロックかどうか
 
 //
 local lightprops = [
@@ -205,7 +207,7 @@ class ResEditorMapVox extends EditorViewBase
 		{ lbl="$T.blk_fence", props=[typefn("fence"),vp0prop,pal0prop,], dir0="/resource/vox/map/fence", caps=64, id="fence" }
 		{ lbl="$T.blk_plant", props=[typefn("plant"),vp0prop,pal0prop,], dir0="/resource/vox/map/plant", caps=64, id="plant" }
 		null,
-		{ lbl="$T.blk_door", props=[typefn("door"),vp0prop,pal0prop,inexprop( FB_INDOOR, FB_EXDOOR),colsprop,pushprop,], dir0="/resource/vox/map/door", caps=64, id="door" }
+		{ lbl="$T.blk_door", props=[typefn("door"),vp0prop,pal0prop,inexprop( FB_INDOOR, FB_EXDOOR),colsprop,pushprop,deflockprop,opensndprop], dir0="/resource/vox/map/door", caps=64, id="door" }
 		{ lbl="$T.blk_lamp", props=[typefn("lamp"),vp0prop,pal0prop,inexprop( FB_INLAMP, FB_EXLAMP),colsprop,plcprop,pushprop,lightprops,], dir0="/resource/vox/map/lamp", caps=64, id="lamp" }
 		{ lbl="$T.blk_exterior", props=[typefn("exterior"),vp0prop,pal0prop,colsprop,plcprop,pushprop,], dir0="/resource/vox/map/exterior", caps=128, id="exterior" }
 		{ lbl="$T.blk_interior", props=[typefn("interior"),vp0prop,pal0prop,colsprop,plcprop,pushprop,], dir0="/resource/vox/map/interior", caps=128, id="interior" }

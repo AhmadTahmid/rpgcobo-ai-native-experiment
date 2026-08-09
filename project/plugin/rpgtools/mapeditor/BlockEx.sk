@@ -67,6 +67,9 @@ with FreeBlock
 	function cls(){
 		return ::fblks[fbtype].cls;
 	}
+	function isClass( cls){
+		return ::fblks[fbtype].cls == cls;
+	}
 
 	function findModel( name){
 		local fbt = conf(), va = fbt.variations[fbparam&0x3ff];

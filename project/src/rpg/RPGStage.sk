@@ -152,12 +152,16 @@ class RPGStage
 		setPlayerPosition( stat.player.pos);
 		//	イベント配置
 		events = [];
+		local doorevmap = {};
 		foreach( evid, v in map.event){		//	マップ定義のイベントを全て配置。この時点では未スポーン。
 			local er = RPGStageEventRunner( evid, v, this, stat.evarmap[evid]);
 			local es = stat.estatmap[evid];
 			if( es) er.setEventSnapshot( es);
 			events .. er;
+			if( v["mdl"]["fbuid"]) doorevmap[v.mdl.fbuid] <- er;	//	ドアがらみのイベントはfbuidで検索できるようにする
 		}
+		addDoorEvents( doorevmap);	//	ドアフリーブロックは、開閉ロックがかかっていない場合は自動で"door"イベントが生成される。
+		//
 		//	カメラ参照
 		cam3d = RPG3DObject.create3DObject( {r=[0,0,0,0.25,0.25,0.25]});	//	ghost
 		scn.addObject( cam3d);
@@ -215,6 +219,37 @@ class RPGStage
 		b3world.addBody( bf);
 		b3world.addBody( br);
 		b3mapbnds = (bn,bl,bf,br);	//	参照を残しておかないとb3worldから消える
+	}
+
+	//	ステージ内の全ドアを調べて、開閉ロックがかかっていない場合は自動でドアイベントを生成する。
+	//	また、手動でイベントを指定している場合もドアイベントを生成しない。
+	function addDoorEvents( doorevmap){
+		local doorevid = 1990000;	//	ドアのイベントIDはここから始まる。。。
+		foreach( fb in bw.collectFreeBlocks( BLK_DIGCLOSE, [])){	//	ドアが閉まってる場合はBLK_DIGCLOSEフラグが立つ
+			if( ::fblks[fb.fbtype].cls == "door" && !(fb.fbparam & 0x40000000)){	//	開閉ロックがかかっていない場合は自動でドアイベントを生成する
+				local fbuid = fb.fbuid;
+				if( doorevmap[fbuid]){	//	既にイベントが設定されている場合はドアイベントを生成しない
+					continue;
+				}
+				local evid = doorevid++;
+				//	todo fbからmap_vox.door[]の情報を取得。ドアの開閉サウンドを設定する。
+				local mapvox = ::conf._resource["map_vox"].door[fb.fbparam & 0x3ff];	//	ドアの定義
+				local opensnd = mapvox["opensnd"] || "SE100";	//	ドアの開閉サウンド
+				local ev = {
+					"col":0,
+					"flags":1,
+					"mdl":{"fbparam":fb.fbparam,"fbtype":fb.fbtype,"fbuid":fbuid},
+					"name":"*door-"..evid,
+					"opensnd":opensnd,
+					"pos":[fb.x,fb.y,fb.z,fb.rot],
+					"role":"door",
+					"spawndist":2,	//	4m範囲になるまでスポーンしない。軽量化用。
+				};
+				map.event[evid] <- ev;	//	confに入れちゃう！！！！？？？？大分無理やりだが一番簡単。
+				local er = RPGStageEventRunner( evid, ev, this, stat.evarmap[evid]);
+				events .. er;
+			}
+		}
 	}
 
 	//	エンカウント増加値を計算。

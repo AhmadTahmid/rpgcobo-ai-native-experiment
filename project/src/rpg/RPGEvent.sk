@@ -1266,7 +1266,7 @@ class RPGStageEventRunner extends RPGEventRunner
 		}
 		case 2: case 3: case 4:	//	プレイヤーの4m, 8m, 12m以内に入る
 		{
-			local pp = stage.player["pos"];
+			local pp = stage.player3d["pos"];
 			return pp && pp.hypot( p) < (spawndist-1)*4.0;
 		}
 		case 5:

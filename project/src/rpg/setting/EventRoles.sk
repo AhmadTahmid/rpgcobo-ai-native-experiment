@@ -183,6 +183,7 @@ RPGSystem.eventrole .. {
 	name = {"ja":"開閉ドア","en":"Openable Door"}
 	icon = "\ueffd"
 	desc = ""
+	hide = true
 	
 	props = [
 		nameprop,
@@ -266,6 +267,7 @@ RPGSystem.eventrole .. {
 		{ pid="dest", lbl="$T.cmd_mapmove_dest", type=PORTAL, cnt="cnt6.ui", },
 		wipeprop,
 		{ pid="remap", lbl="$T.lbl_remap", type=BOOL, },
+		{ pid="opensnd", lbl="$T.lbl_sound", type=RESID, restype="snd", },
 	]
 
 	defdata = {
@@ -273,15 +275,17 @@ RPGSystem.eventrole .. {
 		dest = null
 		wipe = 2
 		remap = false
+		opensnd = "SE100"
 	}
 
 	defpage = [
 		{
 			standani = {id="close"}
 			trigger = 3
+			wvarmap = { W="opensnd" }
 			cmdblock = [
 				{ cmd="cmd_compute", lvar="A", op="=", rvar="REMAPID" }
-				{ cmd="cmd_snd", sndid="SE100", who=1 }
+				{ cmd="cmd_snd", who=1, sndid="SE100", _var={sndid="\tW||\"SE100\""} }
 				{ cmd="cmd_wait", time=100 }
 			]
 		},
@@ -289,7 +293,7 @@ RPGSystem.eventrole .. {
 			standani = {id="open"}
 			reqs = { lvar="A", op="==", rvar="REMAPID"},
 			trigger = 5
-			wvarmap = { W="dest", X="wipe",Y="remap" }
+			wvarmap = { W="dest", X="wipe", Y="remap" }
 			cmdblock = [
 				{ cmd="cmd_mapmove", dest=null, _var={dest="W",wipe="X",remap="Y"}, }
 			]
