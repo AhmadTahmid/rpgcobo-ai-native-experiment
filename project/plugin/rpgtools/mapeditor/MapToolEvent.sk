@@ -604,7 +604,7 @@ class MapTools.tool_event extends MapTool
 			ctxmenu = [
 				{ id="edit", lbl="$T.lbl_edit", icon="\ue745", modkey="Enter"},
 				{ id="color", lbl="$T.lbl_color", icon=evcolorlist[data.col].icon, submenu=colmenu},
-				{ id="rot", lbl="$T.lbl_direction", submenu=dirlist},
+				{ id="rot", lbl="$T.lbl_direction", submenu=dirlist, disable=data["mdl"]["fbuid"]},
 				"-"
 				{ id="copy", lbl="$T.menu_edit_copy", icon="\ue14d" },
 				{ id="cut", lbl="$T.menu_edit_cut", icon="\ue14e" },

@@ -259,6 +259,9 @@ class MapTools.tool_fblk extends MapTool
 						if( !canvas.selfbmap[hb.fbuid]) canvas.clearFBSelection();
 						if( hb.fbuid != selgz["ref"]["fbuid"]) _pickfb( hb);
 					}
+				}else{
+					removeGuide( "gz"); selgz = null;
+					canvas.clearFBSelection();
 				}
 			}else{
 				hb = rayTest( e, BLK_SOLID | BLK_SOLIDFB | BLK_DECAL);
@@ -268,9 +271,14 @@ class MapTools.tool_fblk extends MapTool
 				}else{
 					removeGuide( "gz"); selgz = null;
 					//	階段ツール、屋根ツール以外はドラッグによる範囲選択に対応する！
-					if( !ispensel && hb && e.isMouseDown( BUTTON1_MASK)){
-						hb.setFace( 0);
-						return sel2DStart( e, hb);
+					if( e.isMouseDown( BUTTON1_MASK)){
+						if( hb){
+							hb.setFace( 0);
+							return sel2DStart( e, hb);
+						}else{
+							canvas.setFBSelection( []);
+							updateFBSelectionColor();
+						}
 					}
 				}
 				e.consume();
@@ -316,7 +324,7 @@ class MapTools.tool_fblk extends MapTool
 			case VK_ESCAPE:
 				e.consume();
 				removeGuide( "gz"); selgz = null;
-				updateFBSelectionColor();
+				canvas.clearFBSelection();	// updateFBSelectionColor();
 				break;
 			case VK_DELETE:
 				e.consume();
@@ -403,8 +411,8 @@ class MapTools.tool_fblk extends MapTool
 				self.place2DRegion( box, PEN_SELECT);
 				break;
 			case MOUSE_RELEASED:
-				local hb = self.rayTest( e, BLK_SOLID | BLK_SOLIDFB | BLK_DECAL);	//	blkflag
-				if( hb.fbuid){
+				local hb = self.rayTest( e, BLK_SOLID | BLK_SOLIDFB | BLK_DECAL | BLK_LIQUID);	//	blkflag
+				if( hb["fbuid"]){
 					local fb = bw.getFreeBlock( hb.fbuid);
 					if( fb) self.placeFBGizmo( fb, -1);
 				}
@@ -714,7 +722,7 @@ class MapTools.tool_column extends MapTools.tool_fblk
 		local superfn = super._getgizmofunc();
 		local br0 = clone guides["gz"].br, fb0 = clone guides["gz"].ref;
 		local fbt = fb0.conf(), va = fbt.variations[fb0.fbparam&0xfff];
-		if( va.ctype!=2){
+		if( va["ctype"]!=2){
 			return @( gz, op, arg=null){
 				// self.removeGuide( "fb"); self.selblk.deselect(); self.fblk = null;
 				switch( op){

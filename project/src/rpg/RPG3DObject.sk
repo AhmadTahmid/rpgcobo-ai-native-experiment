@@ -1123,6 +1123,7 @@ class RPG3DGhost extends RPG3DObject
 //	ドアはフリーブロックと同一のボックス。ポータルになってるものもある。
 //	見た目は無く、設定されたFreeBlockのコリジョンのconvexhullだけを持つ。
 //	
+//	
 class RPG3DDoor extends RPG3DObject
 {
 	static doorshpcache = {};
@@ -1136,7 +1137,8 @@ class RPG3DDoor extends RPG3DObject
 	//	※コリジョンの回転のみに適用。ブロックの回転はpivotが(0.25,0.25,0.25)
 	function setPosition( p){
 		basepos = clone p;
-		prevpos( pos( p));
+		prevpos( pos( p).add( 0.25));
+		setPivot( Vector3D( 0.5).scale( -VOX_SCALE*8.0));
 		prevdir = dir = p[3];
 		rot.setHPB( dir, 0.0, 0.0);
 		matdirty = true;

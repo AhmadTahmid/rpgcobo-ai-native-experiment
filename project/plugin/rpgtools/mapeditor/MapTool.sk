@@ -935,7 +935,8 @@ class SelectBlock
 						local req = { bw:bw, br:#IRect3D(0,0,0,2,3,2), vd:vd, id:i };
 						local res = BlockRenderer.createVoxelDatas( [req]);
 						ret = texcache[q.i] <- imgpreview.getVoxelDataImage( vd);
-					}else{	//	フリーブロックのプレビューは直接PM化
+					}else
+					if( v["fblk"]){	//	フリーブロックのプレビューは直接PM化
 						//	屋根、階段などはparamを
 						ret = texcache[q.i] <- imgpreview.getFreeBlockImage( v.fblk);
 					}

@@ -42,7 +42,7 @@ local cullfacelist = [
 local camworks = [
 	{ lbl="Field Map", val={"fovy":30,"hpb":[0,38,0],"viewport":15.0,"yoffs":0.5} },
 	{ lbl="Indoor Map", val={"fovy":30,"hpb":[0,30,0],"viewport":13.0,"yoffs":1.0} },
-	{ lbl="Maze Map", val={"fovy":26,"hpb":[0,66,0],"viewport":12.0,"yoffs":0.7} },
+	{ lbl="Maze Map", val={"fovy":26,"hpb":[0,62,0],"viewport":13.5,"yoffs":0.7} },
 ];
 
 local presetcamlist( e){
@@ -939,7 +939,7 @@ class MapTools.tool_sel extends MapTool
 	}
 	
 	//	
-	function paste3DStart( hb0, srcbw, rot0=0, dop=null){
+	function paste3DStart( hb0, srcbw, rot0=0, dop=null, mode=0){
 		local self = this;
 		editor.setPlacingVisible( true);
 		//	matrix, guide
@@ -958,7 +958,7 @@ class MapTools.tool_sel extends MapTool
 			local oldbr = (clone br).clip( IRect3D(0,0,0,dst.w,dst.h,dst.d)), oldbw = dst.createCopy( oldbr);	//	brの元のブロック状態
 			local redo = [@(){
 				if( dop) dop.redo[0]();
-				dst.drawWorld( src, srcm);
+				dst.drawWorld( src, srcm, mode);
 			}];
 			local undo = [@(){
 				dst.clearRegion( oldbr);
@@ -1099,7 +1099,7 @@ class NewAssetDialog extends Dialog
 		case "idmenu":
 			local aid = e.actioncmd.aid;
 			assetid = aid;
-			nameedit.setText( "$T.lbl_asset %d" % aid);
+			nameedit.setText( "$T.lbl_asset %S" % aid);
 			break;
 		}
 		super.actionevent( e);

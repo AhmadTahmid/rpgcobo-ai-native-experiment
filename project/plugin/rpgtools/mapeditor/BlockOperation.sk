@@ -269,9 +269,10 @@ class BlockOperation
 			chk[k] <- 1;
 			local oldblk = bw.blockat( x, y, z) & 0x3ff;
 			if( oldblk == blk0){
-				if( bw.blockat( x+nx, y+ny, z+nz)) continue; //	ブロックが隠れるように配置している場合は打ち止め
 				pos.set( x, y, z);
 				local ok = _plcblk( pos, blk);
+				local nb = bw.blockat( x+nx, y+ny, z+nz);
+				if( nb) continue; //	ブロックが隠れるように配置している場合は打ち止め・・・このタイミングだと隠れる位置までは塗る
 				if( ok){	//	塗りつぶしが成功した時に周りに伝える
 					if( ax!=0 && x-x0 >= bm && x > 0) stk .. (x-1) .. y .. z;
 					if( ax!=0 && x-x0 <= bp && x < r) stk .. (x+1) .. y .. z;

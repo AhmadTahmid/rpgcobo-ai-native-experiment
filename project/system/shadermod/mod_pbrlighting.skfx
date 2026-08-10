@@ -123,8 +123,10 @@ fs pbrlighting
 			mediump int i = 3*int( step( shadow[2].x, viewz) + step( shadow[2].y, viewz));
 			uv = vec2( dot( pos, shadow[3+i]), dot( pos, shadow[4+i])); highp vec4 zv = shadow[5+i]; highp float texz = float( texture( shadowtex, uv).x) * (1.0/65535.0) * zv.x + zv.y - ZOFFS;
 			//	
-			highp float rate = clamp( exp( -coff * -(lightz - texz)), 0.0, 1.0);
+			highp vec2 uvc = floor( uv);	//	uv clamp check
+			highp float rate = clamp( exp( -coff * -(lightz - texz)) + dot( uvc, uvc), 0.0, 1.0);
 			highp float dark = clamp( mix( shadow[0].x+blk, 1.0, pow( viewz*shadow[0].y, 4.0)), 0.0, 1.0);
+			// if( uv.y <= 0.0) return 0.0;	//	?? assset preview
 			return mix( dark, 1.0, rate);
 		} : {
 			return 1.0;

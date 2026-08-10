@@ -297,9 +297,14 @@ class MapTools.tool_asset extends MapTool
 			local hb;
 			hb = rayTest( e, blkflag);
 			if( hb){
+				local ma = ::conf._resource.map_asset[aid];
+				local po = ma["plcoffs"] || #(0,0,0);
+				local im = IMat( hb.bx,hb.by,hb.bz).rotate( rot&3).translate( po[0], po[1], po[2]);
+				local p = im.transform( (0,0,0));
+				hb.bx = p[0]; hb.by = p[1]; hb.bz = p[2];	//	hbをいじっちゃう
 				removeGuide( "fb");
 				local fn = MapTools.tool_sel.paste3DStart;
-				editor.canvas.toolfunc = fn( hb, abw, rot);
+				editor.canvas.toolfunc = fn( hb, abw, rot, null, ma["plcair"]?1:0);
 			}
 			break;
 		}
@@ -351,7 +356,11 @@ class MapTools.tool_asset extends MapTool
 			addGuide( "fb", sk3d);
 			sk3d.ref = key;
 		}
-		local p = (hb.bx,hb.by+1,hb.bz);
+		local ma = ::conf._resource.map_asset[aid];
+		local po = ma["plcoffs"] || #(0,0,0);
+		local im = IMat( hb.bx,hb.by+1,hb.bz).rotate( rot&3).translate( po[0], po[1], po[2]);
+		//
+		local p = im.transform( (0,0,0));
 		sk3d.pos( p).scale( 0.5);//.add( 0.25);
 		sk3d.rot.set( rotquat[rot&3]);
 		sk3d.matdirty = 1;
@@ -471,6 +480,7 @@ class SelectAsset
 					bw64 = v.bw64,
 				};
 			}
+			a.sort( @( v) v.aid);
 			pages .. {
 				idx : pi,
 				id : g.id,

@@ -359,6 +359,7 @@ class MapCanvas extends CanvasBehavior
 		foreach( fbuid, sk3d in selfbmap){
 			local fb = editor.bw.getFreeBlock( fbuid);
 			if( !fb){
+				sk3d?.kill();
 				removei;	//	無い！
 			}else{
 				if( fb.br <> sk3d["ref"]){
