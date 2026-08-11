@@ -148,6 +148,33 @@ class MapTools.tool_fblk extends MapTool
 	function selblkevent( e){
 		e.consume();
 		updateSelBlock();
+		if( e.count == 2 && selgz){
+			local fblk = listfb();
+			replaceGizmoTo( fblk);
+		}
+	}
+
+	function replaceGizmoTo( fblk){
+		//	屋根置き換え。角度の違うのはダメ。
+		local fb0 = selgz.ref;	//	FreeBlock
+		local fbuid = fb0.fbuid;
+		removeGuide( "fb");
+		removeGuide( "gz");
+		local p = {
+			fbuid = fbuid,
+			fbtype = fblk.fbtype,
+			fbparam = fblk.fbparam,
+			pos = [fb0.x,fb0.y,fb0.z],
+			rot = fb0.rot,
+		}
+		local fb = FreeBlock.create( p);
+		local bop = BlockOperation( editor.bw);
+		bop.placeFreeBlock( { fblk=fb, fbuid=fbuid});
+		if( bop.len()){
+			bop.submit( editor);
+			local fb = editor.bw.getFreeBlock( fbuid);
+			placeFBGizmo( fb, -1);
+		}
 	}
 
 	function updateSelBlock(){
@@ -610,6 +637,29 @@ class MapTools.tool_column extends MapTools.tool_fblk
 		selblk.setFreeBlockPages( [FB_COLUMN,FB_LADDER,]);	//	FB_BAR
 	}
 
+	function replaceGizmoTo( fblk){
+		//	屋根置き換え。角度の違うのはダメ。
+		local fb0 = selgz.ref;	//	FreeBlock
+		local fbuid = fb0.fbuid;
+		removeGuide( "fb");
+		removeGuide( "gz");
+		local p = {
+			fbuid = fbuid,
+			fbtype = fblk.fbtype,
+			fbparam = (fblk.fbparam&255) | (fb0.fbparam&0xfffff000),
+			pos = [fb0.x,fb0.y,fb0.z],
+			rot = fb0.rot,
+		}
+		local fb = FreeBlock.create( p);
+		local bop = BlockOperation( editor.bw);
+		bop.placeFreeBlock( { fblk=fb, fbuid=fbuid});
+		if( bop.len()){
+			bop.submit( editor);
+			local fb = editor.bw.getFreeBlock( fbuid);
+			placeFBGizmo( fb, -1);
+		}
+	}
+
 	function mousePressed( e, hb0, fb0, rot){
 		local fbt = fb0.conf(), va = fbt.variations[fb0.fbparam&0xfff];
 		if( va["ctype"] == 2){
@@ -775,6 +825,29 @@ class MapTools.tool_slope extends MapTools.tool_fblk
 		// selblk.setPage( 0);
 	}
 
+	function replaceGizmoTo( fblk){
+		//	屋根置き換え。角度の違うのはダメ。
+		local fb0 = selgz.ref;	//	FreeBlock
+		local fbuid = fb0.fbuid;
+		removeGuide( "fb");
+		removeGuide( "gz");
+		local p = {
+			fbuid = fbuid,
+			fbtype = fblk.fbtype,
+			fbparam = (fblk.fbparam&255) | (fb0.fbparam&0xfffff000),
+			pos = [fb0.x,fb0.y,fb0.z],
+			rot = fb0.rot,
+		}
+		local fb = FreeBlock.create( p);
+		local bop = BlockOperation( editor.bw);
+		bop.placeFreeBlock( { fblk=fb, fbuid=fbuid});
+		if( bop.len()){
+			bop.submit( editor);
+			local fb = editor.bw.getFreeBlock( fbuid);
+			placeFBGizmo( fb, -1);
+		}
+	}
+
 	function mousePressed( e, hb0, fb0, rot){
 		removeGuide( "gz");
 		selgz = null;
@@ -900,30 +973,26 @@ class MapTools.tool_roof extends MapTools.tool_fblk
 		hval.setValue( hval.getValue() + e.count);
 	}
 
-	function selblkevent( e){
-		super.selblkevent( e);
-		if( e.count == 2 && selgz){
-			//	屋根置き換え。角度の違うのはダメ。
-			local fblk = listfb();
-			local fb0 = selgz.ref;	//	FreeBlock
-			local fbuid = fb0.fbuid;
-			removeGuide( "fb");
-			removeGuide( "gz");
-			local p = {
-				fbuid = fbuid,
-				fbtype = fblk.fbtype,
-				fbparam = (fblk.fbparam&255) | (fb0.fbparam&0xfffff000),
-				pos = [fb0.x,fb0.y,fb0.z],
-				rot = fb0.rot,
-			}
-			local fb = FreeBlock.create( p);
-			local bop = BlockOperation( editor.bw);
-			bop.placeFreeBlock( { fblk=fb, fbuid=fbuid});
-			if( bop.len()){
-				bop.submit( editor);
-				local fb = editor.bw.getFreeBlock( fbuid);
-				placeFBGizmo( fb, -1);
-			}
+	function replaceGizmoTo( fblk){
+		//	屋根置き換え。角度の違うのはダメ。
+		local fb0 = selgz.ref;	//	FreeBlock
+		local fbuid = fb0.fbuid;
+		removeGuide( "fb");
+		removeGuide( "gz");
+		local p = {
+			fbuid = fbuid,
+			fbtype = fblk.fbtype,
+			fbparam = (fblk.fbparam&255) | (fb0.fbparam&0xfffff000),
+			pos = [fb0.x,fb0.y,fb0.z],
+			rot = fb0.rot,
+		}
+		local fb = FreeBlock.create( p);
+		local bop = BlockOperation( editor.bw);
+		bop.placeFreeBlock( { fblk=fb, fbuid=fbuid});
+		if( bop.len()){
+			bop.submit( editor);
+			local fb = editor.bw.getFreeBlock( fbuid);
+			placeFBGizmo( fb, -1);
 		}
 	}
 

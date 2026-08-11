@@ -1214,7 +1214,7 @@ class SelectBlock
 		case SOURCE_DRAG_OVER:
 			if( dragsp){
 				local tool = ::skstudio.editor.tool;
-				dragsp.visible = !length( tool.guides);	//	なんらかガイドが表示されてたら表示オフ
+				dragsp.visible = !( tool.guides["fb"]);	//	なんらかガイドが表示されてたら表示オフ
 			}
 			break;
 		case SOURCE_DROP:

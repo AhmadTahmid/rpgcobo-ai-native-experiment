@@ -100,6 +100,11 @@ class MapEditor extends EditorViewBase
 
 			tools.findChild( "tool_event").setVisible( false);
 		}
+		//	データのチェック。
+		local dups = w.duplicationCheck();
+		if( length( dups)){
+			removeDuplications( w, dups);
+		}
 		//	データセット
 		setBlockWorld( w);
 		canvas.setBackground( data["bg"]);
@@ -118,6 +123,18 @@ class MapEditor extends EditorViewBase
 		foreach( toolid in toolids){
 			toolmap[toolid] <- MapTool.createTool( this, toolid);
 		}
+	}
+
+	//	重複ブロックを削除する。bwの中で同じフリーブロックが同じ場所に複数ある場合に1つを除いてすべて削除する。undo対象外。
+	function removeDuplications( w, dups){
+		printf( "NOTICE: BlockWorld duplication detected! %S\n", encodeJSON( dups, 1));
+		foreach( a in dups){
+			a.pop();	//	最後のだけ残す
+			foreach( fbuid in a){
+				w.removeFreeBlock( fbuid);
+			}
+		}
+		newthread().start( @(){ suspend(); Popups.showInfo( "$T.pop_dupremoved")}, this);
 	}
 	
 	//	BlockWorldを設定しなおす。サイズ変更、初期化、voxインポートなど、同じBlockWorldを使い続けられない場合にも
@@ -217,6 +234,18 @@ class MapEditor extends EditorViewBase
 			if( ret && ret<>data["encount"]){
 				setEncountData( ret);
 			}
+			return true;
+		case "editor_map_menu_edit_mapgen":
+			local bw1 = MapGenDialog.run( this, data);
+			if( bw1){
+				//	イベントの初期化はいらないかな？
+				local self = this;
+				local bw0 = bw;
+				local redo = [@(){ self.setBlockWorld( bw1); }];
+				local undo = [@(){ self.setBlockWorld( bw0); }];
+				submitOp( redo, undo, null);
+			}
+			return true;
 		}
 		return false;
 	}
@@ -448,9 +477,9 @@ class MapEditor.MapSizeDialog extends Dialog
 		wval = createNumInputBehavior( view.findChild( "wval"));
 		hval = createNumInputBehavior( view.findChild( "hval"));
 		dval = createNumInputBehavior( view.findChild( "dval"));
-		wval.setRange( 4, 1024, 1);
-		hval.setRange( 4, 128, 1);
-		dval.setRange( 4, 1024, 1);
+		wval.setRange( 2, 1024, 1);
+		hval.setRange( 2, 128, 1);
+		dval.setRange( 2, 1024, 1);
 		alignchk = [];
 		for( local l = 0;l < 9;l ++){
 			alignchk .. view.findChild( "a"..l);
@@ -545,6 +574,8 @@ with( skstudio){
 	registerMenu( { uid="editor_map_menu_edit_mapsize", parentid="menu_edit", lbl="$T.editor_map_menu_edit_mapsize", where=["editor_map"]});
 	registerMenu( { uid="editor_map_menu_edit_mapclear", parentid="menu_edit", lbl="$T.editor_map_menu_edit_mapclear", where=["editor_map"]});
 	registerMenu( { uid="editor_map_menu_edit_encount", parentid="menu_edit", lbl="$T.editor_map_menu_edit_encount", where=["editor_map"]});
+	registerMenu( { parentid="menu_edit", separator="*ui_map1", where=["editor_map"]});
+	registerMenu( { uid="editor_map_menu_edit_mapgen", parentid="menu_edit", lbl="$T.lbl_mapgen", where=["editor_map"], disable=@() !::skstudio.editor["data"]});	//	アセットでは使用不能
 	
 	registerEditor( {
 		uid = "editor_map",

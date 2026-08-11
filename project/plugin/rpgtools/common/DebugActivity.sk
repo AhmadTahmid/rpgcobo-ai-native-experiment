@@ -104,6 +104,7 @@ function startDebugMenu( m){
 	local exe = FileRef( "rpgcobo.exe");
 	local p = popen_s();
 	p.open( exe, ["-testplay", ...args], 0x100);
+	::skstudio.freezeEditorView( true);	//	editorの再描画を抑制して並列処理を高速化
 	Dialogs.showWaiting( "$T.lbl_debug_running", @(){
 		if( p.isrunning()){
 			for( local li; li = p.readLine();){
@@ -118,6 +119,7 @@ function startDebugMenu( m){
 		printf( "::: %S\n", li.trim());
 	}
 	p.close();
+	::skstudio.freezeEditorView( false);	//	editorの再描画を再開
 }
 
 

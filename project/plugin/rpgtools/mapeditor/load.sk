@@ -13,3 +13,5 @@ runsk( "MapSideView.sk");
 runsk( "MapPropertyBehaviors.sk");
 runsk( "EncountDialog.sk");
 runsk( "CustomEventEditor.sk");
+runsk( "MapGenerator.sk");
+runsk( "MapGenDialog.sk");

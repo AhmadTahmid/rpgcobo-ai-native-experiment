@@ -1,0 +1,468 @@
+import PropertyType;
+import RPGPropertyType;
+import VirtualKeyCode;
+import ModifiersMask;
+import FreeBlockCategoryID;
+import CollisionGroupID;
+import BlockFlagID;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+//	
+//	MapGenDialog : 自動マップ生成ダイアログ
+//	
+
+local srcdir = dirname( callee().getSourceName());
+
+import MapGenBiomeID;
+import MapGenObjectID;
+
+class MapGenDialog extends UndoableDialog
+{
+	editor = null;
+	type = null;
+	gendata = null;		//	
+	blkmap = null;		//	{biomeid/objid : blkid/fblkid}
+	blockmaplist = null;	//	[blockmap, ...]		conf.map._meta.blockmaplist
+
+	genthread = null;
+
+	//	LEFT
+	typemenu = null;	//	MenuBehavior
+	tabs = null;			//	TabBehavior
+	proplist = null;	//	PropertyListBehavior
+	blocklist = null;	//	
+
+	seltab = 0;			//	0:properties, 1:blocks
+	
+	//	RIGHT
+	piclist = null;		//	GPUIListView : 生成済みのマップのサムネイル一覧
+	canvas = null;		//	CanvasBehavior
+	bw3d = null;		//	BlockWorld3D
+	bwcol = null;		//	b3Body<BlockColiderInterface>
+	selpic = null;		//	SKView : 選択されたpic
+
+	resbw = null;		//	結果のBlockWorld
+
+	static function run( editor, data){
+		local dlg = this( srcdir.."/ui/mapgendialog.ui", editor, data);
+		::skstudio.freezeEditorView( true);	//	editorの再描画を抑制して並列処理を高速化
+		dlg.show();
+		::skstudio.freezeEditorView( false);
+		return dlg.resbw;
+	}
+
+	constructor( v, e, d){
+		super( v);
+		editor = e;
+
+		typemenu = MenuBehavior( view.findChild( "typemenu"), ::MapGenerators);
+		tabs = TabsBehavior( view.findChild( "tabs"),["$T.lbl_properties","$T.lbl_blocks"]);
+		
+		proplist = PropertyListBehavior( view.findChild( "proplist"), null);
+		proplist.listview.addEventListener( ACTION_EVENT, propevent);
+		proplist.ref = this;
+		
+		blocklist = view.findChild( "blocklist");
+		blocklist.addEventListener( ACTION_EVENT, blockevent);
+
+		piclist = view.findChild( "piclist");
+		piclist.addEventListener( ACTION_EVENT, picevent);
+		piclist.setRowCount( 0);
+
+		canvas = CanvasBehavior( view.findChild( "canvas"), null);
+		canvas.view.renderer.setEnvironment( ::RenderSettings.getEnvironment( "pbr_fw"));
+
+		setType( ::MapGenerators[0].val);
+		tabs.selectTab( 0);
+		setTab( 0);
+		view.addUpdateFunc( updateFunc.bindenv( this));
+	}
+
+	function updateFunc( dt){
+		if( bw3d){
+			local cam = canvas.camwork.cam;
+			bw3d.checkUpdateInCameraMesh( cam);
+		}
+		return true;
+	}
+
+	function setType( t){
+		type = t;
+		typemenu.selectItem( @( v) v.val==t);
+		gendata = {};
+		local gendef = ::MapGenerators.find( @( v) v.val==t);
+		local props = gendef.props;
+		::setDefaultProperties( props, gendata);
+		proplist.bindProperties( props);
+		proplist.setParameters( gendata);
+		//	blkmap
+		blkmap = clone gendef.blkmap;
+		updateBlockList( gendef);
+	}
+
+	function updateBlockList( gendef){
+		local defs = gendef.blkmaplist;
+		blocklist.setRowCount( (length( defs)+2)/3);
+		foreach( i, def in defs){
+			local r = blocklist.rows[i/3], c = i%3;
+			if( !c){
+				for( local l = 0;l < 3;l ++){
+					local v = r.findChild( "i"..l);
+					if( !v.ref) v.ref = BlockSetIcon( v);
+				}
+			}
+			local v = r.findChild( "i"..c);
+			if( def){
+				v.setVisible( true);
+				v.ref.setBlockItem( def, blkmap[def.id]);
+			}else{
+				v.setVisible( false);
+			}
+		}
+	}
+
+	function setTab( idx){
+		seltab = idx;
+		proplist.listview.setVisible( idx==0);
+		blocklist.setVisible( idx==1);
+	}
+	
+	function actionevent( e){
+		switch( e.src["name"]){
+		case "typemenu":
+			setType( e.actioncmd.val);
+			break;
+		case "LIST":	//	tabsのこと。。。
+			setTab( e.actioncmd);
+			break;
+		case "btn_gen":
+			genthread = newthread( "MapGen Thread");
+			genthread.start( @(){
+				e.src.setEnabled( false);
+				runSerialMapgen();
+				e.src.setEnabled( true);
+			}, this);
+			break;
+		case "btn_apply":
+			if( bw3d){
+				resbw = bw3d.bw;
+				close();
+			}
+			break;
+		case "btn_copy":
+			if( bw3d){
+				local bw64 = encodeBASE64( ObjectOutput.encode( bw3d.bw));
+				putClipboard( "mapsel", { bw64=bw64, selmode=0});
+				Popups.showInfo( "$T.pop_mapcopied");
+			}
+			break;
+		case "listmenu":
+			if( seltab == 0){
+				showPropListMenu( e);
+			}else{
+				showBlockListMenu( e);
+			}
+			break;
+		}
+		super.actionevent( e);
+	}
+
+	function showPropListMenu( e){
+		local ctxmenu = [
+			{ id="reset", lbl="$T.lbl_reset", icon="\uf053"},
+		];
+		local m = MenuPopup.run( ctxmenu, e.src);
+		switch( m["id"]){
+		case "reset":
+		{
+			local olddata = gendata;
+			local newdata = {};
+			local props = ::MapGenerators.find( @( v) v.val==type).props;
+			::setDefaultProperties( props, newdata);
+			local self = this;
+			local redo = [@(){
+				self.gendata = newdata;
+				self.proplist.setParameters( newdata);
+			}];
+			local undo = [@(){
+				self.gendata = olddata;
+				self.proplist.setParameters( olddata);
+			}];
+			submitOp( redo, undo, null);
+			break;
+		}
+		}
+	}
+	
+	//	ブロックセットの管理メニュー。ブロックセットは8つぐらいで固定しちゃっても良いかも？
+	//	選択、コピー、ペースト、保存。
+	//	map._meta.blockmaplistに保存。
+	//	
+	function showBlockListMenu( e){
+		local cbdata = getClipboard( "blockmap");	//	開くたびにクリップボード取得しちゃうけどまーだいじょぶかな
+		local ctxmenu = [
+			{ lbl="$T.menu_edit_copy", id="copy", icon="\ue14d" },
+			{ lbl="$T.menu_edit_paste", id="paste", icon="\ue14f", disable=!cbdata },
+			"-",
+			{ id="size", val=8, lbl="8 x 8", icon="\ue5d0"},
+			{ id="size", val=16, lbl="16 x 16", icon="\ue5d0"},
+			{ id="size", val=32, lbl="32 x 32", icon="\ue5d0"},
+			"-",
+			{ id="invert", lbl="$T.lbl_invert", icon="\ue5d0"},
+		];
+		local ret = MenuPopup.run( ctxmenu, e.src);
+		switch( ret["id"]){
+		case "copy":
+		{
+			putClipboard( "blockmap", blockmap);
+			break;
+		}
+		case "paste":
+		{
+			break;
+		}
+		}
+	}
+
+	function blockevent( e){
+		switch( e.id){
+		case ACTION_PERFORMED:
+			if( e.isMouseDown( BUTTON2_MASK)){
+				showBlockListMenu( e);
+			}else
+			if( e.actioncmd){
+				local bi = e.src.ref;
+				local self = this, oldval = blkmap[bi.def.id], val = e.actioncmd;
+				local redo = [@(){
+					self.blkmap[bi.def.id] <- val;
+					bi.setBlockItem( bi.def, val);
+				}];
+				local undo = [@(){
+					self.blkmap[bi.def.id] <- oldval;
+					bi.setBlockItem( bi.def, oldval);
+				}];
+				submitOp( redo, undo, null);
+			}
+			break;
+		}
+	}
+
+	function picevent( e){
+		switch( e.id){
+		case ACTION_PERFORMED:
+			if( e.isMouseDown( BUTTON2_MASK)){
+				showBlockListMenu( e);
+			}else{
+				if( selpic != e.src){
+					local ref = e.src.parent.ref;
+					selpic?.setSelected( false);
+					e.src.setSelected( true);
+					selpic = e.src;
+					selectMapgen( ref);
+				}
+			}
+			break;
+		}
+	}
+
+	//	
+	function propevent( e){
+		local cmd = e.actioncmd;
+		if( cmd["cmd"] == "prop"){
+			local pid = cmd.prop.pid, type = this.type, data = gendata;
+			local val = cmd.val;
+			local oldval = ::getProperty( cmd.prop, data);
+			local trk = null;
+			//	
+			local self = this;
+			local redo = [@(){
+				::setProperty( cmd.prop, data, val);
+				self.proplist.setParam( cmd.prop.pid, val);
+			}];
+			local undo = [@(){
+				::setProperty( cmd.prop, data, oldval);
+				self.proplist.setParam( cmd.prop.pid, oldval);
+			}];
+			submitOp( redo, undo, trk);
+		}
+	}
+
+	//	1回のmapgenを実行、結果の画像とbinを読み込む。
+	//	optはrangeをランダムで一意に決定したものが渡ってくる
+	function execMapgen( dirname, seed){
+		local mapgen = MapGenerator();
+		local gendef = ::MapGenerators.find( @( v) v.val==type);
+		mapgen.srcw = gendata["size"][0];
+		mapgen.srcd = gendata["size"][1];
+		mapgen.seed = seed;
+		mapgen.gendef = gendef;
+		mapgen.gendata = gendata;
+		mapgen.blkmap = blkmap;
+		mapgen.tmpdir = dirname;
+		mapgen.generateSourceImage();
+		return { mapgen=mapgen, png=mapgen.src, bw=null, bw3d=null, bwcol=null };
+	}
+
+	//	10個のマップ生成を行う。生成完了まで次の「生成」ボタンは押せない。
+	//	
+	function runSerialMapgen(){
+		local seed = rnd( 1, 100000000);
+		local num = 10;
+		piclist.setRowCount( 0);
+		local dirname = "tmp/mapgen/"..seed;
+		FileRef( dirname).mkdirs(); sleep( 100);
+		for( local l = 0;l < num;l ++){
+			//	1回のマップ生成を実行。複数並列にやっても良いが。
+			local ret = execMapgen( dirname, seed+l);
+			//	
+			piclist.setRowCount( l+1);
+			local r = piclist.rows[l];
+			r.setValue( "pic", ret.png);
+			r.ref = ret;
+		}
+		FileRef( dirname).deleteAll(); sleep( 100);
+	}
+
+	//	pic.refを指定して呼び出す
+	//	
+	function selectMapgen( ref){
+		local scn = canvas.scn, b3world = scn.getB3World();
+		if( bw3d) scn.removeObject( bw3d);
+		if( bwcol) b3world.removeBody( bwcol);
+		if( !ref.bw){
+			ref.mapgen.generate();	//	ここで最終的な生成処理
+			ref.bw = ref.mapgen.toBlockWorld();
+			ref.bw3d = SK3DBlockWorld( ref.bw);
+			ref.bw3d.setVoxelTec( skFXFindTechnique( "vox.grid"));
+			local bci = BlockColiderInterface( ref.bw);
+			bci.setFlagMask( BLK_SOLID|BLK_PLANT|BLK_BARRIOR|BLK_SOLIDFB);
+			local bcshp = b3Shape.createCustomConcave( bci);
+			ref.bwcol = b3Body( 0, bcshp, ref.bw3d.mat, G_STAGE, G_VIEW|G_CHARA|G_OBJECT);
+			ref.bwcol.ref = bci;
+		}
+		bw3d = ref.bw3d;
+		bw3d.updateMatrix( true);
+		scn.addObject( bw3d);
+		
+		bwcol = ref.bwcol;
+		b3world.addBody( bwcol);
+	}
+}
+
+class MapGenDialog.MapGenCanvas extends CanvasBehavior
+{
+	function _getlocalmouse(){
+		local ms = ::rootview.mouses[0];
+		local pv = canvas.view, p = Vector3D( ms.mousex, ms.mousey, 0.0).transform( pv.getInvMatrix());
+		if( p.x < 0 || p.y < 0 || p.x >= pv.bnd.w, p.y >= pv.bnd.h){
+			return null;
+		}
+		return {lx:p.x, ly:p.y};	//	lx,lyでアクセスできるように、、、
+	}
+
+	//	現在のマウス位置にフォーカスする。
+	function focusToMouse(){
+		local p = _getlocalmouse();
+		if( !p) return false;
+		local q = canvas.getRay( p.lx, p.ly);
+		local b3res = scn.b3world.rayTest( 1, q[0], q[1], -1, G_STAGE);	//	closest
+		foreach( br in b3res){
+			local fp = br.pointb;
+			canvas.camwork.moveTo( fp, canvas.camwork.hpb, 15.0);
+			return true;
+		}
+		return false;
+	}
+
+	//	マウス、キーイベント
+	function defevent( e){
+		switch( e.id){
+		case MOUSE_PRESSED:
+			if( e.isMouseDown( BUTTON3_MASK)){
+				focusToMouse();
+			}
+			break;
+		}
+	}
+}
+
+//	blocklistの各アイコン。クリックで候補から選択するポップアップ。 SelectBlock, SelectAssetを使う
+class MapGenDialog.BlockSetIcon
+{
+	view = null;
+	def = null;
+	item = null;		//	blkid/fblkid
+
+	constructor( v){
+		view = v;
+		view.setValue( "lbl", "");
+		view.findChild( "icon").sp.visible = false;
+		view.addEventListener( ACTION_EVENT, actionevent);
+		v.ref = this;
+	}
+
+	//	int / string
+	function setBlockItem( d, b){
+		def = d;
+		view.setValue( "lbl", d.lbl);
+		item = b;
+		local icon = view.findChild( "icon");
+		if( def.type == "asset"){
+			local ba = ::conf._resource.map_asset[b];
+			if( ba["bw64"]){
+				SelectAsset.getPreviewTex( ba.bw64, @( tex){ icon.setSprite( Sprite( tex)); });
+			}
+		}else{
+			if( b){
+				local t = def.type=="blk" ? {blk=b} : { fblk=FreeBlock.create({fbtype:b&4095, fbparam:b>>>12}) };
+				SelectBlock.getPreviewTex( t, @( tex){ icon.setSprite( Sprite( tex)); });
+				icon.setVisible( true);
+			}else{
+				icon.setVisible( false);
+			}
+		}
+	}
+
+	function actionevent( e){
+		switch( e.id){
+		case ACTION_PERFORMED:
+			if( e.isMouseDown( BUTTON1_MASK)){
+				showChoose( e);
+			}
+			break;
+		}
+	}
+	
+	//	選択を表示
+	function showChoose( e){
+		local popsc = ::loadSKView( srcdir.."/ui/selblkpopup.ui");
+		local pop = Popup( popsc);
+		//
+		local self = this;
+		local selv = popsc.findChild( "selblock");
+		if( def.type == "asset"){
+			local sela = SelectAsset( selv);
+		}else{
+			local selb = SelectBlock( selv);
+			if( def.type == "blk"){
+				selb.setBlockPages( def.blkpages);
+				selb.selectBlock( item);
+			}else{
+				selb.setFreeBlockPages( def.fbpages);
+				selb.selectFreeBlock( {fbtype=item&4095, fbparam:item>>>12});
+			}
+			selv.addEventListener( ACTION_EVENT, @( e){
+				switch( e.id){
+				case ACTION_PERFORMED:
+					local cmd = e.actioncmd, b = cmd["blk"];
+					if( !b) b = cmd["fblk"].fbtype | (cmd["fblk"].fbparam << 12);
+					self.view.postActionEvent( b);
+					pop.close();
+					break;
+				}
+				e.consume();
+			});
+		}
+		pop.show( null, e.src);
+	}
+}
