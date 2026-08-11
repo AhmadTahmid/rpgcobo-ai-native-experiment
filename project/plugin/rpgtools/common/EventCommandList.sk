@@ -46,7 +46,7 @@ class EventCommandList
 	}
 
 	function setCommandBlock( cb){
-		rootblkview = EventCommandBlockView.create( null, cb, 0);
+		rootblkview = RootEventCommandBlockView.create( null, cb, 0);
 		spaceview = SKView();
 		spaceview.setRect( 0, 0, 100, LINEH*16);
 		(spaceview.viewdata = ::SKViewEntityData()).staticparams = [( SKViewPropertyID.SIZE_STATIC, (100, LINEH*16))]
@@ -216,6 +216,10 @@ class EventCommandList
 			mpress = false;
 			mdrag = false;
 			pressy = e.ly;
+			if( e.lx < 20){	//	シュリンクボタン領域クリック
+				rootblkview.pressShrinkButton( e);
+				break;
+			}
 			mview = rootblkview.commandAt( e.ly);
 			if( !isSelectionContains( mview)){
 				selectCommand( mview);
@@ -267,6 +271,10 @@ class EventCommandList
 			// if( sv != mview){
 				mview = sv;
 			// }
+			rootblkview.setShrinkVisible( e.lx < 28);
+			break;
+		case MOUSE_EXITED:
+			rootblkview.setShrinkVisible( false);
 			break;
 		}
 	}
@@ -559,5 +567,76 @@ class EventCommandSelectPopup extends Popup
 			return close();
 		}
 		return super.actionevent( e);
+	}
+}
+
+//	コマンドブロックを縮小表示するためのボタンを配置するエリアを表示する
+//	
+class RootEventCommandBlockView extends EventCommandBlockView
+{
+	//	ブロックシュリンク機能
+	blkviewlist = null;		//	EventCommandBlockView[]
+	blksplist = null;		//	Sprite[] : シュリンクカーソル表示のSprite
+	showshrink = false;		//	blksplistを表示するかどうか。シュリンク時にはfalseでも表示
+	
+	function loadFinished(){
+	}
+
+	function updateHeight(){
+		super.updateHeight();
+		updateButtons();
+		repaint();
+	}
+
+	function updateButtons(){
+		blkviewlist = gatherBlocks( this, []);
+		blksplist = [];
+		updateMatrixAll( true);
+		local sp0 = #::getSprite( "/skstudio/img/ui/dir4d.png");
+		local sp1 = #::getSprite( "/skstudio/img/ui/dir1.png");
+		local im = getInvMatrix();
+		foreach( i, bv in blkviewlist){
+			local cv = bv.parent, col = cv.cmddef["color"][0] || 0xffffffff;
+			local sp = clone (bv.shrink ? sp1 : sp0);
+			local p = v3_1( 0.0).transform( bv.mat).transform( im);
+			sp.bnd.set( 2, p.y-LINEH+2, 20, 20);
+			sp.color = col;
+			sp.visible = (showshrink|bv.shrink);
+			blksplist .. sp;
+		}
+	}
+
+	function gatherBlocks( blkview, a){
+		foreach( cv in blkview.cmdviews){
+			foreach( bv in cv.cmdblockviews){
+				a .. bv;
+				if( !bv.shrink) gatherBlocks( bv, a);
+			}
+		}
+		return a;
+	}
+
+	function render(){
+		skDrawSprites( blksplist);
+	}
+
+	function setShrinkVisible( b){
+		if( showshrink != b){
+			showshrink = b;
+			foreach( i, bv in blkviewlist){
+				blksplist[i].visible = (b|bv.shrink);
+			}
+			repaint();
+		}
+	}
+
+	function pressShrinkButton( e){
+		foreach( i, sp in blksplist){
+			if( sp.bnd.contains( e.lx, e.ly)){
+				local bv = blkviewlist[i];
+				bv.setShrink( !bv.shrink); 
+				break;
+			}
+		}
 	}
 }

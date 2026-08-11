@@ -1034,6 +1034,8 @@
 	"lbl_groundpos"						: {"ja":"接地位置", "en":"Ground Pos"}
 	"lbl_eventuse"						: {"ja":"イベントとして配置", "en":"Place as Event"}
 	"lbl_editasset"						: {"ja":"アセットを編集", "en":"Edit this Asset"}
+	"lbl_plcoffs"						: {"ja":"配置オフセット", "en":"Place Offset"}
+	"lbl_plcair"						: {"ja":"空気ブロックを配置", "en":"Place Air Block"}
 	"lbl_editall_mtl"					: {"ja":"マテリアル一括設定", "en":"Edit Materials"}
 	"lbl_copy_pal"						: {"ja":"パレット画像をコピー", "en":"Copy Palette Image"}
 	"lbl_paste_pal"						: {"ja":"パレット画像をペースト", "en":"Paste Palette Image"}
@@ -1186,7 +1188,6 @@
 	"lbl_copyfrommap"					: {"ja":"別マップからコピー", "en":"Copy from another map"}
 	"pop_mapcopied"						: {"ja":"マップがコピーされました", "en":"Map was copied"}
 	
-
 	"penmode_paint"						: {"ja":"ペイント", "en":"Paint"}
 	"penmode_attach"					: {"ja":"アタッチ", "en":"Attach"}
 	"penmode_erace"						: {"ja":"イレース", "en":"Erace"}
@@ -1225,6 +1226,8 @@
 	"lbl_map_cursize"					: {"ja":"現在のサイズ", "en":"Current Size"}
 	"lbl_map_floorheight"				: {"ja":"床の高さ", "en":"Floor Height"}
 	"lbl_map_clearevents"				: {"ja":"イベントのクリア", "en":"Clear Events"}
+
+	"pop_dupremoved"					: {"ja":"このワールド内に存在した重複しているフリーブロックを削除しました。", "en":"Duplicate Free Blocks in this world have been removed."}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	//	デバッグ

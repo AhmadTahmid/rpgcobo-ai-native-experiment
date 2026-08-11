@@ -108,7 +108,7 @@ class EventCommandItemView extends SKLibView
 	
 	function updateHeight(){
 		local y = h1;
-		foreach( v in cmdblockviews){
+		foreach( i, v in cmdblockviews){
 			if( y != v.pos.y){
 				v.pos.y = y;
 				v.matdirty = 1;
@@ -161,6 +161,13 @@ class EventCommandItemView extends SKLibView
 		}
 		return d;
 	}
+
+	function blockIndexOf( blk){
+		foreach( i, b in cmdblockviews){
+			if( b == blk) return i;
+		}
+		return -1;
+	}
 }
 
 class EventCommandBlockView extends SKLibView
@@ -172,6 +179,7 @@ class EventCommandBlockView extends SKLibView
 	stretchg = null;			//	ストレッチ領域
 	cmdviews = null;			//	EventCommandItemView[] : 
 	indent = 0;					//	ルートのみ0、他は40
+	shrink = false;
 
 	static function create( p, a, indent){
 		local v = ::loadSKView( srcdir.."/ui/evcmdblk.ui", this);
@@ -201,11 +209,18 @@ class EventCommandBlockView extends SKLibView
 
 	function updateHeight(){
 		local h = 0;
-		foreach( v in cmdviews){
-			v.pos.x = indent;
-			v.pos.y = h;
-			v.matdirty = true;
-			h += v.bnd.h;
+		if( shrink){
+			foreach( v in cmdviews){
+				v.visible = false;
+			}
+		}else{
+			foreach( v in cmdviews){
+				v.visible = true;
+				v.pos.x = indent;
+				v.pos.y = h;
+				v.matdirty = true;
+				h += v.bnd.h;
+			}
 		}
 		if( h+LINEH != bnd.h){	//	umm
 			bnd.h = h+LINEH;
@@ -236,7 +251,7 @@ class EventCommandBlockView extends SKLibView
 	}
 
 	function commandAt( ly){
-		if( ly >= 0.0 && ly < bnd.h){
+		if( !shrink && ly >= 0.0 && ly < bnd.h){
 			foreach( v in cmdviews){
 				local r = v.commandAt( ly - v.pos.y); if( r) return r;
 			}
@@ -269,5 +284,12 @@ class EventCommandBlockView extends SKLibView
 			delete cmdblock[s];
 		}
 		revalidate();
+	}
+
+	function setShrink( b){
+		if( shrink != b){
+			shrink = b;
+			revalidate();
+		}
 	}
 }

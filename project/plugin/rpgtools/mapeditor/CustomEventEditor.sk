@@ -102,7 +102,7 @@ class CustomEventEditor
 		pageproplist.bindProperties( props);
 		pageproplist.setParameters( page);
 		local cb = pagecmdblockmap[page];	//	キャッシュはidxじゃなくてpage実体そのものから。。。
-		if( !cb) cb = pagecmdblockmap[page] <- EventCommandBlockView.create( null, page.cmdblock, 0);
+		if( !cb) cb = pagecmdblockmap[page] <- RootEventCommandBlockView.create( null, page.cmdblock, 0);
 		cmdlist.setCommandBlockView( cb);
 	}
 
