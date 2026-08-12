@@ -164,7 +164,7 @@ class MapTools.tool_fblk extends MapTool
 			fbuid = fbuid,
 			fbtype = fblk.fbtype,
 			fbparam = fblk.fbparam,
-			pos = [fb0.x,fb0.y,fb0.z],
+			pos = [fb0.x,fb0.y-fb0.br.h/2+fblk.br.h/2,fb0.z],	//	yは底面を合わせる
 			rot = fb0.rot,
 		}
 		local fb = FreeBlock.create( p);
@@ -217,7 +217,7 @@ class MapTools.tool_fblk extends MapTool
 				//	ドア配置時にデフォルトの開閉ロックを設定する
 				if( fblk.isClass( "door")){
 					local mapvox = ::conf._resource["map_vox"].door[fblk.fbparam & 0x3ff];	//	ドアの定義
-					if( mapvox["deflock"]){
+					if( mapvox["deflock"] && !(fblk.fbparam & 0x80000000)){	//	オープン状態でもロックしない
 						fblk = FreeBlock.create({fbtype:fblk.fbtype, fbparam:fblk.fbparam|0x40000000});
 					}
 				}
@@ -359,8 +359,9 @@ class MapTools.tool_fblk extends MapTool
 				break;
 			case VK_D:
 				if( e.isCommandDown()){
-					if( selgz){
-						local fb = clone selgz.ref;
+					local fb = selgz["ref"] || listfb();
+					if( fb){
+						fb = clone fb;
 						return startDuplicate( fb);
 					}
 				}
@@ -490,16 +491,25 @@ class MapTools.tool_fblk extends MapTool
 			...getDefaultContextMenu( e),
 		];
 		if( selgz && selgz.ref.isClass( "door")){
-			local fb = selgz.ref, lock = (fb.fbparam & 0x40000000) != 0;
-			ctxmenu[0] <- { id="lock", lbl=lock?"$T.lbl_doorlock":"$T.lbl_doorunlock", icon=lock?"\ue897":"\ue898", };
+			local fb = selgz.ref, fbstat = (fb.fbparam>>>30);
+			ctxmenu[0] <- { lbl="$T.lbl_doorstat", icon="\ueffd", submenu=[
+				{ id="lock", lbl="$T.lbl_lock", icon="\ue897", checked= fbstat==1, },
+				{ id="unlock", lbl="$T.lbl_unlock", icon="\ue898", checked= fbstat==0},
+				{ id="open", lbl="$T.lbl_dooropen", icon="\ue9ba", checked= fbstat==2},
+			]};
 			ctxmenu[1] <- "-";
 		}
 		local m = MenuPopup.run( ctxmenu);
 		switch( m["id"]){
 		case "lock":
+		case "unlock":
+		case "open":
 			if( selgz){
-				local fb = selgz.ref;
-				local newfb = FreeBlock.create({fbtype=fb.fbtype, fbparam=(fb.fbparam ^ 0x40000000)});
+				local fb = selgz.ref, p = fb.fbparam;
+				if( m["id"]=="lock") p = (p&~0x80000000) | 0x40000000;
+				else if( m["id"]=="unlock") p = (p&~0x80000000) & ~0x40000000;
+				else p = (p&~0x40000000) | 0x80000000;
+				local newfb = FreeBlock.create({fbtype=fb.fbtype, fbparam=p});
 				local bop = BlockOperation( editor.bw);
 				bop.placeFreeBlock({fblk:newfb, fbuid:fb.fbuid, pos=(fb.x,fb.y,fb.z), rot=fb.rot});
 				if( bop.len()){

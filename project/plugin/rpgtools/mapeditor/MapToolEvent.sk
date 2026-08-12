@@ -19,7 +19,7 @@ local srcdir = dirname( callee().getSourceName());
 
 class MapTools.tool_event extends MapTool
 {
-	blkflag = BLK_SOLID |BLK_SOLIDFB;	//	rayTestで使う
+	blkflag = BLK_SOLID |BLK_SOLIDFB | BLK_DECAL;	//	rayTestで使う
 
 	colsellist = null;
 	evlist = null;
@@ -483,20 +483,30 @@ class MapTools.tool_event extends MapTool
 		local evlist = ::RPGSystem.eventrole._list.map( @( v) v["menutype"]=="door" && !v["hide"] ? {
 			id="placedoor", lbl=v.name, icon=v.icon, key=v.key
 		} : undefined);
+		local fb = editor.bw.getFreeBlock( hb.fbuid);
 		//	開閉ロックはfbの状態で判断
-		local lock = (hb.fbparam & 0x40000000) != 0;
-		evlist[0] <- { id="lock", lbl=lock?"$T.lbl_doorlock":"$T.lbl_doorunlock", icon=lock?"\ue897":"\ue898", };
+		local fbstat = (fb.fbparam>>>30);
+		evlist[0] <- { lbl="$T.lbl_doorstat", icon="\ueffd", submenu=[
+			{ id="lock", lbl="$T.lbl_lock", icon="\ue897", checked= fbstat==1, },
+			{ id="unlock", lbl="$T.lbl_unlock", icon="\ue898", checked= fbstat==0},
+			{ id="open", lbl="$T.lbl_dooropen", icon="\ue9ba", checked= fbstat==2},
+		]};
 		evlist[1] <- "-";
 		//
 		local ctxmenu = evlist;
 		local m = MenuPopup.run( ctxmenu);
-		local fb = editor.bw.getFreeBlock( hb.fbuid);
 		local mapvox = ::conf._resource["map_vox"].door[fb.fbparam & 0x3ff];	//	ドアの定義
 		local opensnd = mapvox["opensnd"] || "SE100";	//	ドアの開閉サウンド
 		switch( m["id"]){
 		case "lock":
+		case "unlock":
+		case "open":
 		{
-			local newfb = FreeBlock.create({fbtype=fb.fbtype, fbparam=(fb.fbparam ^ 0x40000000)});
+			local p = fb.fbparam;
+			if( m["id"]=="lock") p = (p&~0x80000000) | 0x40000000;
+			else if( m["id"]=="unlock") p = (p&~0x80000000) & ~0x40000000;
+			else p = (p&~0x40000000) | 0x80000000;
+			local newfb = FreeBlock.create({fbtype=fb.fbtype, fbparam=p});
 			local bop = BlockOperation( editor.bw);
 			bop.placeFreeBlock({fblk:newfb, fbuid:fb.fbuid, pos=(fb.x,fb.y,fb.z), rot=fb.rot});
 			if( bop.len()){

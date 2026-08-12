@@ -1220,8 +1220,8 @@
 	"lbl_asset"							: {"ja":"アセット", "en":"Asset"}
 	"lbl_eventlist"						: {"ja":"イベントリスト", "en":"Event List"}
 	"lbl_pickheight"					: {"ja":"この高度に設定", "en":"Set to this Height"}
-	"lbl_doorlock"						: {"ja":"ドア開閉: ロック", "en":"Door: Locked"}
-	"lbl_doorunlock"					: {"ja":"ドア開閉: 可能", "en":"Door: Unlocked"}
+	"lbl_doorstat"						: {"ja":"ドア状態", "en":"Door Status"}
+	"lbl_dooropen"						: {"ja":"オープン", "en":"Open"}
 
 	"lbl_map_cursize"					: {"ja":"現在のサイズ", "en":"Current Size"}
 	"lbl_map_floorheight"				: {"ja":"床の高さ", "en":"Floor Height"}
