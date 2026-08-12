@@ -560,7 +560,7 @@ class MapGenerator
 		args .. "-type" .. gendef.val .. "-w" .. (srcw/wdiv) .. "-d" .. (srcd/wdiv);
 		args .. "-dir" .. tmpdir .. "-out" .. outid;
 		parseopts( gendata, args);
-		p.open( exe, args);
+		p.open( exe, args, 0x200);	//	0x200 = CREATE_NO_WINDOW
 		while( p.isrunning()){
 			suspend();
 		}
