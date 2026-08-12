@@ -169,7 +169,7 @@ eventcmd .. {
 		}
 	]
 	
-	defval = { reqs = [{ lvar="A", op="=", rvar=true, }], cmdblocks = [[]] }
+	defval = { reqs = [{ lvar="A", op="==", rvar=true, }], cmdblocks = [[]] }
 	
 	cmdinfo = @( cmd)({
 		info = eventRequirementText( cmd.reqs),
