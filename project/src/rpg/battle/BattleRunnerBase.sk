@@ -449,13 +449,13 @@ class BattleRunnerBase
 		}
 		return null;	//	どのコマンドも使えなかった。ページを切り替えとかしてリトライしても良い
 	}
-
+	
 	function chooseAIPage( pc, ai){
 		if( length( ai) <= 1) return 0;
 		local a = ai.map( @( v, i){
-			local req0 = RPGSystem.aipagereq[v["req0"]]["calc"];
-			local req1 = RPGSystem.aipagereq[v["req1"]]["calc"];
-			if( (req0 && !req0( v.req0, pc)) || (req1 && !req1( v.req1, pc))) return undefined;
+			local req0 = v["req0"], calc0 = ::RPGSystem.aipagereq[req0["key"]||req0]["calc"];
+			local req1 = v["req1"], calc1 = ::RPGSystem.aipagereq[req1["key"]||req1]["calc"];
+			if( (calc0 && !calc0( req0, pc)) || (calc1 && !calc1( req1, pc))) return undefined;
 			local rate = ::rnd( 0.0, v.rate);
 			return {idx=i, rate=rate};
 		});

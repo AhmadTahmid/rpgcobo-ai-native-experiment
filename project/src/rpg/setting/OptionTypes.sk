@@ -1469,8 +1469,8 @@ RPGSystem.option .. {
 		case "prebattle":
 		case "preturn":
 		case "postcommand":	//	バトル時は色々なタイミングをかけなおす。prebattleの場合は発動エフェクトなし
-			local req = RPGSystem.aipagereq[opd.req]["calc"];
-			if( (!req || req( opd.req, self))){
+			local req = opd["req"], calc = ::RPGSystem.aipagereq[req["key"]||req]["calc"];
+			if( (!req || calc && calc( req, self))){
 				local cond = self.hasCondition( opd.condid);
 				if( cond){
 					cond.turn = cond.steps = cond.count = 0;	//	ターンと歩数等をリセットして常時掛かってるように

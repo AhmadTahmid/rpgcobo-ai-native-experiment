@@ -113,6 +113,7 @@ RPGSystem.ui ..
 					break;
 			}
 		}
+		if( !length( list)) return -1;	//	選択肢がない場合はダイアログを表示しないで-1を返す
 
 		local view = RPGMain.showView({
 			layer = "message"

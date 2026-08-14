@@ -185,16 +185,19 @@ settingprops .. {
 
 	tostring = @( v){
 		local dirs = ["↑","→","↓","←",];
-		local map = ::conf.map[v["mapid"]], pos = v.pos;
-		local lbl = sprintf( "%S: %S (%S %S %S %S)", v["mapid"], map["name"] || "$T.lbl_invalidid", pos[0], pos[1], pos[2], dirs[pos[3]]);
+		local map = ::conf.map[v["mapid"]], pos = v.pos, r = (Math.iround( pos[4]*Math.RTOD)/90) & 3;
+		local lbl = sprintf( "%S: %S (%S %S %S %S)", v["mapid"], map["name"] || "$T.lbl_invalidid", pos[0], pos[1], pos[2], dirs[r]);
 		return lbl;
 	}
 
 	//	コンテキストメニュー表示してマップ編集に移動
 	edit = @( val){
-		if( MenuPopup.run( [{ lbl="$T.setting_inimap_open", icon="\ue89e" }])){
+		if( MenuPopup.run( [{ lbl="$T.setting_inimap_open", icon="\ue89e" }], view.findChild( "btn"))){
 			::skstudio.openEditor( "/.x/map/%S" % val.mapid);
-			//	位置まで移動したらもっと親切
+			local pos = val["pos"];
+			if( pos){
+				::skstudio.editor.canvas.camwork.moveFocus( Vector3D( pos), 0);
+			}
 		}
 	}
 };
@@ -539,7 +542,8 @@ local exitmappropdef = {
 			{ pid="enabled", lbl="$T.lbl_enabled", type=BOOL, refresh=true,
 				get = @( prop, data) !!data["dest"],
 				set = @( prop, data, val){
-					data.dest <- val ? (clone ::conf.setting.inimap) : null;
+					local m = ::conf.setting.inimap, p = m.pos;
+					data.dest <- val ? { mapid=m.mapid, pos=p } : null;
 				}
 			},
 		];

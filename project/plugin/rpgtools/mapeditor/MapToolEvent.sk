@@ -606,15 +606,18 @@ class MapTools.tool_event extends MapTool
 			{ id="rot", lbl="↓", val=2, checked=rot==2 },
 			{ id="rot", lbl="←", val=3, checked=rot==3 },
 		];
-		local data = gz.data;
+		local data = gz.data, role = ::RPGSystem.eventrole[data["role"]];
 		local ctxmenu;
 		if( gz.id=="inimap"){
 			ctxmenu = [ { id="rot", lbl="$T.lbl_direction", submenu=dirlist}, ]
 		}else{
+			local rolemenu = fget( role, "rolemenu", null);
+			//
 			ctxmenu = [
 				{ id="edit", lbl="$T.lbl_edit", icon="\ue745", modkey="Enter"},
 				{ id="color", lbl="$T.lbl_color", icon=evcolorlist[data.col].icon, submenu=colmenu},
 				{ id="rot", lbl="$T.lbl_direction", submenu=dirlist, disable=data["mdl"]["fbuid"]},
+				...( rolemenu && ["-",...rolemenu] ),
 				"-"
 				{ id="copy", lbl="$T.menu_edit_copy", icon="\ue14d" },
 				{ id="cut", lbl="$T.menu_edit_cut", icon="\ue14e" },
@@ -625,6 +628,7 @@ class MapTools.tool_event extends MapTool
 			}
 		}
 		local m = MenuPopup.run( ctxmenu);
+		if( m["func"]) return m["func"]( gz);
 		local a = [getListItem( gz.id)];
 		switch( m["id"]){
 		case "edit":

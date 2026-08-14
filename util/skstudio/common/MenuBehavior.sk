@@ -158,7 +158,7 @@ class MenuPopup extends Popup
 		if( dis){ v.anime( 10); v.enabled = false; }else{ v.anime( 0); v.enabled = true; }
 
 		//	初期選択
-		if( mi["checked"] || (mi && m["iniitem"] == mi)){
+		if( mi["checked"] || (mi && !(m["iniitem"] <> mi))){
 			local chk = v.findChild( "chk");
 			if( chk) chk.layerflags |= 1;
 		}
@@ -257,6 +257,7 @@ class MenuPopup extends Popup
 		p.rootmenu = rootmenu;
 		p.parentmenu = this;
 		p.poplayout = 3;
+		p.iniitem = iniitem;
 		local ma = fget( v.ref, "submenu");
 		p.setMenu( ma);
 		submenu = p;

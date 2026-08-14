@@ -130,6 +130,23 @@ local wipeprop = {
 	list = @() ::mapwipelist.map( @( v, i) +{ lbl=v.lbl, val=i})
 }
 
+///////////// ロール毎メニュー
+
+local openmapmenu = {
+	lbl="$T.lbl_opendestmap", icon="\uea77",
+	func=@( gz){
+		local dest = gz["data"]["dest"];
+		if( !dest) return;
+		::skstudio.openEditor( "/.x/map/%S" % dest["mapid"]);
+		//	
+		local pos = dest["pos"] || ::skstudio.editor.data["event"][dest["evid"]]["pos"];
+		if( pos){
+			::skstudio.editor.canvas.camwork.moveFocus( Vector3D( pos).scale( 0.5), 0);
+		}
+	}
+};
+
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
 //	ポータルのイベントロール。
@@ -166,6 +183,8 @@ RPGSystem.eventrole .. {
 			]
 		},
 	],
+
+	rolemenu = [openmapmenu],
 }
 
 
@@ -299,6 +318,8 @@ RPGSystem.eventrole .. {
 			]
 		},
 	],
+
+	rolemenu = [openmapmenu],
 }
 
 

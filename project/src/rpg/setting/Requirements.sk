@@ -148,6 +148,14 @@ aipagereq .. {
 	icon = "\ue0b7"
 	calc = @( key, src) src.hprate()>=100
 }
+//	hp100 : HP＜100%
+//	
+aipagereq .. {
+	key = "hp99"
+	name = "HP＜100%"
+	icon = "\ue0b7"
+	calc = @( key, src) src.hprate()<100
+}
 
 //	hp50 : HP半分以下
 //	

@@ -464,6 +464,7 @@
 	"cmd_move"							: {"ja":"キャラ移動", "en":"Chara Move"}
 	"cmd_rotate"						: {"ja":"キャラ回転", "en":"Chara Rotate"}
 	"cmd_freeze"						: {"ja":"フリーズ", "en":"Freeze"}
+	"cmd_depop"							: {"ja":"イベントの一時消去", "en":"Vanish Event"}
 
 	"cmd_battleend"						: {"ja":"バトルを終了", "en":"End Battle"}
 	"cmd_battlecmd"						: {"ja":"バトルコマンド実行", "en":"Battle Command"}
@@ -534,6 +535,7 @@
 	"cmd_move_tips"						: {"ja":"キャラを移動します。", "en":""}
 	"cmd_rotate_tips"					: {"ja":"キャラを回転します。", "en":""}
 	"cmd_freeze_tips"					: {"ja":"キャラの動作を一時的に止めます。", "en":""}
+	"cmd_depop_tips"					: {"ja":"イベントを条件を満たすまで一時的に消去します。", "en":"Temporarily vanish an event until conditions are met."}
 	
 	"cmd_battleend_tips"				: {"ja":"勝利、敗北、又は中止を指定してバトルを強制的に終了します。", "en":""}
 	"cmd_battlecmd_tips"				: {"ja":"バトル用のコマンドを実行します。", "en":""}
@@ -569,6 +571,9 @@
 	"svar_party"						: {"ja":"メンバーリスト", "en":"Member List"}
 	"svar_enemies"						: {"ja":"エネミーリスト", "en":"Enemy"}
 	"svar_showtimer"					: {"ja":"表示タイマー", "en":"Show Timer"}
+	"svar_curportal"					: {"ja":"現在ポータル", "en":"Current Portal"}
+	"svar_lastportal"					: {"ja":"前回ポータル", "en":"Last Portal"}
+	"svar_exitmap"						: {"ja":"出口マップ", "en":"Exit Map"}
 
 	//	フォーマット
 	"format_own"						: {"ja":"%S の所持", "en":"%S's num"}
@@ -992,6 +997,10 @@
 	"lbl_placeparma"					: {"ja":"永久配置", "en":"Permanent Place"}
 	"lbl_stage"							: {"ja":"ステージ", "en":"Stage"}
 	"lbl_noenemyg"						: {"ja":"エネミー設定なし", "en":"No Enemy Settings"}
+	"lbl_repop_remap"					: {"ja":"再入場でリポップ", "en":"Repop on Reentry"}
+	"lbl_repop_time"					: {"ja":"秒数でリポップ", "en":"Repop by Time"}
+	"lbl_repop_reqs"					: {"ja":"その他のリポップ条件", "en":"Other Repop Conditions"}
+	"lbl_repop_outcam"					: {"ja":"カメラ外のみリポップ", "en":"Only Out of Camera"}
 
 	//	イベントロール
 	"lbl_storeclerk"					: {"ja":"ショップ店員", "en":"Store Clerk"}
@@ -1222,6 +1231,7 @@
 	"lbl_pickheight"					: {"ja":"この高度に設定", "en":"Set to this Height"}
 	"lbl_doorstat"						: {"ja":"ドア状態", "en":"Door Status"}
 	"lbl_dooropen"						: {"ja":"オープン", "en":"Open"}
+	"lbl_opendestmap"					: {"ja":"移動先のマップを開く", "en":"Open the Destination"}
 
 	"lbl_map_cursize"					: {"ja":"現在のサイズ", "en":"Current Size"}
 	"lbl_map_floorheight"				: {"ja":"床の高さ", "en":"Floor Height"}
