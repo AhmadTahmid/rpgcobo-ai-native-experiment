@@ -51,6 +51,9 @@ RPG-Cobo consists of multiple repositories.
 - **rpgcobo-assets**  
   Default materials/templates
 
+- **rpgcobo-mapgen**  
+  A tool that generates images for automatic map generation
+
 ---
 
 ## 🛠️ How to do it

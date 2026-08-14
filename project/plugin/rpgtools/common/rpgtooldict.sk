@@ -1308,9 +1308,9 @@
 	},
 	"tmpl_build_confirm"				: {
 		"ja":"ビルドを開始しますか？ビルドが成功するとチケットが消費されます。\n[P]現在の所持数: $own\n使用する枚数: $use",
-		"en":"Do you want to start the build? When the build was successful, a ticket will be consumed. \n[P]You have: $v",
+		"en":"Do you want to start the build? When the build was successful, a ticket will be consumed. \n[P]You have: $own\nUse: $use",
 	},
-	"tmpl_build_noticket"				: {"ja":"ビルドチケットが足りません\n現在の所持数 $own\n使用する枚数 $use\n", "en":"Running game build... $v"},
+	"tmpl_build_noticket"				: {"ja":"ビルドチケットが足りません\n現在の所持数 $own\n使用する枚数 $use", "en":"Not enough build tickets\nYou have: $own\nRequired: $use"},
 
 	"tmpl_build_running"				: {"ja":"ゲームのビルドを実行しています… $v", "en":"Running game build... $v"},
 	"tmpl_build_error"					: {"ja":"ゲームのビルドが失敗しました\n$v", "en":"Game build failed\n$v"},
