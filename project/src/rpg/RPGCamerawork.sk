@@ -87,15 +87,15 @@ class RPGCameraworkStandard extends RPGCamerawork
 		dp.rotate( hpb[0], 0, 0);
 		toloc.add( dp);
 		//	Yはベースを移動していかないといけない
-		if( Math.abs( gy-tgtloc.pos.y) < 0.01){
+		if( Math.abs( gy-tgtloc.pos.y) < 0.51){
 			if( (gytime+=dt) >= 200){
 				local _dy = (toloc.y-(gy+poffs.y)), dy = Math.abs( _dy);
 				local spd = (dy * 0.003 + 0.0001) * dt * Math.saturate( (gytime-200)/1000.0);
-				if( spd >= dy){
-					toloc.y = gy+poffs.y;
-				}else{
+				// if( spd >= dy){
+					// toloc.y = gy+poffs.y;
+				// }else{
 					toloc.y += spd * (_dy<0 ? 1:-1);
-				}
+				// }
 			}
 		}else{
 			gytime = 0;

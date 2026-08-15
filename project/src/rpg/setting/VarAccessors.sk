@@ -292,10 +292,10 @@ class SystemVarAccessor
 			func = @( key, val=undefined) ::rpgstage.battle["enemies"]?.map( @( v) makeobjref( v)) || null,
 		},
 		makesvar({
-			key = "CURPORTAL", name = "$T.svar_lastportal", type = VAR_ANY, defval = null, readonly = true,
+			key = "CURPORTAL", name = "$T.svar_curportal", type = VAR_ANY, defval = null, readonly = true,
 		}),
 		makesvar({
-			key = "LASTPORTAL", name = "$T.svar_lastportal", type = VAR_ANY, defval = null, readonly = true,
+			key = "RETPORTAL", name = "$T.svar_retportal", type = VAR_ANY, defval = null, readonly = true,
 		}),
 		{
 			key = "EXITMAP", name = "$T.svar_exitmap", type = VAR_ANY, readonly = true,

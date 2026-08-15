@@ -312,11 +312,11 @@ class MapEditor extends EditorViewBase
 	function getWorkingData(){
 		local t = { conf={}, res={}};
 		if( datares){
-			local d = data;
+			local d = deepclone( data);
 			if( modaledit){	//	カスタムイベント編集中。。。
-				d = deepclone( d);
 				d.event[modaledit.evid] <- modaledit.data;
 			}
+			d["***replace***"] <- true;
 			t.conf.map <- { [mapid] = d };
 			t.res[bwres.path] <- ObjectOutput.encode( bw);
 		}else{

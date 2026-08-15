@@ -1565,9 +1565,9 @@ eventcmd .. {
 	color = color4
 	
 	props = [
-		{ pid="dest", lbl = "$T.cmd_mapmove_dest", type=PORTAL, cnt="cnt6v.ui", variable=true }
-		{ pid="wipe", lbl="$T.wipe", type=LIST, list=@()::mapwipelist.map( @( v, i) +{ lbl=v.lbl, val=i}), variable=true }	//	トランジション
-		{ pid="remap", lbl="$T.lbl_remap", type=BOOL, variable=true },
+		{ pid="dest", lbl = "$T.cmd_mapmove_dest", type=PORTAL, cnt="cnt6v.ui", variable=1, varbits=1|2|4|8 }
+		{ pid="wipe", lbl="$T.wipe", type=LIST, list=@()::mapwipelist.map( @( v, i) +{ lbl=v.lbl, val=i}), variable=1 }	//	トランジション
+		{ pid="remap", lbl="$T.lbl_remap", type=BOOL, variable=1 },
 	]
 	
 	defval = @(){

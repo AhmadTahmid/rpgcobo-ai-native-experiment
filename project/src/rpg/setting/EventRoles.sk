@@ -160,7 +160,8 @@ RPGSystem.eventrole .. {
 	
 	props = [
 		nameprop,
-		{ pid="dest", lbl="$T.cmd_mapmove_dest", type=PORTAL, cnt="cnt6.ui", },
+		{ pid="back", lbl="$T.lbl_backportal", type=BOOL, },
+		{ pid="dest", lbl="$T.cmd_mapmove_dest", type=PORTAL, cnt="cnt6v.ui", hide=@( pl){ return pl.getParam( "back"); } },
 		wipeprop,
 		{ pid="remap", lbl="$T.lbl_remap", type=BOOL, },
 	]
@@ -168,6 +169,7 @@ RPGSystem.eventrole .. {
 	defdata = {
 		mdl = { r = [0,1.0,0,0.5,1.0,0.5] }
 		spawndist = 1
+		back = false
 		dest = null
 		wipe = 1
 		remap = true
@@ -177,8 +179,15 @@ RPGSystem.eventrole .. {
 		{
 			ani=null
 			trigger = 5
-			wvarmap = { W="dest", X="wipe",Y="remap" }
+			wvarmap = { W="dest", X="wipe", Y="remap", Z="back" }
 			cmdblock = [
+				{
+					cmd="cmd_if",
+					reqs=[ { lvar="Z",op="==",rvar=true} ],
+					cmdblocks=[
+						[ { cmd="cmd_compute", lvar="W", op="=", rvar="RETPORTAL" } ]
+					],
+				}
 				{ cmd="cmd_mapmove", dest=null, _var={dest="W",wipe="X",remap="Y"}, }
 			]
 		},
@@ -283,7 +292,8 @@ RPGSystem.eventrole .. {
 	
 	props = [
 		nameprop,
-		{ pid="dest", lbl="$T.cmd_mapmove_dest", type=PORTAL, cnt="cnt6.ui", },
+		{ pid="back", lbl="$T.lbl_backportal", type=BOOL, },
+		{ pid="dest", lbl="$T.cmd_mapmove_dest", type=PORTAL, cnt="cnt6v.ui", hide=@( pl){ return pl.getParam( "back"); } },
 		wipeprop,
 		{ pid="remap", lbl="$T.lbl_remap", type=BOOL, },
 		{ pid="opensnd", lbl="$T.lbl_sound", type=RESID, restype="snd", },
@@ -291,6 +301,7 @@ RPGSystem.eventrole .. {
 
 	defdata = {
 		spawndist = 1,
+		back = false
 		dest = null
 		wipe = 2
 		remap = false
@@ -312,8 +323,15 @@ RPGSystem.eventrole .. {
 			standani = {id="open"}
 			reqs = { lvar="A", op="==", rvar="REMAPID"},
 			trigger = 5
-			wvarmap = { W="dest", X="wipe", Y="remap" }
+			wvarmap = { W="dest", X="wipe", Y="remap", Z="back" }
 			cmdblock = [
+				{
+					cmd="cmd_if",
+					reqs=[ { lvar="Z",op="==",rvar=true} ],
+					cmdblocks=[
+						[ { cmd="cmd_compute", lvar="W", op="=", rvar="RETPORTAL" } ]
+					],
+				}
 				{ cmd="cmd_mapmove", dest=null, _var={dest="W",wipe="X",remap="Y"}, }
 			]
 		},

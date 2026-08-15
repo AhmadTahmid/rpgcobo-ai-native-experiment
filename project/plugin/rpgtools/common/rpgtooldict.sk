@@ -572,7 +572,7 @@
 	"svar_enemies"						: {"ja":"エネミーリスト", "en":"Enemy"}
 	"svar_showtimer"					: {"ja":"表示タイマー", "en":"Show Timer"}
 	"svar_curportal"					: {"ja":"現在ポータル", "en":"Current Portal"}
-	"svar_lastportal"					: {"ja":"前回ポータル", "en":"Last Portal"}
+	"svar_retportal"					: {"ja":"戻り先ポータル", "en":"Return Portal"}
 	"svar_exitmap"						: {"ja":"出口マップ", "en":"Exit Map"}
 
 	//	フォーマット
@@ -945,6 +945,7 @@
 	"lbl_dontlink_var"					: {"ja":"変数にリンクしない", "en":"Do not link to Variable"}
 	"lbl_errorop"						: {"ja":"エラー時の処理", "en":"Operation on Error"}
 	"lbl_op"							: {"ja":"操作", "en":"Operation"}
+	"lbl_backportal"					: {"ja":"元のマップへ移動", "en":"Back to last map"}
 	"lbl_remap"							: {"ja":"マップの再配置", "en":"Restore Map"}
 	"lbl_choice"						: {"ja":"選択肢", "en":"Choice"}
 	"lbl_choices"						: {"ja":"選択肢", "en":"Choices"}

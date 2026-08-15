@@ -49,7 +49,11 @@ function override( dst, src, makeslot=true){
 				}
 			}else
 			if( (st==SS_TABLE) && (dt==SS_TABLE||dt==SS_INSTANCE)){
-				override( dst[si], sv, makeslot);
+				if( sv["***replace***"]){
+					dst[si] <- sv;	//	完全に置き換える
+				}else{
+					override( dst[si], sv, makeslot);
+				}
 			}else{
 				if( si in dst) dst[si] = sv;
 				else if( makeslot) dst[si] <- sv;	//	instanceにnewslotは基本出来ない

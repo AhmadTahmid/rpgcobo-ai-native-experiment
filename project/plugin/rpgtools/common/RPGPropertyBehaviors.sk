@@ -2092,7 +2092,10 @@ class PropertyBehaviors.Portal extends PropertyBehavior
 		//	ポータル配置
 		local portals = [];
 		foreach( i, v in map.event){
-			if( v.role=="portal" || v.role=="pdoor") portals..{ lbl=v.name, evid=i, }
+			if( v.role=="portal" || v.role=="pdoor"){
+				local role = ::RPGSystem.eventrole[v.role];
+				portals .. { lbl=v.name, evid=i, icon=role.icon, };
+			}
 		}
 		portalmenu.setMenu( portals);
 		portalmap.setPortals( map, portals);

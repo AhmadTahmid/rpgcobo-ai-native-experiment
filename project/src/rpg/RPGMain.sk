@@ -332,6 +332,7 @@ import GamepadStateID;
 		//	コマンドを拡張してマップ移動をバトルにする
 		local cmd_ = {
 			wipe = 1,
+			noportal = true,	//	バトルマップに移動するのでポータルは無効
 			...cmd,	//	enemies, escape, bgm など必要な情報のために展開しておく
 			//	マップ移動先指定
 			dest = { mapid=cmd.mapid, pos=(8,null,8), },

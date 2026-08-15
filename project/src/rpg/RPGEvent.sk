@@ -695,9 +695,9 @@ class RPGEventRunner
 
 	//	マップ間の移動。暗転明転処理なども込み。
 	function moveMap( cmd){
-		//	pauseされた瞬間にイベントスレッドが止まるため、自律スレッドでマップ移動は行なわれる。
-		//	startMoveMapはptrを返し、マップ移動の処理完了を伝える。
-		//	※同じマップ内の移動、又はマクロでの移動はこのイベントの処理が続く。
+		local myportal = { mapid=stage.mapid, evid=evid };
+		::rpgstat.svarmap.RETPORTAL <- myportal;	//	このイベントの目の前に戻ってこれるように記録
+		::rpgstat.svarmap.CURPORTAL <- cmd.dest;	//	現在ポータルとして移動先を記録
 		local doneptr = ::RPGMain.moveMap( cmd);
 		while( !(~doneptr)){
 			suspend();
@@ -1146,7 +1146,7 @@ class RPGStageEventRunner extends RPGEventRunner
 	//
 	function despawn(){
 		if( rp3d){
-			local p = rp3d.pos;
+			local p = v_0( rp3d.pos).add( rp3d.pivot);
 			spawnpos = (p.x,p.y,p.z,rp3d.dir);	//	保存される
 			rp3d.kill();
 			rp3d = null;
