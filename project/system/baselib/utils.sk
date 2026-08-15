@@ -58,7 +58,12 @@ function compiletemplate_c( src, flags=0){
 
 //	
 function tmpl( tmplstr, vals){
-	return ~(compiletemplate_c( ::lang( tmplstr)), vals);
+	try{
+		return ~(compiletemplate_c( ::lang( tmplstr)), vals);
+	}catch( ex){
+		printexception( ex);
+		return `$tmplstr : ${encodeJSON( vals)}`;
+	}
 }
 
 

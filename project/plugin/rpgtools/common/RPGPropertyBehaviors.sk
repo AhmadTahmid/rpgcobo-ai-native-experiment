@@ -967,6 +967,9 @@ class PropertyBehaviors.Requirements extends PropertyBehavior
 		reqlist = view.findChild( "reqlist");
 		noreqs = view.findChild( "noreqs");
 		h0 = cnt.bnd.h;
+		if( prop["locknum"]){
+			cnt.findChild( "menu")?.setVisible( false);
+		}
 	}
 
 	function getParam(){
@@ -1004,6 +1007,7 @@ class PropertyBehaviors.Requirements extends PropertyBehavior
 				rv.ref.setVar( v.rvar);
 				if( v["op"]){
 					op.ref.selectItem( @( a) a.val==v.op)
+					op.setVisible( true);
 				}else{
 					op.setVisible( false);
 				}

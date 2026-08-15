@@ -72,6 +72,7 @@ class RPGStage
 	searchpush = 0;		//	
 	searchpop = null;	//	RPG3DPopupView : 調べる、話すのポップアップ
 	searchshown = false;
+	selchara = null;	//	RPGCharaBase : 選択中のキャラ
 	
 	//	ステージの機能
 	battle = null;		//	BattleRunner : バトルの処理はここで

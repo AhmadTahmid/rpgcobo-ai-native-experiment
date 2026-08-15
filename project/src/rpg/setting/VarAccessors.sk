@@ -185,20 +185,7 @@ local makesvar( t){
 }
 
 local makeobjref( v){
-	local ret;
-	if( v instanceof RPGCharaBase){
-		ret = RPGObjectRef();
-		ret.type = (v instanceof RPGEnemy) ? "enemy" : "player";
-		ret.id = v.dataid;
-		ret.objid ??= v["objid"];
-	}
-	if( v instanceof RPGStageEventRunner){
-		ret = RPGObjectRef();
-		ret.type = "event";
-		ret.id = v.evid;
-		ret.mapid = ::rpgstage.mapid;
-	}
-	return ret;
+	return RPGObjectRef().set( v);
 }
 
 //	ゲーム全般の情報を取得するための変数アクセッサ。書き込み可能なものもある。
@@ -303,6 +290,16 @@ class SystemVarAccessor
 		{
 			key = "ENEMIES", name = "$T.svar_enemies", type = VAR_ANY, readonly = true,
 			func = @( key, val=undefined) ::rpgstage.battle["enemies"]?.map( @( v) makeobjref( v)) || null,
+		},
+		makesvar({
+			key = "CURPORTAL", name = "$T.svar_lastportal", type = VAR_ANY, defval = null, readonly = true,
+		}),
+		makesvar({
+			key = "LASTPORTAL", name = "$T.svar_lastportal", type = VAR_ANY, defval = null, readonly = true,
+		}),
+		{
+			key = "EXITMAP", name = "$T.svar_exitmap", type = VAR_ANY, readonly = true,
+			func = @( key, val=undefined) ::rpgstage.stat.statmap["exitmap"]["dest"],
 		},
 	]);
 

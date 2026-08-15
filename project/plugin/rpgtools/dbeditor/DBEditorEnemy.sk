@@ -188,9 +188,18 @@ local turnbitslist = [
 	{ lbl="4/4", val=0x888 },
 ];
 
-local aireqlist(){
-	return RPGSystem.aipagereq._list.map( @( v)({ lbl:v.name, val:v.key, submenu:v["submenu"] }));
-}
+local aireqprops = {
+	list = @( pl, val){
+		return RPGSystem.aipagereq._list.map( @( v){
+			local _v = val["key"]==v.key ? val : v.key;
+			return {
+				...v,
+				lbl = fget( v, "lbl", v, _v),
+				val = _v,
+			};
+		});
+	}
+};
 
 local ailvlist = [
 	{ lbl="0:$T.lbl_level_low", val=0 },
@@ -210,8 +219,8 @@ local ailvlist = [
 class BattleAIEdit
 {
 	static aiprops = [
-		{ pid="req0", lbl="${T.lbl_require}1", type=LIST, list=aireqlist, },
-		{ pid="req1", lbl="${T.lbl_require}2", type=LIST, list=aireqlist, },
+		{ pid="req0", lbl="${T.lbl_require}1", type=LIST, ...aireqprops, },
+		{ pid="req1", lbl="${T.lbl_require}2", type=LIST, ...aireqprops, },
 		{ pid="rate", lbl="$T.lbl_rate", type=SCALAR, range=(0,100) },
 		{ pid="turn", lbl="$T.lbl_contturns", type=VEC2, range=(1,9), ui="r" },
 		{ pid="actnum", lbl="$T.lbl_actnum", type=VEC2, range=(1,9), ui="r" },

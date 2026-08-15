@@ -46,8 +46,7 @@ import GamepadStateID;
 	}
 
 	function setupUI(){
-		//	元々作られている場合はそれを使い続ける。
-		local root = ::rootview || (::rootview = ::loadSKView( "/resource/ui/rpgroot.ui", SKRootView));
+		local root = (::rootview = ::loadSKView( "/resource/ui/rpgroot.ui", SKRootView));
 		root.resizemode = 2;
 		if( skGetOSName() == "Windows"){	//	Windowsのみ。タイトルバー作る
 			RPGTitleLayer( root.findChild( "titlelayer"));

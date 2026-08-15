@@ -154,13 +154,17 @@ class ToolCamerawork
 		cd1.to << p;
 		cd1.hpb << r;
 		cd1.zoom = z;
-		moveCameraData( cd1, time);
+		if( time){
+			moveCameraData( cd1, time);
+		}else{
+			setCameraData( cd1);
+		}
 	}
 
 	//	r:Rect3D
-	function moveFocus( r){
+	function moveFocus( r, time=200){
 		local p = r;
-		moveTo( p, hpb, zoom, 200);
+		moveTo( p, hpb, zoom, time);
 	}
 
 	//	指定したgbndにフィットするようにカメラを調整する

@@ -826,6 +826,7 @@ class PropertyBehaviors.List extends PropertyBehavior
 	static uipath = "list.ui"
 
 	menu = null;	//	MenuBehavior
+	val = null;
 
 	function init(){
 		menu = MenuBehavior( view.findChild( "listmenu"), null);
@@ -842,8 +843,9 @@ class PropertyBehaviors.List extends PropertyBehavior
 		// return Math.max( menu.menuitems.indexOf( menu.selitem), 0);	//	-1は無し
 		// local i = menu.menuitems.indexOf( menu.selitem);
 		// return menu.menuitems[i<0?0:i]["val"];
-		local m = menu.selitem;
-		return m["val"];
+		// local m = menu.selitem;
+		// return m["val"];
+		return val;
 	}
 	
 	function setParam( v){
@@ -852,10 +854,18 @@ class PropertyBehaviors.List extends PropertyBehavior
 		// 	if( mi.val == v) return menu.selectItem( mi);
 		// }
 		menu.selectItem( @( vv) !(vv["val"]<>v));
+		val = v;
 	}
 	
 	function paramevent( e){
 		if( e.src==menu.view){
+			if( menu.selitem["select"]){
+				local ret = menu.selitem.select( this, menu.selitem.val);
+				if( ret == undefined) return setParam( val);
+				setParam( ret);
+			}else{
+				val = menu.selitem.val;
+			}
 			postActionEvent( true);
 		}
 	}
@@ -1586,17 +1596,21 @@ class PropertyBehaviors.CheckBits extends PropertyBehavior
 	
 	function paramevent( e){
 		if( e.src["name"] == "listmenu"){
-			showPopup( e);
+			local b = showPopup( e, prop, bits);
+			if( b <> bits){
+				setParam( b);
+				postActionEvent( true);
+			}
 		}
 	}
 	
-	function showPopup( e){
+	static function showPopup( e, prop, bits){
 		local p = Popup( ::loadSKView( "/skstudio/ui/dialog/checklistpopup.ui"));
 		local lv = p.view.findChild( "LIST");
 		local list = ListBehavior( lv);
 		list.multisel = true;
 		list.flipmode = true;
-		local prop = this.prop, bits = this.bits, getbit = getbit;
+		local getbit = getbit;
 		local a = fget( prop, "list", prop, proplist).map( @( v, i)({
 			idx = v["idx"] ?? i,
 			lbl = prop["hidelisticon"] ? (v["lbl"]||v["name"]) : sprintf( "%S %S", v["icon"]||"", v["lbl"]||v["name"]),
@@ -1617,7 +1631,7 @@ class PropertyBehaviors.CheckBits extends PropertyBehavior
 				}
 			}
 		});
-		p.show( null, e.src);
+		p.show( null, e["src"]||::getMousePos( 0));
 		local b = [0];	//	配列化してからビット設定
 		foreach( v in a){
 			if( list.isItemSelected( v)){
@@ -1629,10 +1643,7 @@ class PropertyBehaviors.CheckBits extends PropertyBehavior
 		}
 		while( length( b)>=2 && !b.last()) b.pop();
 		if( length( b)<=2 && !b[1]) b = b[0];
-		if( b <> bits){
-			setParam( b);
-			postActionEvent( true);
-		}
+		return b;
 	}
 }
 

@@ -135,8 +135,8 @@ local aipagereq = RPGSystem.aipagereq;
 //	
 aipagereq .. {
 	key = "none"
-	name = "$T.lbl_noreq"
-	icon = "\ue0b7"
+	lbl = "$T.lbl_noreq"
+	// icon = "\ue0b7"
 	calc = @( key, src) true
 }
 
@@ -144,16 +144,16 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "hp100"
-	name = "HP＝100%"
-	icon = "\ue0b7"
+	lbl = "HP＝100%"
+	// icon = "\ue0b7"
 	calc = @( key, src) src.hprate()>=100
 }
 //	hp100 : HP＜100%
 //	
 aipagereq .. {
 	key = "hp99"
-	name = "HP＜100%"
-	icon = "\ue0b7"
+	lbl = "HP＜100%"
+	// icon = "\ue0b7"
 	calc = @( key, src) src.hprate()<100
 }
 
@@ -161,8 +161,8 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "hp50"
-	name = "HP≦50%"
-	icon = "\ue0b7"
+	lbl = "HP≦50%"
+	// icon = "\ue0b7"
 	calc = @( key, src) src.hprate()<=50
 }
 
@@ -170,8 +170,8 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "hp25"
-	name = "HP≦25%"
-	icon = "\ue0b7"
+	lbl = "HP≦25%"
+	// icon = "\ue0b7"
 	calc = @( key, src) src.hprate()<=25
 }
 
@@ -179,8 +179,8 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "hp10"
-	name = "HP≦10%"
-	icon = "\ue0b7"
+	lbl = "HP≦10%"
+	// icon = "\ue0b7"
 	calc = @( key, src) src.hprate()<=10
 }
 
@@ -188,8 +188,8 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "team70"
-	name = "$T.aipagereq_team70"
-	icon = "\ue0b7"
+	lbl = "$T.aipagereq_team70"
+	// icon = "\ue0b7"
 	calc = @( key, src) !!rpgstage.battle.getTeam( src).find( @( v) v!=src && v.hprate()<=70)
 }
 
@@ -197,8 +197,8 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "teamdead"
-	name = "$T.aipagereq_teamdead"
-	icon = "\ue0b7"
+	lbl = "$T.aipagereq_teamdead"
+	// icon = "\ue0b7"
 	calc = @( key, src) !!rpgstage.battle.getTeam( src).find( @( v) v!=src && v.isDead())
 }
 
@@ -206,8 +206,8 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "turn1"
-	name = "$T.aipagereq_turn＝1"
-	icon = "\ue0b7"
+	lbl = "$T.aipagereq_turn＝1"
+	// icon = "\ue0b7"
 	calc = @( key, src) src.turn==0
 }
 
@@ -215,8 +215,8 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "turn3"
-	name = "$T.aipagereq_turn≧3"
-	icon = "\ue0b7"
+	lbl = "$T.aipagereq_turn≧3"
+	// icon = "\ue0b7"
 	calc = @( key, src) src.turn>=2
 }
 
@@ -224,27 +224,81 @@ aipagereq .. {
 //	
 aipagereq .. {
 	key = "turn5"
-	name = "$T.aipagereq_turn≧5"
-	icon = "\ue0b7"
+	lbl = "$T.aipagereq_turn≧5"
+	// icon = "\ue0b7"
 	calc = @( key, src) src.turn>=4
+}
+
+//	turn10 : 10ターン経過
+//	
+aipagereq .. {
+	key = "turn10"
+	lbl = "$T.aipagereq_turn≧10"
+	// icon = "\ue0b7"
+	calc = @( key, src) src.turn>=9
 }
 
 //	cond : コンディションがかかっているか
 //	
 aipagereq .. {
 	key = "cond"
-	name = "$T.side_dbview_cond"
-	icon = "\ue0b7"
-	calc = @( key, src){	//	cond.K000みたいなのが入ってくる
-		local condid = key.substring( key.indexOf( '.')+1);
-		return src.getConditionLV( condid);
+	lbl = @( val){
+		if( val["key"]=="cond" && val["bits"]){
+			local sb = StringBuffer();
+			// sb .. "$T.side_dbview_cond: ";
+			foreach( v in bitlist( val.bits)){
+				local cond = ::conf.cond["K%03d" % v];
+				sb .. cond["icon"];
+			}
+			return string( sb);
+		}else{
+			return "$T.side_dbview_cond…";
+		}
 	}
-	//	SettingMapは多階層のキーに対応してる
-	submenu = @(){
-		local a = datalist( "cond").map( @( v) +{...v, val="cond."..v.id});
-		return a;
+	icon = "\uf24a"
+	calc = @( val, src){
+		return src.hasAnyCondition( val["bits"]);
+	}
+
+	select = @( pl, val){
+		local prop = {
+			list = datalist( "cond").map( @( v) +{...v, val="cond."..v.id}),
+		};
+		local b = PropertyBehaviors.CheckBits.showPopup( null, prop, val["bits"]||0);
+		if( !b) return undefined;
+		return { key="cond", bits=b };
 	}
 }
+
+//	req1 : 条件
+aipagereq .. {
+	key = "req1"
+	lbl = @( val){
+		if( val["key"]=="req1" && val["reqs"]){
+			return eventRequirementText( val["reqs"]);
+		}else{
+			return "$T.lbl_detailset…";
+		}
+	}
+	icon = "\uf258"
+	calc = @( val, src){
+		local self = VarGetter( (src, ::rpgvar));
+		return ::reqchk( val["reqs"], self);
+	}
+
+	select = @( pl, val){
+		local propdef = {
+			name="$T.lbl_detailset", icon="\uf258",
+			props = [ { pid="reqs", lbl="$T.lbl_reqs", type=REQUIREMENTS, cnt="cnt6v.ui", varbits=12, locknum = 1 }]
+		};
+		local ret = PropertyEditPopup.run( null, propdef, {reqs=val["reqs"] || [{key="varcmp", lvar="G000", op="==", rvar=true}]});
+		if( ret){
+			return { key="req1", reqs=ret.reqs };
+		}
+		return undefined;
+	}
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 //	敵AIターゲット選択条件

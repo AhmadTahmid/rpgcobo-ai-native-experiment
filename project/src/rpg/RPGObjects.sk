@@ -439,6 +439,16 @@ class RPGCharaBase extends RPGObject
 		return conds.find( @( v) v.dataid==condid);
 	}
 
+	//	指定したビット列のコンディションのいずれかを持っているかを返す。
+	function hasAnyCondition( bits){
+		if( !bits) return false;
+		foreach( c in conds){
+			local i = int( c.dataid.substring( 1));
+			if( ::bitget( bits, i)) return true;
+		}
+		return false;
+	}
+
 	//	現在掛かっているコンディションをビットで返す
 	function getConditionBits(){
 		return conds.reduce( @( v, x){
@@ -1118,6 +1128,20 @@ class RPGObjectRef
 	<ser_o> id = null;			//	"P000", "E000", 10000001
 	<ser_o> objid = null;		//	エネミーの場合は同じIDが複数存在するのでこれで個体を識別
 	<ser_o> mapid = null;		//	type="event"の時に入る
+
+	function set( v){
+		if( v instanceof RPGCharaBase){
+			type = (v instanceof RPGEnemy) ? "enemy" : "player";
+			id = v.dataid;
+			objid ??= v["objid"];
+		}
+		if( v instanceof RPGStageEventRunner){
+			type = "event";
+			id = v.evid;
+			mapid = ::rpgstage.mapid;
+		}
+		return this;
+	}
 
 	function _get( key){
 		switch( key){

@@ -2424,6 +2424,50 @@ eventcmd .. {
 	}
 }
 
+local who1list = [
+	{ lbl="$T.who_event", val=2 }
+]
+
+local repopfadelist = [
+	{ lbl="$T.lbl_none", val=0 },
+	{ lbl="$T.lbl_fadein", val=1 },
+	{ lbl="$T.lbl_blink", val=2 },
+];
+
+//	cmd_depop : イベントの一時消去
+//	
+eventcmd .. {
+	category = 5
+	key = "cmd_depop"
+	name = "$T.cmd_depop"
+	icon = "\uf17d"
+	color = color5
+	
+	props = [
+		{ pid="who", lbl="$T.lbl_who", type=LIST, list=who1list, variable=1, }
+		{ pid="remap", lbl="$T.lbl_repop_remap", type=BOOL, variable=1},
+		{ pid="sec", lbl="$T.lbl_repop_time", type=SCALAR, range=(0,100000), variable=1},
+		{ pid="reqs", lbl="$T.lbl_repop_reqs", type=REQUIREMENTS, cnt="cnt6v.ui", variable=1 },
+		{ pid="outcam", lbl="$T.lbl_repop_outcam", type=BOOL, variable=1},
+		{ pid="fadein", lbl="$T.lbl_fadein", type=LIST, list=repopfadelist, variable=1},
+		{ pid="efxid", lbl="$T.lbl_effect", type=RESID, restype="efx", variable=1, nullable=1 }
+	]
+	
+	cmdinfo = @( cmd){
+		local cmddef = RPGSystem.eventcmd[cmd.cmd];
+		local w = propstr( cmddef.props, cmd, "who");
+		return {
+			info = sprintf( "%S", w);
+		}
+	}
+	
+	defval = { sec=0, who=2, reqs=null, remap=true, outcam=false, fadein=0, efxid=null }
+	
+	exec = @( runner, cmd){
+		runner.depopEvent( cmd);
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 //	サウンド処理
 

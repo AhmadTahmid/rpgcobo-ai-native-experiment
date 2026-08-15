@@ -452,6 +452,9 @@ class BattleRunnerBase
 	
 	function chooseAIPage( pc, ai){
 		if( length( ai) <= 1) return 0;
+		//	選択キャラ、攻撃キャラを一時的にpcに切り替え
+		local _selchr = stage.selchara, _atkchr = atkchr;
+		stage.selchara = atkchr = pc;
 		local a = ai.map( @( v, i){
 			local req0 = v["req0"], calc0 = ::RPGSystem.aipagereq[req0["key"]||req0]["calc"];
 			local req1 = v["req1"], calc1 = ::RPGSystem.aipagereq[req1["key"]||req1]["calc"];
@@ -460,6 +463,8 @@ class BattleRunnerBase
 			return {idx=i, rate=rate};
 		});
 		a.sort( @( v) v.rate);
+		stage.selchara = _selchr;
+		atkchr = _atkchr;
 		return a.last().idx;
 	}
 

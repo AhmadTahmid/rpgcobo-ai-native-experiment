@@ -227,7 +227,11 @@ class RPGEventRunner
 		case 0: p = ::rpgstage.cam3d; break;
 		case 1: p = ::rpgstage.player3d; break;
 		case 2: p = this["rp3d"]; break;
-		default: p = who["rp3d"]; break;	//	RPGObjectRef
+		default: 
+			if( who instanceof RPGCharaBase){
+				who = RPGObjectRef( who);
+			}
+			p = who["rp3d"]; break;	//	RPGObjectRef
 		}
 		return p;
 	}
@@ -840,6 +844,21 @@ class RPGEventRunner
 			}, this);
 		}
 	}
+
+	//	イベントの一時消去。イベント変数に条件を設定
+	//	※実際のデポップはコマンド完了時
+	function depopEvent( cmd){
+		local who = cmd["who"];
+		local dst = who["event"] || ::rpgstage.getEvent( who) || this;
+		dst.evar._depop <- {	//	イベント変数に保存される！
+			remapid = cmd["remap"] && rpgvar.REMAPID,
+			ptime = cmd["sec"] && (cmd["sec"]*1000 + rpgvar.PTIME),	//	プレイ時間でリポップ
+			outcam = cmd["outcam"],
+			reqs = cmd["reqs"],		//	cloneはいらんかな
+			fadein = cmd["fadein"],
+			efxid = cmd["efxid"],
+		};
+	}
 	
 	function timeScale( cmd){
 		stage.setTimeScale( cmd.timescale*0.01);
@@ -1021,6 +1040,7 @@ class RPGEventRunner
 //	(1) スリープモード : イベントとしては何も動いていない状態。距離を詰めると(2)に移る。キャラは+-0.5画面分、ドア、ポータルは5m以内で生成。
 //	(2) スカウトモード : ページを選択して3Dモデルをスポーンし、うろうろしたりするトリガー待ちモード。位置が離れたらまた(1)に移る。トリガーされると(3)に移る。
 //	(3) ランニングモード : イベント処理が実行中のモード。処理が終了すると(2)に戻る。
+//	(4) デポップモード : イベントコマンドでデポップを呼ぶとこのモードに移る。非表示、非動作で解除条件が来るまで待つ。解除されると(1)又は(2)に戻る。
 //	
 //	spawndistの距離に達したらスカウトモードに移る。ページを選択してモデルをスポーン。また、通常のイベントは画面外に出て5秒でスリープモードに戻る。
 //	
@@ -1031,6 +1051,8 @@ class RPGEventRunner
 //	・runnerはRPGStageのアップデート、rp3dはSK3DSceneのアップデートで更新処理が行われる。
 //	・runnerはrp3dの生成、消去、移動パターン設定の影響を与える。
 //	・rp3dはrunnerに直接影響を与えることは無い。
+//	
+//	デポップ状態は、evar._depopに記録される。snapshotはREMAPIDの変化でクリアされるため記録できない。
 //	
 class RPGStageEventRunner extends RPGEventRunner
 {
@@ -1043,7 +1065,7 @@ class RPGStageEventRunner extends RPGEventRunner
 	trgdisable = false;			//	連続トリガー阻止のためのキャンセルフラグ
 	
 	spawnandran = false;		//	スポーン後にイベントが実行したか。     ※※保存しないといけない => 保存はなし。ロード時にも実行される
-
+	
 	constructor( ei, ed, stg, evr){
 		evid = ei;
 		data = ed;
@@ -1095,6 +1117,14 @@ class RPGStageEventRunner extends RPGEventRunner
 	}
 	
 	function run(){
+		//	startからの初回実行時は、デポップモードかスカウトモードかを判定して、run_depop()かrun_scout()に移行する。
+		try{
+			if( evar["_depop"]) run_depop();
+			else if( mode) run_scout();
+		}catch( ex){
+			printexception( ex);
+			suspend();
+		}
 		for(;;){
 			try{
 				run_sleep();
@@ -1188,9 +1218,7 @@ class RPGStageEventRunner extends RPGEventRunner
 		local despawncnt = 5000, dt = 1, t0 = skGetTime();
 		for( ;;){
 			local p = selectPage();
-			if( p != page){
-				setPage( p);
-			}
+			if( p != page) setPage( p);
 			if( p){
 				if( trgcooltime) trgcooltime=Math.max( trgcooltime-dt, 0);
 				if( trgdisable) trgdisable=eventTriggerCheck();
@@ -1210,6 +1238,48 @@ class RPGStageEventRunner extends RPGEventRunner
 			suspend();
 			local t1 = skGetTime();
 			dt = t1 - t0; t0 = t1;
+		}
+	}
+	
+	//	デポップ状態。デスポーンして、リポップ条件が満たされるまで待つ。リポップ条件が満たされたらスリープモードに戻る。
+	//	evar._depop = { remapid=rpgvar.REMAPID, time=0, reqs=[...], outcam=true, };
+	function run_depop(){
+		mode = 3;
+		despawn();
+		//	リポップ位置はイベントの初期位置に戻す。
+		local p = data.pos;
+		spawnpos = (p[0]*0.5, p[1]*0.5, p[2]*0.5, p[3]*Math.HPI);
+		local dt = 100;	//	100msごとにリポップ条件をチェック
+		for( ;;){
+			local v = evar["_depop"], b = false;
+			if( (v["ptime"] && (v["ptime"]<=rpgvar.PTIME) <= 0)){ b = true; }
+			if( !b && v["remapid"] && v["remapid"]!=rpgvar.REMAPID) b = true;
+			if( !b && v["reqs"] && ::reqchk( v["reqs"], this)) b = true;
+			if( b){
+				if( !v["outcam"] || !stage.cam.isInside( v_0( spawnpos), 2.0)){	//	outcam=trueの時は画面内に入ってる場合はリポップしない
+					delete evar["_depop"];
+					//	αフェード実行のためにページをセット
+					if( !stage.ctrlock && spawnDistantCheck( v_0)){
+						local p = selectPage();
+						if( p != page) setPage( p);
+						if( rp3d){
+							switch( v["fadein"]){
+							case 1: rp3d.addModifier( OpacityFadeModifier( rp3d, {opacity=[0.0,1.0], fade=600})); break;
+							case 2: rp3d.addModifier( BlinkModifier( rp3d, 5, 600)); break;
+							}
+							if( v["efxid"]) rp3d.effect( { id=v["efxid"], });
+							sleep( 500);	//	すぐ動き出さないためのsleepいるかな～～
+						}
+						return run_scout();
+					}else{
+						return run_sleep();
+					}
+				}else
+				if( stage.ctrlock){	//	ctrlock(マップ切り替え時)はoutcamの状態に関わらずリポップする
+					return run_sleep();
+				}
+			}
+			sleep( dt);	//	全てのイベントが同じタイミングでspawnのチェックはいらないようにしたい
 		}
 	}
 
@@ -1250,6 +1320,7 @@ class RPGStageEventRunner extends RPGEventRunner
 		trgcooltime = 200;	//	クールタイムテスト
 		//	イベント実行が終わったらスカウト状態に戻る
 		finishEventRunning();
+		if( evar["_depop"]) return run_depop();	//	デポップ状態移行のチェックはrunとここだけで良し
 		return run_scout();
 	}
 
