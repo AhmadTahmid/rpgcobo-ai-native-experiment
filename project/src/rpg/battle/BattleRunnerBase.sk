@@ -427,28 +427,30 @@ class BattleRunnerBase
 	
 	//	
 	function chooseAICommand( pc, ai){
-		//	まずはページ選択
-		local page = ai[pc.aipage];
-		if( !page || pc.aiturn>=page["turn"][1] || (pc.aiturn>=page["turn"][0] && rnd(1.0)>=0.5) ){
-			pc.aiturn = 0;
-			pc.aipage = chooseAIPage( pc, ai);
-			page = ai[pc.aipage];
-			if( !page) return null;	//	ページが選択できなかった。何もしない
-		}
-		local n = ::rnd( page.actnum[0], page.actnum[1]+1);
 		local cmds = [];
-		for( local l = 0;l < n;l ++){
-			local turnbits = 1 << (pc.aiturn % 12);
+		for( local l = 0; l < 10;l ++){	//	無限ループ対策
+			//	まずはページ選択
+			local page = ai[pc.aipage];
+			if( !page || pc.aiturn>=page["turn"][1] || (pc.aiturn>=page["turn"][0] && rnd(1.0)>=0.5) ){
+				pc.aiturn = 0;
+				pc.aipage = chooseAIPage( pc, ai);
+				page = ai[pc.aipage];
+				if( !page) break;	//	ページが選択できなかった。何もしない
+			}
 			//	次はページ内のコマンド選択
+			local turnbits = 1 << (pc.aiturn % 12);
+			++pc.aiturn;	//	複数行動するAIはaiturnは1ターンで複数回増える
 			local pcmds = page.cmds.filter( @( v) v.turnbits & turnbits);
-			pcmds.sort( @( v) -rnd(0.0,v.rate));		//	rateでランダムソート
+			pcmds.sort( @( v) -v.rate * rnd( 0.3, 1.0));		//	rateでランダムソート
 			//	最後にターゲットを指定してコマンド完成
 			foreach( cmd in pcmds){
 				local skill = ::conf.skill[cmd.skillid] || pc.getAttackSkill();
 				local dst = chooseAITarget( skill, pc, page, cmd, charas);
 				local dsts = dst && getCommandTargets( pc, dst, skill.cmdtgt, false);
-				if( length( dsts)) cmds .. SkillCommand( pc, skill, dsts);
+				if( length( dsts)){ cmds .. SkillCommand( pc, skill, dsts); break; }
 			}
+			local n = ::rnd( page.actnum[0], page.actnum[1]+1);
+			if( length( cmds) >= n) break;	//	行動回数を超えた
 		}
 		return cmds;
 	}

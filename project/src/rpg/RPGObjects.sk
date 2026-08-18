@@ -320,7 +320,6 @@ class RPGCharaBase extends RPGObject
 	//	ターン経過で消去されたコンディションの配列を返す。
 	function spendTurn(){
 		++turn;
-		++aiturn;
 		battleflags = battleflags&0xffff0000;
 		if( isDead()) return null;	//	死んでる場合は何もしない
 		local rems;
