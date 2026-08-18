@@ -414,14 +414,13 @@ class BattleRunnerBase
 		}
 		local cmds = null, ai = pc.data["ai"];
 		if( ai){
-			local cmd = chooseAICommand( pc, ai);
-			if( cmd) cmds = [cmd];
+			cmds = chooseAICommand( pc, ai);
 		}else{
 			//	aiない場合は攻撃？オートだと前回の行動かも
 			local skill = pc.getAttackSkill();
 			local dst = chooseRandomTarget( pc, skill.cmdtgt);
 			local cmd = SkillCommand( pc, skill, [dst]);
-			cmds = [cmd];
+			if( cmd) cmds .. cmd;
 		}
 		return cmds;
 	}
@@ -436,18 +435,22 @@ class BattleRunnerBase
 			page = ai[pc.aipage];
 			if( !page) return null;	//	ページが選択できなかった。何もしない
 		}
-		local turnbits = 1 << (pc.aiturn % 12);
-		//	次はページ内のコマンド選択
-		local cmds = page.cmds.filter( @( v) v.turnbits & turnbits);
-		cmds.sort( @( v) -rnd(0.0,v.rate));		//	rateでランダムソート
-		//	最後にターゲットを指定してコマンド完成
-		foreach( cmd in cmds){
-			local skill = ::conf.skill[cmd.skillid] || pc.getAttackSkill();
-			local dst = chooseAITarget( skill, pc, page, cmd, charas);
-			local dsts = dst && getCommandTargets( pc, dst, skill.cmdtgt, false);
-			if( length( dsts)) return SkillCommand( pc, skill, dsts);
+		local n = ::rnd( page.actnum[0], page.actnum[1]+1);
+		local cmds = [];
+		for( local l = 0;l < n;l ++){
+			local turnbits = 1 << (pc.aiturn % 12);
+			//	次はページ内のコマンド選択
+			local pcmds = page.cmds.filter( @( v) v.turnbits & turnbits);
+			pcmds.sort( @( v) -rnd(0.0,v.rate));		//	rateでランダムソート
+			//	最後にターゲットを指定してコマンド完成
+			foreach( cmd in pcmds){
+				local skill = ::conf.skill[cmd.skillid] || pc.getAttackSkill();
+				local dst = chooseAITarget( skill, pc, page, cmd, charas);
+				local dsts = dst && getCommandTargets( pc, dst, skill.cmdtgt, false);
+				if( length( dsts)) cmds .. SkillCommand( pc, skill, dsts);
+			}
 		}
-		return null;	//	どのコマンドも使えなかった。ページを切り替えとかしてリトライしても良い
+		return cmds;
 	}
 	
 	function chooseAIPage( pc, ai){

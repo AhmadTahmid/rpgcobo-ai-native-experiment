@@ -685,7 +685,7 @@ class Damage
 		form.setupDamage( this);
 		local dmgtype = skill["dmgtype"]||0;
 		pid = DamageTypePID[dmgtype];	//	HP,MP,TPのいずれかに影響する
-		heal = dmgtype && (dmgtype&2);
+		heal = dmgtype && !(dmgtype&1);
 		ovctx = {};
 	}
 

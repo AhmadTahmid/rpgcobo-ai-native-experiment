@@ -1467,7 +1467,8 @@ class RPGMacroEventRunner extends RPGEventRunner
 	macroid = null;
 	data = null;			//	macro data
 
-	constructor( mi, md){
+	constructor( st, mi, md){
+		stage = st;
 		evid = mi;
 		macroid = mi;
 		data = md;
@@ -1498,12 +1499,11 @@ class RPGMacroEventRunner extends RPGEventRunner
 		runCommandBlock( data.cmdblock, wv);
 		if( rpgstage["mainevent"]==this){ rpgstage.mainevent = oldevent; }
 		finishEventRunning();
-		mode = 0;
-		suspend();
 		if( data["runrepeat"]){
+			suspend();
 			return run_scout();	//	繰り返し実行する場合は再びスカウトモードに戻る
 		}
-		//	scoutモードには移行しない（ない）。このまま実行終了。
+		mode = 0;	//	runrepeatモード以外はこのまま終了
 	}
 	
 	function eventTriggerable(){

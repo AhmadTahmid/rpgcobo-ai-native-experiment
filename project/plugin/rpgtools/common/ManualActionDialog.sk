@@ -87,7 +87,7 @@ class ManualActionDialog extends UndoableDialog
 			props = [
 				{ pid="ani", lbl="$T.lbl_anime", type=ANIME_INLINE, cnt="cnt6v.ui", 
 					mdlid = @( pl){
-						local dlg = pl.ref, who = dlg.data["who"];
+						local dlg = pl.ref, who = dlg["seltab"];
 						if( who == "player"){
 							return "CV000";
 						}
@@ -99,7 +99,7 @@ class ManualActionDialog extends UndoableDialog
 			]
 			defval={ ani={ id="stand", spd=1.0, part=0}, wait=true, }
 			info = @( v) "$T.anim_"..v.ani.id,
-			bits = 3,
+			bits = 1,
 		},
 		{	//	エフェクトコマンド
 			act = "efx", name="$T.lbl_effect", icon="\uef55", 
@@ -562,7 +562,7 @@ class ManualActionDialog extends UndoableDialog
 	function showItemContextMenu( e){
 		local hasel = length( actionlist.selects), hascur = actionlist.curidx>=0;
 		local cbdata = getClipboard( "maction");	//	開くたびにクリップボード取得しちゃうけどまーだいじょぶかな
-		local bits = (sel3d instanceof RPG3DMapAsset)?2:1, movpid = bits==2?"objmove":"move";
+		local bits = ((sel3d instanceof RPG3DMapAsset) || (sel3d instanceof RPG3DGhost))?2:1, movpid = bits==2?"objmove":"move";
 		local menudata = [
 			{ id="edit", lbl="$T.lbl_edit", icon="\ue745", disable=!hascur },
 			{ id="add", lbl="$T.lbl_addaction", submenu = actiondefs.map( @( v) (v.act=="move"||v.act=="objmove"||!(bits&v.bits))?undefined : {...v, lbl=v.name, id="cmd"}), },
@@ -776,7 +776,7 @@ class ManualActionDialog extends UndoableDialog
 
 	//	
 	function showCanvasContextMenu( e, hb){
-		local bits = (sel3d instanceof RPG3DMapAsset)?2:1, movpid = bits==2?"objmove":"move";
+		local bits = ((sel3d instanceof RPG3DMapAsset) || (sel3d instanceof RPG3DGhost))?2:1, movpid = bits==2?"objmove":"move";
 		local ctxmenu = [
 			{ ...actiondefs.find( @( v) v.act==movpid), id="moveto", lbl="$T.lbl_movehere", icon="\uef3a", },
 			"-",
@@ -862,7 +862,8 @@ class ManualActionDialog extends UndoableDialog
 		foreach( ev3d in ev3dlist){
 			local td = data[ev3d.name];
 			if( !td["actions"]) continue;
-			ev3d.event = RPGStageEventRunner( 100000, envdef.event, null, null);	//	ダミーなRPGStageEventRunnerを生成。
+			local evd = envdef.eventmap[ev3d.name] || envdef.event;
+			ev3d.event = RPGStageEventRunner( 100000, evd, null, null);
 			ev3d.manuaction = ManualMoveAction( ev3d);
 			ev3d.manuaction.act( @() playData( td, st, me));
 		}

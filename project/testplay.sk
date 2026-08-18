@@ -82,8 +82,12 @@ if( ::arguments.contains( "-skprof")) (prof = SKProfiler()).start();
 local applydebugpref(){
 	if( ws["debugitems"]) rpgstat.addAllItems();
 	if( ws["debuglv"]){
-		foreach( p in rpgstat.playermap){
-			if( p) p.setLV( ws.debuglv);
+		foreach( pc in rpgstat.playermap){
+			if( pc){
+				pc.setLV( ws.debuglv);
+				pc.HP = pc.MAXHP;
+				pc.MP = pc.MAXMP;
+			}
 		}
 	}
 }

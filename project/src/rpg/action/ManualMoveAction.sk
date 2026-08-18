@@ -120,8 +120,8 @@ class ManualMoveAction
 	function playData( d, st, ev3d){
 		//	moveの基準位置。ブロック座標
 		local event = ev3d.event, curstat = curstat;
-		local p0 = event.data.pos;
 		local bp = d["basepos"] || 0;
+		local p0 = rp3d.event["data"]["pos"];	//	動作するイベントの配置位置
 		if( typeof( bp) == SS_ARRAY){
 			p0 = bp;
 		}else
@@ -129,6 +129,7 @@ class ManualMoveAction
 			p0 = [Math.round( rp3d.pos.x*2), Math.round( rp3d.pos.y*2), Math.round( rp3d.pos.z*2)];
 		}else
 		if( bp == 2){
+			p0 = event.data["pos"];
 			local dp = frontpos[p0[3]];
 			p0 = [p0[0]+dp[0],p0[1],p0[2]+dp[1]];
 		}

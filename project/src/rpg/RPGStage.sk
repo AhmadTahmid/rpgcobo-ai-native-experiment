@@ -167,7 +167,7 @@ class RPGStage
 		cam3d = RPG3DObject.create3DObject( {r=[0,0,0,0.25,0.25,0.25]});	//	ghost
 		scn.addObject( cam3d);
 		//	オートマクロ生成
-		automacros = ::automacrolist().map( @( v) RPGMacroEventRunner( v.dataid, v.data) );
+		automacros = ::automacrolist().map( @( v) RPGMacroEventRunner( this, v.dataid, v.data) );
 		manumacros = [];
 		setCamerawork( stat.camwork);		//	カメラ状態を復元。キャラが一通り配置された後。
 		//	SK3DBlockWorld、コリジョン生成
@@ -703,7 +703,7 @@ class RPGStage
 			runmode = ismain?1:2,
 			wvar = wvar,
 		};
-		local m = RPGMacroEventRunner( macroid, md);
+		local m = RPGMacroEventRunner( this, macroid, md);
 		//	初回実行
 		m.update( 1);
 		if( m.mode==2) manumacros .. m;

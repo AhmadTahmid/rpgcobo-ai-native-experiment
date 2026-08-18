@@ -1816,6 +1816,7 @@ eventcmd .. {
 			dest = { mapid=m0, },
 			remap = true, 
 			isload = true,
+			wipe = 1,
 			loadfunc=@(){
 				(::rpgstat = RPGState()).newGame();
 			},

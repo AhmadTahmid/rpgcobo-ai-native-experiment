@@ -107,7 +107,7 @@ class SKRootView extends SKView
 		case QUIT_REQUESTED: quit = true; break;
 		case SCREEN_RESIZED: screenResized( e.x, e.y); break;
 		case SCREEN_REPAINT: dorepaintall = true; break;
-		case EVENT_REPOST: deliverEvent( e.actioncmd);
+		case EVENT_REPOST: deliverEvent( e.actioncmd); break;
 		}
 		return false;
 	}

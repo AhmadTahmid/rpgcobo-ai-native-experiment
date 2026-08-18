@@ -159,6 +159,7 @@ battlecmd .. {
 			//	※消費MP、封印チェックはリアルタイムに行う！
 			if( !v["addlist"]) return undefined;
 			if( !pc.hasSkill( i)) return undefined;
+			if( !((v["occasion"]||0)&1)) return undefined;
 			local disable(){
 				return !pc.isSkillUseable( i);
 			}

@@ -48,6 +48,8 @@ class SKStudio extends SKView
 	favorites = null;			//	[dirpath,...] : お気に入り
 	openhistory = null;			//	[filepath,...] : オープンしたファイルのヒストリー
 	closehistory = null;		//	Ctrl+Shift+Tで開きなおす
+	movehistory = null;			//	[filepath,...] : 開いたタブのヒストリー
+	movecurs = -1;				//	現在のmovehistoryのカーソル位置
 	
 	static function create( cdir, args){
 		local v = ::loadSKView( "/skstudio/ui/main/skstudio.ui", SKStudio);
@@ -76,6 +78,7 @@ class SKStudio extends SKView
 		favorites = [];
 		openhistory = [];
 		closehistory = [];
+		movehistory = [];
 		
 		titlebar = TitlebarBehavior( findChild( "titlebar"));
 		filetabbar = FileTabBehavior( findChild( "filetabbar"));
@@ -99,6 +102,7 @@ class SKStudio extends SKView
 
 		filetabbar.view.addEventListener( ACTION_EVENT, filetabevent);
 		titlebar.menulistview.addEventListener( ACTION_EVENT, titlemenuevent);
+		titlebar.view.findChild( "go").addEventListener( ACTION_EVENT, goevent);
 		
 		/////////////////////////////////////////////////////////////////////////////////////////
 		//	register defaults
@@ -135,13 +139,16 @@ class SKStudio extends SKView
 		registerMenu( { uid="menu_edit_selall", parentid="menu_edit", lbl="$T.menu_edit_selall", icon="\ue162", defkey="^A"});
 		// registerMenu( { uid="menu_edit_unsel", parentid="menu_edit", lbl="$T.menu_edit_unsel", defkey="^D"});
 		//	view menu
-		registerMenu( { uid="menu_view_gotofile", parentid="menu_view", lbl="$T.menu_view_gotofile", icon="\ue9bd" defkey="^P", func=menuGotoFile.bindenv( this)});
-		registerMenu( { uid="menu_view_rendersetting", parentid="menu_view", lbl="$T.menu_view_rendersetting", icon=FileIcons.conf, defkey="^_R", func=menuRenderSettingDialog.bindenv( this)});
+		registerMenu( { uid="menu_view_goback", parentid="menu_view", lbl="$T.menu_view_goback", icon="\ue5c4", defkey="~Left", disable=@() ::skstudio.movecurs <= 0, func=@() ::skstudio.moveEditor( -1)});
+		registerMenu( { uid="menu_view_goforward", parentid="menu_view", lbl="$T.menu_view_goforward", icon="\ue5c8", defkey="~Right", disable=@() ::skstudio.movecurs >= length( ::skstudio.movehistory) - 1, func=@() ::skstudio.moveEditor( 1)});
 		registerMenu( { parentid="menu_view", separator="*1"});
+		registerMenu( { uid="menu_view_gotofile", parentid="menu_view", lbl="$T.menu_view_gotofile", icon="\ue9bd", defkey="^P", func=menuGotoFile.bindenv( this)});
+		registerMenu( { uid="menu_view_rendersetting", parentid="menu_view", lbl="$T.menu_view_rendersetting", icon=FileIcons.conf, defkey="^_R", func=menuRenderSettingDialog.bindenv( this)});
+		registerMenu( { parentid="menu_view", separator="*2"});
 		registerMenu( { uid="menu_view_console", parentid="menu_view", lbl="$T.menu_view_console", icon="\ueb8e", defkey="^@", func=menuSystemConsole.bindenv( this)});
 		registerMenu( { uid="menu_view_sideview", parentid="menu_view", lbl="$T.menu_view_sideview", icon="\ue66b", defkey="^B", func=menuSideView.bindenv( this)});
 		//	tool menu
-		registerMenu( { parentid="menu_tool", separator="*1"});
+		registerMenu( { parentid="menu_tool", separator="*3"});
 		registerMenu( { uid="menu_tool_commands", parentid="menu_tool", lbl="$T.menu_tool_commands", submenu=@() ::skstudio.listCommandMenu()});
 		//	file view
 		registerActivity( {uid:"act_fileview", sideview="side_fileview", icon="\ue2c8", slbl="$T.lbl_file"});
@@ -390,6 +397,15 @@ class SKStudio extends SKView
 		}
 	}
 
+	function goevent( e){
+		switch( e.src["name"]){
+		case "btn_goback":
+		case "btn_goforward":
+			moveEditor( e.src["name"] == "btn_goback" ? -1 : 1);
+			break;
+		}
+	}
+
 	//	指定したメニューを実行する。
 	//	m : string|menu
 	//	
@@ -610,7 +626,7 @@ class SKStudio extends SKView
 	}
 
 	//	
-	function openEditor( path){
+	function openEditor( path, movecursset=true){
 		local ed = tabeditors[path];
 		if( !ed){
 			ed = createEditor( path);
@@ -620,6 +636,11 @@ class SKStudio extends SKView
 			_addhistory( openhistory, path, 50);
 		}
 		filetabbar.selectTab( path, true);
+		if( movecursset && path != editor["filepath"]){
+			movehistory.resize( movecurs+1) .. path;
+			movecurs = length( movehistory) - 1;
+		}
+		updateMoveHistoryButtons();
 		//	
 		freezeEditorView( false);
 		_changecontent( editorarea, ed, "editor");
@@ -627,6 +648,21 @@ class SKStudio extends SKView
 		//	サイドビュー同期はここでチェック。
 		if( ::workspace["tabsync"]) syncToSideView( path);
 		return true;
+	}
+
+	function moveEditor( dir){
+		local c = movecurs + dir;
+		if( c < 0 || c >= length( movehistory)) return;
+		movecurs = c;
+		openEditor( movehistory[c], false);
+	}
+
+	function updateMoveHistoryButtons(){
+		printf( "movecurs=%d  len=%d\n", movecurs, length( movehistory));
+		local b1 = titlebar.view.findChild( "btn_goback");
+		local b2 = titlebar.view.findChild( "btn_goforward");
+		b1.setEnabled( movecurs > 0);
+		b2.setEnabled( movecurs < length( movehistory) - 1);
 	}
 
 	function createEditor( path){

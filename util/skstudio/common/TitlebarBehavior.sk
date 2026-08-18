@@ -51,8 +51,8 @@ class TitlebarBehavior
 		switch( e.id){
 		case MOUSE_PRESSED:
 			mx0 = e.x; my0 = e.y;
-			if( e.count == 2){
-				toggleMaximize();
+			if( e.count >= 2){
+				if( e.src == view) toggleMaximize();
 			}else{
 				if( !isMaximized()) winmoving = true;
 			}

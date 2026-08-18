@@ -192,7 +192,7 @@ class GotoDBSearch
 
 
 ::skstudio.registerMenu( {
-	uid="search_gotodb", parentid="menu_view", block="*1", lbl="$T.search_gotodb", icon="\uea19", defkey="^K"
+	uid="search_gotodb", parentid="menu_view", block="*2", lbl="$T.search_gotodb", icon="\uea19", defkey="^K"
 	func = @( mi){
 		ProjectSearchPopup.run( GotoDBSearch);
 	}
