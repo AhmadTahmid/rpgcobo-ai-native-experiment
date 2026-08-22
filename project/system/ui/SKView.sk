@@ -647,7 +647,7 @@ with SKView
 	//	イベント処理
 	
 	function addEventListener( type, func, self=null){
-		if( !listeners) listeners = tuple(30);
+		if( !listeners) listeners = tuple(20);
 		if( !listeners[type]) listeners[type] = [];
 		local fn = (func.bindenv( self || getcaller( 1)));
 		listeners[type] .. fn;	//	呼び出し元のthisがbindenvされる。
@@ -655,10 +655,15 @@ with SKView
 	}
 	
 	function removeEventListener( type, func){
-		local r = listeners[type]?.removeValue( func);
+		return removeListenerFrom( listeners[type], func);
+	}
+
+	function removeListenerFrom( list, func){
+		if( !list) return null;
+		local r = list.removeValue( func);
 		if( r) return r;
-		foreach( i, clo in listeners[type]){	//	bindenv前のfunctionにも対応
-			local a = clo.unbindenv(); if( a[0] == func) return delete listeners[type][i];
+		foreach( i, clo in list){	//	bindenv前のfunctionにも対応
+			local a = clo.unbindenv(); if( a[0] == func) return delete list[i];
 		}
 		return null;
 	}

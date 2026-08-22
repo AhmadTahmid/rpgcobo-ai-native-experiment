@@ -271,7 +271,7 @@ class DBSideView extends SKView
 			if( !Dialogs.confirm( {msg=rtf( tmpl( T.tmpl_confirm_erace_noundo, {v=`$r.name:$d.name`})), icon="\ue002"} )) return;
 			r.clear();
 			::skstudio.fileview.refreshDir( r.pres.path);
-			::skstudio.flushEditor( r.pres.path);
+			::skstudio.flushEditor( r.path);
 		}
 	}
 	

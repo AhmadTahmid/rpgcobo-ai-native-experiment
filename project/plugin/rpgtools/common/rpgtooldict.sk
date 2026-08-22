@@ -776,6 +776,7 @@
 	"lbl_countrem"						: {"ja":"発動で状態解除", "en":"Remove Condition"}
 	"lbl_uncommandable"					: {"ja":"コマンド不可", "en":"Uncommandable"}
 	"lbl_revcond"						: {"ja":"相反コンディション", "en":"Reverse Condition"}
+	"lbl_remcondreq"					: {"ja":"解除条件", "en":"Removal Condition"}
 	"lbl_xcondbits"						: {"ja":"他状態の発動をブロック", "en":"Block other Conditions"}
 	"lbl_remcondbits"					: {"ja":"他状態を解除", "en":"Remove other Conditions"}
 	"lbl_rem_die"						: {"ja":"死亡で解除", "en":"Removed on Death"}
@@ -1245,6 +1246,10 @@
 	"act_debug"							: {"ja":"デバッグ", "en":"Debug"}
 	"menu_debug"						: {"ja":"デバッグ", "en":"Debug"}
 	"menu_debug_start"					: {"ja":"デバッグを開始", "en":"Start Debug"}
+	"menu_debug_stop"					: {"ja":"デバッグを停止", "en":"Stop Debug"}
+	"menu_debug_pause"					: {"ja":"デバッグのポーズ", "en":"Pause Debug"}
+	"menu_debug_resume"					: {"ja":"デバッグのポーズ解除", "en":"Resume Debug"}
+	"menu_debug_restart"				: {"ja":"デバッグを再起動", "en":"Restart Debug"}
 	"menu_debug_selectslot"				: {"ja":"開始地点の選択", "en":"Select a Start point"}
 	"menu_debug_setting"				: {"ja":"デバッグ設定", "en":"Debug Settings"}
 	"menu_debug_title"					: {"ja":"タイトル画面から", "en":"From Title Scene"}

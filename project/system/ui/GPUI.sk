@@ -1011,6 +1011,7 @@ class GPUIGamepadDevice extends GPUIDevice
 		{ vb = BTN_X , devkey = BTN_X, },
 		{ vb = BTN_Y , devkey = BTN_Y, },
 		{ vb = BTN_START , devkey = BTN_START, },
+		{ vb = BTN_BACK , devkey = BTN_BACK, },
 		{ vb = BTN_ZL , devkey = BTN_ZL, subkey = AXIS_ZL},
 		{ vb = BTN_ZR , devkey = BTN_ZR, subkey = AXIS_ZR},
 		{ vb = BTN_LB , devkey = BTN_LB, },
@@ -1048,7 +1049,7 @@ class GPUIGamepadDevice extends GPUIDevice
 	static function gpbutton( gp, vb){
 		if( vb >= 32){
 			local v = axisdata[vb&31];
-			local a = v.axis, d = v.vec, t = v["thrs"]||0.3;
+			local a = v.axis, d = v.vec, t = v["thrs"]||0.7;
 			return @() gp[a]*d>=t?1:0;
 		}
 		local vbbit = 1<<vb;

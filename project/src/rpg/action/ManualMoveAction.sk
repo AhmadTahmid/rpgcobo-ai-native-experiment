@@ -313,7 +313,7 @@ class ManualMoveAction
 			if( ammo && dst){
 				local sp = clone ammo.pos, ep = Vector3D( dst.gbnd.x, dst.gbnd.y, dst.gbnd.z);
 				ammo.rot << Quaternion.from2Axis( #Vector3D(0,0,1), (ep-sp).normalize());
-				newthread().start( @(){
+				::rpgstage.subthread( @(){
 					local time = x["time"]+0.0;
 					local t0 = skGetTime();
 					for( ;;){

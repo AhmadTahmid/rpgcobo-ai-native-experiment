@@ -74,8 +74,9 @@ class ClientConfig
 
 	static def_keybtnmap = {
 		[BTN_START] = [VK_ENTER],
+		[BTN_BACK] = [VK_ESCAPE],
 		[BTN_A] = [VK_Z, VK_SPACE],
-		[BTN_B] = [VK_X, VK_ESCAPE],
+		[BTN_B] = [VK_X, VK_SHIFT],
 		[BTN_X] = [VK_C, VK_TAB],
 		[BTN_Y] = [VK_V, VK_CONTROL],
 		[BTN_LB] = [VK_A],

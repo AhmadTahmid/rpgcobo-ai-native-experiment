@@ -39,6 +39,7 @@ class SKRootView extends SKView
 	
 	prelisteners = null;
 	postlisteners = null;
+	execlisteners = null;		//	EXEC_EVENTの実行はdispatchlockの影響を受けないため独立
 	
 	//	アップデート配列保存
 	updatefuncs = null;
@@ -352,12 +353,7 @@ class SKRootView extends SKView
 	}
 	
 	function removePreEventListener( type, func){
-		local r = prelisteners[type]?.removeValue( func);
-		if( r) return r;
-		foreach( i, clo in prelisteners[type]){	//	bindenv前のfunctionにも対応
-			local a = clo.unbindenv(); if( a[0] == func) return delete prelisteners[type][i];
-		}
-		return null;
+		return removeListenerFrom( prelisteners[type], func);
 	}
 	
 	function addPostEventListener( type, func, self=null){
@@ -369,7 +365,18 @@ class SKRootView extends SKView
 	}
 	
 	function removePostEventListener( type, func){
-		return postlisteners[type]?.removeValue( func);
+		return removeListenerFrom( postlisteners[type], func);
+	}
+
+	function addExecListener( func, self=null){
+		if( !execlisteners) execlisteners = [];
+		local fn = (func.bindenv( self || getcaller( 1)));
+		execlisteners .. fn;	//	呼び出し元のthisがbindenvされる。
+		return fn;
+	}
+	
+	function removeExecListener( func){
+		return removeListenerFrom( execlisteners, func);
 	}
 	
 	function postEvent( e){
@@ -398,6 +405,9 @@ class SKRootView extends SKView
 		case DRAGSOURCE_EVENT:
 			deliverDragSourceEvent( e);
 			break;
+		case EXEC_EVENT:	//	EXEC_EVENTはイベントを通してプロセス外の処理を実行するため、dispatchlockの影響を受けてはいけない。
+			foreach( f in execlisteners){ f( e); if( e.consumed) break; }
+			break;
 		default:
 			local f = focusview || this;
 			while( f && !f.isEnabled()) f = f.parent;
@@ -424,6 +434,9 @@ class SKRootView extends SKView
 				e.src = this;
 				postEvent( e);
 			}
+			break;
+		case EXEC_EVENT:	//	EXEC_EVENTはイベントを通してプロセス外の処理を実行するため、dispatchlockの影響を受けてはいけない。
+			foreach( f in execlisteners){ f( e); if( e.consumed) break; }
 			break;
 		default:
 			//	特定のイベントのみロック時でもpostする。そのイベントはロック解除後に順次実行される

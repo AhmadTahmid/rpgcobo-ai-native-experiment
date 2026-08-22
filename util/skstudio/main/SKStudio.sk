@@ -59,11 +59,11 @@ class SKStudio extends SKView
 
 	static function createEmptyEditor( path, iserr=false){
 		local r = ::getResource( path);
-		if( !r) return null;
+		// if( !r) return null;
 		local ed = ::loadSKView( "/skstudio/ui/main/emptyeditor.ui", EditorViewBase);
 		ed.setValue( "pathlbl", path);
 		ed.setValue( "pathicon", skstudio.getResourceIcon( ::getResource( path)));
-		ed.setValue( "msg", iserr ? "$T.editor_empty_error" : "$T.editor_empty_noeditor");
+		ed.setValue( "msg", !r ? "$T.editor_empty_nofile" : iserr ? "$T.editor_empty_error" : "$T.editor_empty_noeditor");
 		ed.findChild( "closebtn").addEventListener( ACTION_EVENT, @( e){
 			skstudio.closeEditor( path);
 		});
@@ -148,7 +148,7 @@ class SKStudio extends SKView
 		registerMenu( { uid="menu_view_console", parentid="menu_view", lbl="$T.menu_view_console", icon="\ueb8e", defkey="^@", func=menuSystemConsole.bindenv( this)});
 		registerMenu( { uid="menu_view_sideview", parentid="menu_view", lbl="$T.menu_view_sideview", icon="\ue66b", defkey="^B", func=menuSideView.bindenv( this)});
 		//	tool menu
-		registerMenu( { parentid="menu_tool", separator="*3"});
+		registerMenu( { parentid="menu_tool", separator="*1"});
 		registerMenu( { uid="menu_tool_commands", parentid="menu_tool", lbl="$T.menu_tool_commands", submenu=@() ::skstudio.listCommandMenu()});
 		//	file view
 		registerActivity( {uid:"act_fileview", sideview="side_fileview", icon="\ue2c8", slbl="$T.lbl_file"});
@@ -235,6 +235,7 @@ class SKStudio extends SKView
 			local menu = keymenumap[modkey];
 			if( menu){
 				// printf( "MENU! %S\n", encodeJSON( menu));
+				if( fget( menu, "disable") || fget( menu, "hide")) break;
 				if( execMenu( menu)) e.consume();
 			}
 			break;
@@ -658,7 +659,7 @@ class SKStudio extends SKView
 	}
 
 	function updateMoveHistoryButtons(){
-		printf( "movecurs=%d  len=%d\n", movecurs, length( movehistory));
+		// printf( "updateMoveHistoryButtons movecurs=%d  len=%d\n", movecurs, length( movehistory));
 		local b1 = titlebar.view.findChild( "btn_goback");
 		local b2 = titlebar.view.findChild( "btn_goforward");
 		b1.setEnabled( movecurs > 0);
@@ -1001,11 +1002,9 @@ class SKStudio extends SKView
 	function menuPreference( m){
 		PreferenceDialog.run();
 	}
-	
-	//	全ての変更されたファイルを保存するか確認する。
-	//	保存、保存しない、キャンセルの選択肢で、キャンセルの場合はfalse、それ以外はtrueを返す。
-	//	
-	function checkSaveFiles(){
+
+	//	ファイルが変更されているエディタのリストを返す。エディタの配列を返す。
+	function getFileChangedList(){
 		local changed = [];
 		foreach( tv in filetabbar.tablist.rows){
 			local tab = tv.ref, path = tab.path;
@@ -1014,6 +1013,14 @@ class SKStudio extends SKView
 				changed .. ed;
 			}
 		}
+		return changed;
+	}
+	
+	//	全ての変更されたファイルを保存するか確認する。
+	//	保存、保存しない、キャンセルの選択肢で、キャンセルの場合はfalse、それ以外はtrueを返す。
+	//	
+	function checkSaveFiles(){
+		local changed = getFileChangedList();
 		if( length( changed)){
 			local r = Dialogs.fileSaveCheck( changed.map( @( v) v.filepath));
 			if( !r) return;	//	cancel
@@ -1025,6 +1032,15 @@ class SKStudio extends SKView
 			}
 		}
 		return true;
+	}
+
+	//	全ての変更されたファイルを保存する。
+	function saveAllFiles(){
+		local changed = getFileChangedList();
+		foreach( ed in changed){
+			local m = menumap["menu_file_save"];	//	上書きセーブメニューを実行
+			ed.execMenu( m);
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////

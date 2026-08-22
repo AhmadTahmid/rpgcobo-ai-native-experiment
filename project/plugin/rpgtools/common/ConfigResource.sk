@@ -114,7 +114,7 @@ class ConfigResource extends Resource
 		local bb = encodeJSON( table(), 1|4, ByteBuffer());
 		bb.pos = 0;
 		FileRef( filedir, name..".json").save( bb);
-		printf( "conf[%S] = %S\n", name, encodeJSON( table(), 1|4));
+		// printf( "conf[%S] = %S\n", name, encodeJSON( table(), 1|4));
 		cache = null;
 		userdata = null;
 		dirty = true;
@@ -146,7 +146,7 @@ class ConfigItemResource extends Resource
 		local bb = encodeJSON( pres.table(), 1|4, ByteBuffer());	//	dir.name
 		bb.pos = 0;
 		FileRef( pres.filedir, pres.name..".json").save( bb);
-		printf( "conf[%S] = %S\n", pres.name, encodeJSON( pres.table(), 1|4));
+		// printf( "conf[%S] = %S\n", pres.name, encodeJSON( pres.table(), 1|4));
 		cache = null;
 		userdata = null;
 	}
@@ -212,7 +212,7 @@ class GameConfigResource extends Resource
 		local bb = encodeJSON( ::conf[id], 1|4, ByteBuffer());
 		bb.pos = 0;
 		file.save( bb);
-		printf( "conf[%S] = %S\n", id, encodeJSON( ::conf[id], 1|4));
+		// printf( "conf[%S] = %S\n", id, encodeJSON( ::conf[id], 1|4));
 	}
 
 	function getResourceName(){
@@ -287,8 +287,7 @@ class GameResourceResource extends Resource
 		local bb = encodeJSON( ::conf._resource[id], 1|4, ByteBuffer());
 		bb.pos = 0;
 		FileRef( resdir, id..".json").save( bb);
-		printf( "resource.%S = %S\n", id, encodeJSON( ::conf._resource[id], 1|4));
-		// printf( "resource = %S\n", encodeJSON( ::conf._resource, 1|4));
+		// printf( "resource.%S = %S\n", id, encodeJSON( ::conf._resource[id], 1|4));
 	}
 
 	function getResourceName(){

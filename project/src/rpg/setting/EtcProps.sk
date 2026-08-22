@@ -81,7 +81,7 @@ condprops .. {
 condprops .. {
 	pid = "REM"
 	type = HEADER,
-	lbl = "解除条件"
+	lbl = "$T.lbl_remcondreq"
 }
 
 condprops .. {

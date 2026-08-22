@@ -190,8 +190,7 @@ class RealtimeBattleRunner extends BattleRunnerBase
 		}else{
 			local pc = members.find( @( v) v.isCommandable() && v.cmdgauge>=100.0);
 			if( pc){
-				cmdthread = newthread( "CommandInput thread");
-				cmdthread.start( inputCommand, this, pc);
+				cmdthread = stage.subthread( inputCommand, this, pc);
 			}
 		}
 	}

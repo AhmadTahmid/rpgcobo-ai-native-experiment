@@ -224,6 +224,7 @@ class SK3DBlockWorld extends SK3DObject
 		visiblemask = SK_VISIBLE_OPAQUE|SK_VISIBLE_SELECTOR|SK_VISIBLE_SHADOW_CASTER|SK_VISIBLE_SHADOW_RECEIVER;
 		lights = [];
 		lightmap = {};
+		vchunkmap = {};
 		mtl = ::getVoxelMeshMaterial( null);
 		if( w) setBlockWorld( w);
 	}
@@ -242,8 +243,10 @@ class SK3DBlockWorld extends SK3DObject
 		bw = w;
 		bnd.set( bw.w*0.25, bw.h*0.25, bw.d*0.25, bw.w*0.25, bw.h*0.25, bw.d*0.25);
 		gbnd.set( bnd);
-		vchunkmap = {};
 		meshgenqueue = [];
+		foreach( ch in vchunkmap){
+			ch.seq = -100;	//	全チャンク再描画ー
+		}
 	}
 
 	function setVisibleFaceMask( vs){

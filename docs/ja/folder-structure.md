@@ -5,7 +5,7 @@ RPG-Cobo のプロジェクトは、ゲームのソースコード・データ�
 ## 	ルートディレクトリ
 
 ```
-/
+project/
 ├── addon/
 ├── docs/
 ├── project/

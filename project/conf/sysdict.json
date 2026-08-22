@@ -77,12 +77,16 @@
 	"btn_talk":{ "ja":"話す", "en":"Talk"},
 	"btn_sell":{ "ja":"売る","en":"Sell"},
 	"btn_page":{ "ja":"ページ切り替え", "en":"Change Page"},
+	"btn_pause":{ "ja":"ポーズ", "en":"Pause"},
 
 	"autobattle":{ "ja":"オートバトル", "en":"Auto Battle"},
 
 	"cursor":{ "ja":"カーソル", "en":"Cursor"},
 	"button":{ "ja":"ボタン", "en":"Button"},
 	"btn_tap":{ "ja":"画面タップ", "en":"Tap Screen"},
+	"pause":{"ja":"ポーズ", "en":"Pause"},
+	"resume_btn":{"ja":"ポーズ解除", "en":"Resume"},
+	"resume_tap":{"ja":"タップでポーズ解除", "en":"Tap to Resume"},
 	
 	"equip":{ "ja":"装備", "en":"Equipment"},
 	"weapon":{ "ja":"武器", "en":"Weapon"},

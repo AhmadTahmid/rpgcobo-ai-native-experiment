@@ -357,6 +357,10 @@ const GPUI_SELECTED = 1503
 const GPUI_DESELECTED = 1504
 const GPUI_GAMEPAD_CHANGED = 1510
 const GPUI_GAMEPAD_NOTICE = 1511
+const EXEC_INVOKE = 1600
+const EXEC_NOTIFY = 1601
+const EXEC_RESPONSE = 1602
+const EXEC_MCP = 1603
 
 const APP_EVENT = 0
 const MOUSE_EVENT = 1
@@ -375,6 +379,7 @@ const IAP_EVENT = 11
 const NOTIFY_EVENT = 13
 const BROADCAST_EVENT = 14
 const GPUI_EVENT = 15
+const EXEC_EVENT = 16
 
 
 ///////////////////////////////////////////////////////////////////////////////

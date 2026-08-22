@@ -158,11 +158,11 @@ class GotoDBSearch
 		}
 	}
 
-	//	最大200件まで
+	//	リストだけ取得
 	//	
-	function search( k){
+	function _search( k, conf){
 		local a = [];
-		foreach( i in ["player","job","cond","skill","item","weapon","armor","enemy","map","quest","store","macro"]){
+		foreach( i in #["player","job","cond","skill","item","weapon","armor","enemy","map","quest","store","macro"]){
 			_searchdb( i, ::conf[i], k, a);
 		}
 		_searchgvar( ::conf.gvar, k, a);
@@ -170,6 +170,13 @@ class GotoDBSearch
 			_searchev( mapid, map, k, a);
 		}
 		a.sort( @( v) -v[2]);
+		return a;
+	}
+
+	//	最大200件まで
+	//	
+	function search( k){
+		local a = _search( k, ::conf);
 		if( length( a) > 500) a.resize( 500);
 		popup.list.setListItems( a);
 		if( length( a)) popup.list.setSelectedIndex( 0);

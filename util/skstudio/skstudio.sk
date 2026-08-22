@@ -3,7 +3,9 @@ runsk( "Workspace.sk");	//	最初にワークスペースをロード！！！�
 if( ::workspace.lang) ::lang <- Language( chooseLanguage( ::workspace.lang));	//	ワークスペースに保存された言語を指定
 {	//	ファイルへのログ開始。1日ごとにファイル名更新
 	FileRef( "log").mkdirs();
-	local d = Date(); changeStdOutFile( FileRef( "log/s%04d%02d%02d.log" % (d.tm_year+1900, d.tm_mon+1, d.tm_mday)));
+	local d = Date();
+	::logpath <- "log/s%04d%02d%02d.log" % (d.tm_year+1900, d.tm_mon+1, d.tm_mday);
+	changeStdOutFile( FileRef( logpath));
 }
 
 //	再起動時にはウィンドウは生成済み
