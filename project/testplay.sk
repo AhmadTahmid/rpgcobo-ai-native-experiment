@@ -4,12 +4,12 @@
 local args = ::arguments, i;
 
 //	言語選択。workspaceから設定取ってきちゃうかな～
-local ws = decodeJSON( FileRef( ".sakana.ws")?.load() || "{}");
 local sysset = loadconf( "/data/setting.json");
-local lt = chooseLanguage( ws["debuglang"] || sysset.projlang);
-::lang = Language( lt);
+local lt = sysset.projlang;
+if( (i=args.indexOf( "-lang")) >= 0) lt = args[i+1];
+::lang = Language( chooseLanguage( lt));
 
-module.hookAction( "conf_postload", @(){
+local applytrans(){
 	if( lang.code != sysset.projlang){
 		local tres = getResource( `/data/trans/${lang.code}.trns`);
 		if( tres){
@@ -20,24 +20,26 @@ module.hookAction( "conf_postload", @(){
 		local bb = encodeJSON( conf._map, 5, ByteBuffer()); bb.pos = 0;
 		f.save( bb);
 	}
-}, -100);
+}
+
+local loadworkdata( wd){
+	override( conf._map, wd["conf"], true);
+	foreach( path, v in wd["res"]){
+		local r = getResource( path);
+		if( r){
+			r.file = { load = @() v};	//	すごい
+		}
+	}
+}
+
+module.hookAction( "conf_postload", applytrans, -100);
 
 //	作業中のデータを復元。翻訳前に
 
 if( (i=args.indexOf( "-wd")) >= 0){
 	local wd = ObjectInput.decode( FileRef( args[i+1]).load());
-	// printf( "WorkingData: %S\n", encodeJSON( wd, 5));
-	module.hookAction( "conf_postload", @(){
-		override( conf._map, wd["conf"], true);
-		foreach( path, v in wd["res"]){
-			local r = getResource( path);
-			if( r){
-				r.file = { load = @() v};	//	すごい
-			}
-		}
-	}, -200);
+	module.hookAction( "conf_postload", @() loadworkdata( wd), -200);
 }
-
 
 //	テストプレイ環境はWindowsでProgram Files外にあるはずなので、カレント/savedataに保存する
 ::savedir <- FileRef( skGetCurrentDir().."/savedata"); ::savedir.mkdirs();
@@ -59,7 +61,9 @@ skBeginRender();
 skClearParam( #ClearParam( 0.0, 0.0, 0.0, 1.0));
 
 runsk( "/load.sk");
-if( ws["debugtouch"]) GPUI.emuosname <- "Android";		//	タッチデバッグの時はAndroidってことにする
+runsk( "/plugin/rpgtools/common/IPCConnection.sk");	//	ツールとの通信のためにIPCConnectionだけロード
+
+if( args.contains( "-debugtouch")) GPUI.emuosname <- "Android";		//	タッチデバッグの時はAndroidってことにする
 ::soundmanager.setBGMVolume( clientconf.sound.bgmvol * 0.008);	//	BGMはちょっと小さめに。。。
 ::soundmanager.setSEVolume( clientconf.sound.sevol * 0.012);	//	SEは大き目。。。
 ::renderhint.set( ClientConfig.renderhints[clientconf["render"]["quality"]]);	//	保存されたレンダリング品質を設定
@@ -69,8 +73,8 @@ RPGMain.setupUI();
 {
 	local sc = skGetScreenSize( [0,0]);
 	::rootview.stretchSize( sc[0], sc[1]);
+	(::ipcserv <- IPCConnection()).bind();	//	ツールとの通信のためにIPCConnectionをバインド
 }
-
 
 //	ロゴから起動しない。設定を直に読み込んで
 RPGMain.loadSetting();
@@ -79,12 +83,14 @@ local recfx = arguments.contains( "-recfx");	//	使用したシェーダーを�
 local prof = null;
 if( ::arguments.contains( "-skprof")) (prof = SKProfiler()).start();
 
+//	デバッグ用の設定を適用
 local applydebugpref(){
-	if( ws["debugitems"]) rpgstat.addAllItems();
-	if( ws["debuglv"]){
+	local i;
+	if( args.contains( "-debugitems")) rpgstat.addAllItems();
+	if( (i=args.indexOf( "-debuglv")) >= 0){
 		foreach( pc in rpgstat.playermap){
 			if( pc){
-				pc.setLV( ws.debuglv);
+				pc.setLV( int( args[i+1]));
 				pc.HP = pc.MAXHP;
 				pc.MP = pc.MAXMP;
 			}
@@ -92,11 +98,9 @@ local applydebugpref(){
 	}
 }
 
-
 {
-	local slot = -2;
-	
 	//	起動モードの判定
+	local slot = -2;
 	if( (i=args.indexOf( "-slot")) >= 0){
 		slot = int( args[i+1]);
 	}
@@ -107,6 +111,7 @@ local applydebugpref(){
 			applydebugpref();
 			goto SKIP;
 		}
+		// pass throuth
 	case -1:	//	newgame
 		(::rpgstat = RPGState()).newGame();
 		local d = ::conf.setting.inimap;
@@ -195,10 +200,151 @@ SKIP:
 	;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+//	デバッグ用API
+
+
+//	DBの内容だけ部分的に変更を適用する。また、rpgstatとrpgstageに反映される。
+//	翻訳は適用されない。また、リソースの差し替えは行われない。confの内容だけを変更する。
+//	※バトルから戻り先のマップは変化しない！それが必要な場合はgetclassinstances( RPGStage)で回す。
+//	
+function hotReload( wdpath){
+	printf( "hotReload START!!!!!!!!!!!: wdpath=%S\n", wdpath);
+	//	ロードしてconfに反映
+	::getResource( "/data").flush();	//	データ・リソースのキャッシュをクリア。保存されたuiやマップのリソースは再ロードされる。ただし表示中のものは変化しない。
+	::getResource( "/resource").flush();
+	conf._map = loadconf( "/conf/load.conf");	//	conf丸ごと入れ替え！
+	if( wdpath){
+		local wd = ObjectInput.decode( FileRef( wdpath).load());
+		loadworkdata( wd);
+	}
+	module.dispatchAction( "game_hotload");		//	ホットロードされたフック。プラグインで必要に応じてフック。
+	applytrans();
+	local rpgobjs = getclassinstances( RPGObject, true);	//	サブクラス含むすべてのRPGObjectを取得
+	//	まずはdataを更新。
+	foreach( v in rpgobjs){
+		v.data = ::rpgdata[v.dataid];
+		// printf( "hotReload: updated RPGObject %S => %S\n", v.dataid, v);
+	}
+	//	次にプレイヤー、エネミーのステータスを更新。
+	foreach( v in rpgobjs){
+		if( v["updateBaseScore"]) v.updateBaseScore();	//	ベースステータスの再計算(enemy)
+		if( v["updateOptions"]){ v.updateOptions(); v.updateScoreMap(); }	//	オプション、ステータスの再計算(pc)
+	}
+	//	現在ステージ反映
+	local stg = ::rpgstage;
+	stg.map = ::conf.map[stg.mapid];	//	RPGStageStateは変化させない
+	//	BlockWorld変更・・・できるかな
+	local now = Date.currentTime();
+	local bwf = FileRef( ::getResource( "/data/mapdata/%S.bw" % stg.mapid).file.path);
+	if( bwf.lastmodified >= now-3){	//	3秒以内に更新されていたら
+		local bw = ObjectInput.decode( bwf.load());	//	ファイルの方から取ってきちゃう
+		stg.bw = bw;
+		stg.createBlockWorld3D( bw);
+	}
+	//	イベントの反映。追加・削除・変更を反映する。
+	foreach( er in stg.events){
+		if( !(er.evid in stg.map.event)){
+			er.despawn();
+			// printf( "hotReload: removed RPGStageEvent %S => %S\n", er.evid, er);
+			removei;
+		}
+	}
+	foreach( evid, v in stg.map.event){
+		local er = stg.getEvent( evid);
+		if( er){
+			er.data = v;
+			local p = er.data.pos;
+			er.spawnpos = (p[0]*0.5, p[1]*0.5, p[2]*0.5, p[3]*Math.HPI);	//	リスポーン位置は強制設定
+			er.spawndist = er.data.spawndist;
+			local pageidx = er.pagelist.indexOf( er.page);
+			er.pagelist = er.data["page"] || RPGSystem.eventrole[er.data["role"]]["defpage"];
+			//	スカウトモード時でスポーン中のみ即時適用される
+			local pagereset = false;
+			if( er.mode==1 && er.rp3d){
+				er.despawn();
+				er.setPage( er.pagelist[pageidx] || null);
+				pagereset = true;
+			}
+			// printf( "hotReload: updated RPGStageEvent %S => %S pagereset=%S\n", er.evid, er, pagereset);
+		}else{	//	追加されたイベントも追加するか。。。
+			er = RPGStageEventRunner( evid, v, stg, null);
+			stg.events .. er;
+			er.start();
+			// printf( "hotReload: added RPGStageEvent %S => %S\n", er.evid, er);
+		}
+	}
+	//	オートマクロ反映
+	foreach( ma in automacrolist()){
+		local mid = ma.id;
+		local mr = stg.automacros.find( @( v) v.macroid==mid);
+		if( mr){
+			mr.data = ma.data;
+		}else{
+			mr = RPGMacroEventRunner( stg, mid, ma.data);
+			stg.automacros .. mr;
+		}
+	}
+	//	バトルでなんかやることあるかな？
+}
+
+//	skRestartを使ったライブリロード。現在の状態を保存してskRestart()。保存できない状況なら、直前のオートセーブにする。
+//	デバッグ時は3秒に1回の頻度でメモリに自動セーブする。時間巻き戻しの機能にも使える。
+function reloadGame( mode){
+	local a = ::arguments;
+	a.removeValue( "-hotreload");
+	//	現在の状態を保存
+	
+	//	
+	newthread().start( @(){
+		sleep( 100);
+		skRestart();
+	}, this);
+	return true;
+}
+
+//	MCPからデバッグ中のゲームに対して、スクリーンショットを取得する。
+function getDebugScreenShot(){
+	local sp = ::rootview.capture(), tex = sp.tex0;
+	local img = RGBAImage( tex.width, tex.height);
+	local old = skGetRenderTarget();
+	skSetRenderTarget( tex);
+	skReadPixels( 0, 0, img.width, img.height, img);
+	skSetRenderTarget( old);
+	local bb = img.encodePNG(); bb.pos = 0;
+	return bb;
+}
+
+function getDebugStatus(){
+	local stg = ::rpgstage;
+	return [
+		"Paused: "..!!::RPGMain.pause,
+		"MapID: "..stg.mapid,
+	];
+}
+
+//	ウィンドウが背面になると音量を下げる
+::rootview.addEventListener( APP_EVENT, @( e){
+	switch( e.id){
+	case ACTIVESTATE_CHANGED:
+		if( e.keycode == AppActiveState.APPACTIVE_ACTIVE){
+			::soundmanager.ctx[SoundID.SK_SND_GAIN] = 1.0;
+		}else{
+			::soundmanager.ctx[SoundID.SK_SND_GAIN] = 0.2;
+		}
+		break;
+	}
+});
+
 //	flush log
 newthread().start( @(){
+	local paused = false;
 	for( ;;){
 		flushStdOut(); suspend();
+		if( !paused != !::RPGMain.pause){
+			paused = !paused;
+			if( ::ipcserv.peerpid) ::ipcserv.invokeIPCScript( "::debugsession?.pauseChanged( %S);" % paused, 0);	//	notify
+		}
 	}
 }, this);
 
@@ -214,16 +360,19 @@ local rootevent( e){
 	if( e.id != KEY_PRESSED) return;
 	switch( e.keycode){
 	case VK_F2:
-		revertRenderSkip( "info");
-		revertRenderSkip( "stageui");
-		revertRenderSkip( "message");
-		revertRenderSkip( "menu");
+		if( !::RPGMain.pause){
+			revertRenderSkip( "info");
+			revertRenderSkip( "stageui");
+			revertRenderSkip( "message");
+			revertRenderSkip( "menu");
+		}
 		break;
 	}
 }
 
 ::rootview.addPostEventListener( KEY_EVENT, rootevent);
 
+///////////////////////////////////////////////////////////////////////////////////////////
 
 RPGMain.mainloop();
 

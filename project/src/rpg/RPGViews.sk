@@ -694,8 +694,8 @@ class VirtualPad
 	btn_a = null;
 	btn_b = null;
 	btn_x = null;
-	btn_start = null;
-	btn_auto = null;
+	btn_y = null;
+	btn_back = null;
 
 	//	Gamepad fields
 	id = "aaaa:bbbb";
@@ -709,7 +709,7 @@ class VirtualPad
 	axis4 = 0.0;
 	axis5 = 0.0;
 
-	visible = true;
+	visible = false;
 
 	mapping = null;			//	マッピング設定は入らない
 
@@ -719,8 +719,8 @@ class VirtualPad
 		setupButton( btn_a = view.findChild( "vpad_a"), BTN_A);
 		setupButton( btn_b = view.findChild( "vpad_b"), BTN_B);
 		setupButton( btn_x = view.findChild( "vpad_x"), BTN_X);
-		setupButton( btn_start = view.findChild( "vpad_menu"), BTN_START);
-		setupButton( btn_auto = view.findChild( "vpad_auto"), BTN_X);
+		setupButton( btn_y = view.findChild( "vpad_y"), BTN_Y);
+		setupButton( btn_back = view.findChild( "vpad_back"), BTN_BACK);
 	}
 
 	function setVisible( b){

@@ -889,7 +889,7 @@ class RPG3DObject extends SK3DObject
 	//	ダメージのポップアップのビューを作成する。プラグインなどで置き換え可能
 	function createPopDamageView( str, col=0xffffffff, type=0){
 		str = string( str);
-		local r = ::RPGMain.getUIResource( type==1 ? "/resource/ui/parts/popstr2.ui": "/resource/ui/parts/popstr.ui");
+		local r = ::RPGMain.getUIResource( type==1 ? "parts/popstr2.ui": "parts/popstr.ui");
 		local v = ::loadSKView( r);
 		local list = v.findChild( "chrlist");
 		list.setRowCount( length( str));

@@ -53,6 +53,7 @@ function loadPlugin( args, opt){
 	::runsk( srcdir.."/mapeditor/load.sk");
 	::runsk( srcdir.."/dbeditor/load.sk");
 	::runsk( srcdir.."/reseditor/load.sk");
+	::runsk( srcdir.."/mcp/load.sk");
 	loadskfx( getResource( srcdir.."/shader"));
 
 	FileIcons.rpglist <- ("\ue8ef",0xddcc44ff);
@@ -104,6 +105,9 @@ function loadPlugin( args, opt){
 			::workspace.tabs <- ["/.x/map/M001"];
 			::workspace.currenttab <- "/.x/map/M001";
 		}
+		//	MCPサーバーをバインドする
+		::mcpserv <- MCPServer();
+		::mcpserv.bind();
 	}, 0);
 
 	return true;

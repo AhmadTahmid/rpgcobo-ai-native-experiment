@@ -49,6 +49,7 @@ class RPGStage
 	view3d = null;		//	SK3DView : autoupdate=false
 	scn = null;			//	SK3DScene : 
 	b3world = null;		//	b3World : 
+	b3mapbnds = null;	//	b3Body[] : マップ境界の4平面のコリジョン。bwcolと同じくb3worldに追加される。参照を残しておかないとb3worldから消える
 	weather = null;		//	Weather : 天候、時間帯を操作。フェード時にはrenderer.mainpass内を直接置き換えるので結構むずい。
 	screenfx = null;	//	ScreenEffect : ポストエフェクト的なエフェクト。weatherと同時に使用可能。
 	
@@ -122,7 +123,7 @@ class RPGStage
 		stat = ::rpgstat.stagemap[mapid];
 		events = [];
 		// event3ds = [];
-		view = ::loadSKView( "/resource/ui/stage.ui");
+		view = ::loadSKView( ::RPGMain.getUIResource( "stage.ui"));
 		view3d = view.findChild( "stage3d");
 		view3d.setAutoUpdate( false);
 		scn = view3d.scn;
@@ -141,13 +142,11 @@ class RPGStage
 		sndmanager.setReverbID( map.reverbid);
 		scn.setSK3DSoundManager( sndmanager);
 		//	BlockWorld
-		// bw = ::getResourceContent( "/data/mapdata/%S.bw" % mapid);	//	bwがキャッシュされるとdynassetsが残っちゃう。。。まあそんな大きくないし
-		bw = ObjectInput.decode( ::getResource( "/data/mapdata/%S.bw" % mapid).loadData());
+		bw = ObjectInput.decode( ::getResource( "/data/mapdata/%S.bw" % mapid).loadData());	//	bwがキャッシュされるとdynassetsが残っちゃう。。。まあそんな大きくないし
 		if( stat.dynassets){
 			local a = stat.dynassets.map( @( v) v && { ...v, bw = RPGEventRunner._getastbw( v.resid), });
 			bw.placeDynamicAssetAll( a);
 		}
-		addMapBounds();
 		//	プレイヤー配置
 		changePlayer3D( stat.statmap.playermodel);	//	mmm??
 		setPlayerPosition( stat.player.pos);
@@ -171,18 +170,7 @@ class RPGStage
 		manumacros = [];
 		setCamerawork( stat.camwork);		//	カメラ状態を復元。キャラが一通り配置された後。
 		//	SK3DBlockWorld、コリジョン生成
-		bw3d = SK3DBlockWorld( bw);
-		bw3d.setVisibleFaceMask( map.vs);
-		bw3d.setGSelectorID( 1);	//	ステージにセレクタIDを指定。ピクセル単位のオブジェクト識別に使用する
-		scn.addObject( bw3d);
-		local bci = BlockColiderInterface( bw);
-		bci.setFlagMask( BLK_SOLID|BLK_PLANT|BLK_BARRIOR|BLK_SOLIDFB);
-		bci.setFinMode( 1 | (stat.statmap["canenter_water"]?0:2) | (stat.statmap["canenter_hole"]?0:4));		//	barrior | water | hole
-		bci.setBarriorMap( bw.bmp);
-		local bcshp = b3Shape.createCustomConcave( bci);
-		bwcol = b3Body( 0, bcshp, bw3d.mat, G_STAGE, G_VIEW|G_CHARA|G_OBJECT);
-		bwcol.ref = bci;
-		b3world.addBody( bwcol);
+		createBlockWorld3D( bw);
 
 		//	床に接地させる。ポータルの仕様上確実に床にいるとは限らない
 		adjustFloorPos( player3d);
@@ -209,7 +197,6 @@ class RPGStage
 		ctrlock = false;
 	}
 
-	b3mapbnds = null;
 
 	//	マップ境界の4平面のコリジョンを張る
 	function addMapBounds(){
@@ -223,6 +210,30 @@ class RPGStage
 		b3world.addBody( bf);
 		b3world.addBody( br);
 		b3mapbnds = (bn,bl,bf,br);	//	参照を残しておかないとb3worldから消える
+	}
+
+	//	設定されたBlockWorldから表示用、コリジョン用のSK3DBlockWorldを生成する。
+	//	※ほとんどの場合は初期化の時のみ使用される。
+	function createBlockWorld3D( bw){
+		if( bw3d){
+			bw3d.setBlockWorld( bw);
+			b3world.removeBody( bwcol);
+			foreach( b in b3mapbnds) b3world.removeBody( b);
+		}else{
+			bw3d = SK3DBlockWorld( bw);
+			bw3d.setVisibleFaceMask( map.vs);
+			bw3d.setGSelectorID( 1);	//	ステージにセレクタIDを指定。ピクセル単位のオブジェクト識別に使用する
+			scn.addObject( bw3d);
+		}
+		local bci = BlockColiderInterface( bw);
+		bci.setFlagMask( BLK_SOLID|BLK_PLANT|BLK_BARRIOR|BLK_SOLIDFB);
+		bci.setFinMode( 1 | (stat.statmap["canenter_water"]?0:2) | (stat.statmap["canenter_hole"]?0:4));		//	barrior | water | hole
+		bci.setBarriorMap( bw.bmp);
+		local bcshp = b3Shape.createCustomConcave( bci);
+		bwcol = b3Body( 0, bcshp, bw3d.mat, G_STAGE, G_VIEW|G_CHARA|G_OBJECT);
+		bwcol.ref = bci;
+		b3world.addBody( bwcol);
+		addMapBounds();
 	}
 
 	//	ステージ内の全ドアを調べて、開閉ロックがかかっていない場合は自動でドアイベントを生成する。
@@ -434,7 +445,7 @@ class RPGStage
 		scn.addObject( player3d);
 		//	
 		if( !searchpop){
-			searchpop = loadSKView( "/resource/ui/pop_search.ui", RPG3DPopupView);
+			searchpop = loadSKView( ::RPGMain.getUIResource( "pop_search.ui"), RPG3DPopupView);
 			local rt = RichText( "[+4]\ueeca[+0]  $T.btn_search");
 			searchpop.setValue( "lbl", rt);
 			searchpop.setTargetPoint( 0);	//	top

@@ -155,7 +155,7 @@ class BattleRunnerBase
 		charas .. pc;
 		chara3ds .. rp3d;
 		//	ターゲット
-		local tgtview = ::loadSKView( "/resource/ui/parts/target.ui", RPG3DTargetView);
+		local tgtview = ::loadSKView( ::RPGMain.getUIResource( "parts/target.ui"), RPG3DTargetView);
 		tgtview.name = "target"..pc;
 		tgtview.setTarget( rp3d);
 		tgtview.setVisible( false);
@@ -174,7 +174,7 @@ class BattleRunnerBase
 		charas .. ec;
 		chara3ds .. rp3d;
 		//	ターゲット
-		local tgtview = ::loadSKView( "/resource/ui/parts/target.ui", RPG3DTargetView);
+		local tgtview = ::loadSKView( ::RPGMain.getUIResource( "parts/target.ui"), RPG3DTargetView);
 		tgtview.name = "target"..ec;
 		tgtview.setTarget( rp3d);
 		tgtview.setVisible( false);

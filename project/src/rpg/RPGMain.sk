@@ -33,6 +33,7 @@ import GamepadStateID;
 {
 	uistack = [];
 	picmap = {};
+	pause = null;		//	PauseSession : ゲームの一時停止状態を管理する。nullの場合は一時停止していない。
 	
 	//////////////////////////////////////////////////////////////////////////////
 	//	ゲーム初期化。
@@ -46,7 +47,7 @@ import GamepadStateID;
 	}
 
 	function setupUI(){
-		local root = (::rootview = ::loadSKView( "/resource/ui/rpgroot.ui", SKRootView));
+		local root = (::rootview = ::loadSKView( getUIResource( "rpgroot.ui"), SKRootView));
 		root.resizemode = 2;
 		if( skGetOSName() == "Windows"){	//	Windowsのみ。タイトルバー作る
 			RPGTitleLayer( root.findChild( "titlelayer"));
@@ -77,7 +78,12 @@ import GamepadStateID;
 	
 	//	ゲームループを1フレーム処理する。
 	function update( dt){
-		if( rpgstage) rpgstage.updateStage( dt);
+		if( pause){
+			pause.update( dt);
+		}else{
+			if( rpgstage) rpgstage.updateStage( dt);
+			if( ::rpgstat){ ::rpgvar.PTIME += dt; }
+		}
 		rootview.updateEvents( dt);
 		rootview.updateViews( dt);
 		local doflip = rootview.renderViews();
@@ -86,9 +92,23 @@ import GamepadStateID;
 		}else{
 			skSkipFlipScreen();
 		}
-		if( ::rpgstat){ ::rpgvar.PTIME += dt; }
 	}
-
+	
+	//	ゲームを丸ごとポーズする。といってもポーズ画面のUIは動くし疑似的なポーズ状態。
+	//	BGM停止。SEは停止するほどではないか。
+	function setPaused( b){
+		if( !pause == !b) return;
+		if( b){
+			(pause = PauseSession()).start();
+		}else{
+			pause.finish();
+			pause = null;
+		}
+	}
+	
+	function isPaused(){
+		return !!pause;
+	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
 	//	セーブデータ操作
@@ -180,6 +200,7 @@ import GamepadStateID;
 		(::rpgstat = RPGState()).newGame();
 		::rpgstat.saveslot = getLatestSaveSlot();
 		//	タイトルステージ
+		cleanupLayers();
 		RPGMain.showUI( { key="wipe", show="show0"});
 		local m0 = ::conf.setting.titlemap;
 		local sstat = ::rpgstat.stagemap[m0] <- RPGStageState();
@@ -483,7 +504,7 @@ import GamepadStateID;
 		if( uipath in uimapcache){
 			r = uimapcache[uipath];
 		}else{	//	uimapを行う
-			r = ::getResource( "/resource/ui").getResource( uipath);
+			r = ::getResource( "/presetui").getResource( uipath);
 			r = _mapui( r);
 			uimapcache[uipath] <- r;
 		}
@@ -732,6 +753,11 @@ import GamepadStateID;
 			RPGMain.showUI( { key="message_log", text=`\uf830 $T.gamepad_x`});
 			buttonhelp( _btnhelp);
 			break;
+		case GPUI_PRESSED:
+			if( e.keycode == BTN_BACK){
+				setPaused( !pause);
+			}
+			break;
 		}
 	}
 
@@ -749,13 +775,13 @@ import GamepadStateID;
 	}
 
 	btnhelpmap = {
-		title = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"] ],
-		stage = [ [BTN_CURSOR,"$T.btn_move"], [BTN_A,"$T.btn_search"], [BTN_B,"$T.btn_jump"], [BTN_X,"$T.btn_menu"] ],
-		battle = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_Y,"$T.btn_auto"] ],
-		menu = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"] ],
-		menu_s = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_Y,"$T.btn_sort"] ],
-		menu_p = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_LR,"$T.btn_page"] ],
-		menu_sp = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_Y,"$T.btn_sort"], [BTN_LR,"$T.btn_page"] ],
+		title = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_BACK, "$T.btn_pause"] ],
+		stage = [ [BTN_CURSOR,"$T.btn_move"], [BTN_A,"$T.btn_search"], [BTN_B,"$T.btn_jump"], [BTN_X,"$T.btn_menu"], [BTN_BACK, "$T.btn_pause"] ],
+		battle = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_Y,"$T.btn_auto"], [BTN_BACK, "$T.btn_pause"] ],
+		menu = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_BACK, "$T.btn_pause"] ],
+		menu_s = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_Y,"$T.btn_sort"], [BTN_BACK, "$T.btn_pause"] ],
+		menu_p = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_LR,"$T.btn_page"], [BTN_BACK, "$T.btn_pause"] ],
+		menu_sp = [ [BTN_CURSOR,"$T.btn_cursor"], [BTN_A,"$T.btn_apply"], [BTN_B,"$T.btn_back"], [BTN_Y,"$T.btn_sort"], [BTN_LR,"$T.btn_page"], [BTN_BACK, "$T.btn_pause"] ],
 	};
 	
 	_btnhelp = null;
@@ -775,5 +801,87 @@ import GamepadStateID;
 		}
 		::rootview.setValue( "btninfolbl", string( sb));
 		return ret;
+	}
+}
+
+//	ゲームのポーズ状態を管理する。ポーズの解除の他、ゲームのリセットも可能。
+//	※ただし、showUIやshowViewはポーズ中に呼び出すことは出来ない。そのため、ダイアログ等は自前で表示する必要がある。
+//	
+class PauseSession
+{
+	view = null;			//	ポーズ中に表示するビュー。
+
+	mainlayer = null;		//	ポーズ中に非表示にするビュー
+	pauselayer = null;		//	ポーズ中に表示するビューの親ビュー
+	oldcurs = null;			//	ポーズ中に非表示にするビューの親ビュー
+	captureimg = null;		//	SKImageView : ポーズ時のスクリーンショット
+
+	function start(){
+		mainlayer = ::rootview.findChild( "mainlayer");
+		pauselayer = ::rootview.findChild( "pauselayer");
+		view = ::loadSKView( ::RPGMain.getUIResource( "paused.ui"));
+		local sp = mainlayer.capture();	//	ポーズ中に非表示にするビューをキャプチャしておく
+		captureimg = SKImageView( sp);
+		captureimg.setColor( 0x99999999);	//	暗くする
+		view.findChild( "blurg").addChild( captureimg);
+		pauselayer.addChild( view);
+		// mainlayer.layerflags &= ~1;	//	非表示じゃだめだ。。。削除しないと
+		oldcurs = ::gpui.gpuitarget;
+		mainlayer.removeFromParent();
+		//	bgm
+		::soundmanager.currentbgm?.pause( true);
+		//	タッチモードと他で表示内容が違う
+		local recoverlbl = view.findChild( "recoverlbl"), gotitlelbl = view.findChild( "btn_gotitle.lbl");
+		if( ::virtualpad["visible"]){
+			recoverlbl.setValue( "$T.resume_tap");
+			gotitlelbl.setValue( "$T.gotitle");
+		}else{
+			recoverlbl.setValue( "%S $T.resume_btn" % buttonicon( BTN_BACK));
+			gotitlelbl.setValue( "%S+%S   $T.gotitle" % (buttonicon( BTN_LB), buttonicon( BTN_RB)));
+		}
+		view.addEventListener( MOUSE_EVENT, pauseevent);
+		view.addEventListener( KEY_EVENT, pauseevent);
+		view.addEventListener( ACTION_EVENT, pauseevent);
+		view.requestFocus();
+	}
+
+	function finish(){
+		view.removeFromParent();
+		// mainlayer.layerflags |= 1;	//	再表示
+		::rootview.insertChild( 0, mainlayer);
+		if( ::gpui.enabled){
+			::gpui.updateGPUIMap();
+			::gpui.moveCursorTo( oldcurs);
+		}
+		//	bgm
+		::soundmanager.currentbgm?.pause( false);
+	}
+	
+	function update( dt){
+	}
+
+	function pauseevent( e){
+		switch( e.id){
+		case MOUSE_RELEASED:
+			if( e.isMouseDown( BUTTON1_MASK) && e.isClicked()){
+				::RPGMain.setPaused( false);
+			}
+			break;
+		case KEY_PRESSED:
+			if( ::gpui.isButtonDown( BTN_LB) && ::gpui.isButtonDown( BTN_RB)){
+				gotitle();
+			}
+			break;
+		case ACTION_PERFORMED:
+			if( e.src["name"] == "btn_gotitle"){
+				gotitle();
+			}
+			break;
+		}
+	}
+
+	function gotitle(){
+		::RPGMain.setPaused( false);
+		::RPGMain.goTitle();
 	}
 }

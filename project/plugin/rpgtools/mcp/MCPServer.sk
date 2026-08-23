@@ -1,0 +1,274 @@
+import VirtualKeyCode;
+import ModifiersMask;
+
+/////////////////////////////////////////////////////////////////////////////////
+//	
+//	MCPServer : RPG-Coboツール用のMCPサーバー実装。
+//	RPG-CoboツールでMCPサーバープロセスからのプロセス間通信（パイプ経由）を受け取り、MCPコマンドを実行する。
+//	また、ゲームのデバッグ中は子プロセスで実行しているゲームに対してツールとのプロセス間通信(こちらはウィンドウメッセージ通知)が行われる。
+//	MCPクライアントは VSCode を推奨。他のMCPクライアントでも動作するはずだがサポート外。
+//	
+
+class MCPServer
+{
+	static MCPServerTools = [];
+
+	mcpmethodmap = null;	//	method毎のハンドラ
+	mcptoolmap = null;		//	toolのハンドラ
+	clientcapabilities = null;
+
+	changemap = null;		//	データ変更のためのマップ。changeidをキーにして、変更、ロールバック、コミットの情報を保持する。
+	changeidx = 0;			//	データ変更のIDを生成するためのカウンタ。
+	clientresmap = null;	//	クライアントからの応答を処理するためのマップ。idをキーにして、応答の処理を保持する。
+	
+	constructor(){
+		//	メソッドマップを作る
+		mcpmethodmap = {
+			"initialize": mcpInitializeMethod,
+			"notifications/initialized": mcpNotificationsInitializedMethod,
+			"notifications/cancelled": mcpNotificationsCancelledMethod,
+			"ping": mcpPingMethod,
+			"tools/list": mcpToolsListMethod,
+			"tools/call": mcpToolsCallMethod,
+		};
+		mcptoolmap = MCPServerTools.reduce( @( v, x) { x[ v.name] <- v; return x; }, {});
+		changemap = {};
+		clientresmap = {};
+		clientcapabilities = {};
+	}
+
+	function bind(){
+		::rootview.addExecListener( mcpappevent);
+		printf( "MCPServer was bound to receive MCP Commands.\n");
+	}
+
+	function setDebugPID( pid){
+		debugpid = pid;
+		//	MCPクライアントにtools/listの変化を通知。
+		// ::Win32.mcpCallback( 0, { "jsonrpc": "2.0", "method": "notifications/tools/list_changed" });
+	}
+	
+	//	EXECUTEイベントを受け取ると別スレッドでMCPコマンドを実行する。
+	function mcpappevent( e){
+		if( e.id == EXEC_MCP){
+			local cmdid = e.keycode, cmdstr = e.actioncmd;
+			e.consume();
+			newthread( "mcpthread").start( processMCPCommand, this, cmdid, cmdstr);
+		}
+	}
+
+	function processMCPCommand( cmdid, cmdstr){
+		local cmd;
+		try{
+			cmd = decodeJSON( cmdstr);
+			local m = cmd["method"] ? mcpmethodmap[ cmd["method"]] : mcpClientResponseMethod;
+			if( !m) throw Exception( "Unknown method: "..cmd["method"], -32601);
+			local res = m( cmd);
+			if( "id" in cmd){
+				respondResult( cmdid, cmd, res);
+			}
+		}catch( ex){
+			printexception( ex);
+			if( "id" in cmd){
+				respondError( cmdid, cmd, ex);
+			}
+		}
+	}
+
+	//	MCPコマンドが正常に実行された場合のコールバック。
+	function respondResult( cmdid, cmd, res){
+		local t = { "jsonrpc": "2.0", "id": cmd["id"], "result": res, };
+		::Win32.mcpCallback( cmdid, t);
+	}
+	
+	//	MCPコマンドがエラーで終了した場合のコールバック。
+	function respondError( cmdid, cmd, ex){
+		local a = ex.getStackInfo();
+		local trace = a.map( @( v)+{ func=v[0], src=v[1], line=v[2], locals = v.slice( 3).map( @( v) realref( v))});
+		local t = { "jsonrpc": "2.0", "id": cmd["id"], "error": {
+			"code": ex.code||-32603,
+			"message": ex.message,
+			"data": { "trace":trace, },
+		}};
+		::Win32.mcpCallback( cmdid, t);
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	//	データ変更系
+
+	//	データ変更処理。
+	//	conf = {
+	//		"message": "変更内容の説明",
+	//		"commit: @(){ ... },	//	変更を確定するための関数。変更を確定する前に、必要な処理を行う。
+	//		"rollback: @(){ ... },	//	変更をロールバックするための関数。変更をロールバックする前に、必要な処理を行う。
+	//	}
+	function processChange( conf){
+		local changeid = "change-"..(++changeidx);
+		local change = {
+			...conf,
+			changeid = changeid,
+			accepted = null,	//	クライアントからの応答。elicitationでユーザーに確認を求めるためのもの。nullは未応答。
+			changed = false,	//	変更が適用されたかどうか。commit()が呼ばれたらtrueになる。
+		};
+		changemap[changeid] <- change;
+		//	クライアントにelicitationを送信して、ユーザーに確認を求める。応答するまでこのスレッドをブロック。
+		sendElicitation( change);
+		for( ;;){
+			sleep( 100);
+			if( change.accepted != null) break;	//	クライアントからの応答があったらループを抜ける。
+		}
+		//	応答を処理
+		if( change.accepted){
+			if( change.commit()){
+				change.changed = true;
+				//	processChangeの戻り値は、変更IDと、変更が適用されたかどうかを返す。
+				return {
+					content = [{ type="text", text="Change applied. changeid=%S" % changeid }],
+				};
+			}else{
+				delete changemap[changeid];	//	コミットに失敗した場合は、マップから削除する。
+				return {
+					content = [{ type="text", text="Change failed. changeid=%S" % changeid }],
+					isError = true,
+				};
+			}
+		}else{
+			delete changemap[changeid];	//	拒否された場合は、マップから削除する。
+			return {
+				content = [{ type="text", text="The user declined the change. changeid=%S" % changeid }],
+				isError = true,
+			};
+		}
+	}
+
+	//	変更をロールバックする。processChangeが成功したもののみロールバックできる。
+	function rollbackChange( changeid){
+		local change = changemap[changeid];
+		if( !change) throw Exception( "Unknown changeid: "..changeid, -32602);
+		if( !change.changed) throw Exception( "Change not applied: "..changeid, -32602);
+		if( change.rollback()){
+			change.changed = false;	//	ロールバックが成功したらchangedをfalseにする。
+			delete changemap[changeid];	//	ロールバックが成功したら、マップから削除する。
+		}
+		return {
+			"changeid": changeid,
+			"rolledback": !change.changed,
+		}
+	}
+
+	static acceptRequestedSchema = {
+		"type": "object",
+		"properties": {
+			"confirmed": {
+				"type": "boolean",
+				"title": "Apply this change",
+				"default": false
+			}
+		},
+		"required": ["confirmed"],
+	};
+	
+	//	elicitationを発行する。elicitationは、クライアントがユーザーに入力を求めるためのもの。
+	//	elicitationは、MCPの仕様で定義されている。
+	function sendElicitation( change){
+		local id = "elicitation:" .. (change.changeid);
+		local t = {
+			"jsonrpc": "2.0",
+			"id": id,
+			"method": "elicitation/create",
+			"params": {
+				"message": change.message,
+				"requestedSchema": acceptRequestedSchema,
+			},
+		};
+		printf( "sendElicitation...... %S\n", encodeJSON( t, 5));
+		clientresmap[id] <- change;
+		::Win32.mcpCallback( 0, t);	//	cmdidはいくつでも良いはず
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	//	各メソッドの実行
+
+	//	"method": "initialize"
+	//	
+	function mcpInitializeMethod( cmd){
+		clientcapabilities = cmd["params"]["capabilities"] || {};
+		//	
+		return {
+			"protocolVersion": "2025-06-18",
+			"capabilities": {
+				// "logging": {},
+				"tools": {
+					"listChanged": true
+				},
+			},
+			"serverInfo": {
+				"name": "RPG-Cobo MCP Server",
+				"title": "RPG-Cobo MCP Server",
+				"version": "0.1.0"
+			},
+			// "instructions": "Optional instructions for the client"
+		};
+	}
+
+	//	"method": "notifications/initialized"
+	//	
+	function mcpNotificationsInitializedMethod( cmd){
+		//	noop
+	}
+
+	//	"method": "notifications/cancelled"
+	//	
+	function mcpNotificationsCancelledMethod( cmd){
+		//	コマンドのスレッドを覚えておいて、キャンセルされたらスレッドをinterruptするようにする。今はまだ未実装。
+	}
+
+	//	"method": "ping"
+	//	
+	function mcpPingMethod( cmd){
+		return {};
+	}
+
+	//	"method": "tools/list"
+	//	
+	function mcpToolsListMethod( cmd){
+		local tools = {
+			"tools": Table.map( mcptoolmap, @( v, k){
+				local argdef = fget( v, "argdef"), argprops = {};
+				foreach( k, p in argdef){
+					argprops[k] <- { "type": p["type"], "description": p["desc"], "default": p["default"], };
+				}
+				return {
+					"name": v.name,
+					"description": v.desc,
+					"inputSchema": {
+						"type": "object",
+						"properties": argprops,
+						"required": Table.map( argdef, @( p, k) p["required"]?k:undefined),
+					},
+				}
+			}).sort( @( v) v.name)
+		};
+		return tools;
+	}
+
+	//	"method": "tools/call"
+	//	
+	function mcpToolsCallMethod( cmd){
+		local p = cmd["params"];
+		local toolid = p["name"], args = p["arguments"];
+		local tool = mcptoolmap[ toolid];
+		if( !tool) throw Exception( "Unknown tool: "..toolid, -32602);
+		return tool.func( args);
+	}
+	
+	//	"method": null
+	//	※クライアントからの応答を処理する。主にデータ変更の確認。
+	function mcpClientResponseMethod( cmd){
+		local change = delete clientresmap[ cmd["id"]];	//	応答を処理したらマップから削除する。
+		if( change){
+			if( !changemap[change.changeid]) throw Exception( "Unknown changeid: "+change.changeid, -32602);
+			change.accepted = !!( (cmd["result"]["action"]=="accept") && (cmd["result"]["content"]["confirmed"]) );
+		}
+	}
+}

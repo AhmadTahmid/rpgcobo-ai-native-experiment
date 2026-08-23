@@ -1,0 +1,10 @@
+{
+	"servers": {
+		"rpg-cobo": {
+			"command": "rpgcobo.exe",
+			"args": ["-mcp-stdio"],
+			"env": {
+			}
+		}
+	}
+}

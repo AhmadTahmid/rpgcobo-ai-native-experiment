@@ -1,0 +1,119 @@
+import VirtualKeyCode;
+import ModifiersMask;
+
+/////////////////////////////////////////////////////////////////////////////////
+//	
+//	IPCConnection : ゲームデバッグ時のツールとゲームのプロセス間通信を行うためのP2Pサーバー。
+//	双方のプロセスIDを指定して、EXECUTEイベントを介してスクリプトを送信し、実行結果を受け取る。
+//	最初にツールからゲームに対してconnect()で通信を確立する。
+//	
+//	cmdidのビットパターンは最上位からN,0,0,... (N=noresponse)
+//	
+class IPCConnection
+{
+	peerpid = null;			//	通信先のプロセスID。通信前にセットされなければならない。
+	retmap = null;			//	ツールからの応答を処理するためのマップ。
+	nextid = 1;				//	次のコマンドID。1から始まる。
+
+	constructor(){
+		retmap = {};
+	}
+	
+	function bind(){
+		::rootview.addExecListener( ipcappevent);
+		printf( "IPCConnection was bound to receive IPC Commands.\n");
+	}
+
+	function unbind(){
+		::rootview.removeExecListener( ipcappevent);
+		printf( "IPCConnection was unbound.\n");
+	}
+
+	//	EXECUTEイベントを受け取るとIPC処理を実行。cmdid>=0の場合はIPC処理ではないのでスルー。
+	function ipcappevent( e){
+		printf( "IPCConnection ipcappevent eid: %S cmdid: %S\n", e.id, e.keycode);
+		local eid = e.id;
+		switch( eid){
+		case EXEC_INVOKE:
+		case EXEC_NOTIFY:
+		{
+			local cmdid = e.keycode;
+			e.consume();
+			newthread( "ipcthread").start( execIPCScript, this, eid, cmdid, e.actioncmd);
+			break;
+		}
+		case EXEC_RESPONSE:
+		{
+			local cmdid = e.keycode;
+			local bb = decodeBASE64( e.actioncmd, ByteBuffer());
+			local retval = ObjectInput.decode( bb) ?? null;	//	undefinedはnullに変換する
+			local resptr = retmap[cmdid & ~0x20000000];
+			if( resptr) resptr << retval;
+			break;
+		}
+		}
+	}
+	
+	function execIPCScript( eid, cmdid, scp){
+		local r = null;
+		try{
+			local fn = compilestring( scp, "ipc_script");
+			r = fn();
+		}catch( ex){
+			printexception( ex);
+			r = ex;
+		}
+		if( eid != EXEC_NOTIFY){	//	戻り値を返す必要がある場合
+			local bb = ObjectOutput.encode( r);
+			local str = encodeBASE64( bb);
+			printf( "execIPCScript return : %S peer: %S\n", str, peerpid);
+			::Win32.sendMessage( EXEC_RESPONSE, peerpid, cmdid, str);	//	戻り値ビットを立てて返す
+		}
+	}
+
+	//	相手に対してスクリプト実行を要求する。戻り値が必要な場合は、戻り値を返すまで待機する。
+	//	
+	function invokeIPCScript( scp, timeout=1000){
+		if( !peerpid) throw Exception( "IPCConnection: peerpid is not set.");
+		local cmdid = (++nextid)&0x0fffffff;
+		if( ::Win32.sendMessage( timeout? EXEC_INVOKE : EXEC_NOTIFY, peerpid, cmdid, scp) == 0){
+			throw Exception( "IPCConnection: failed to send message.");
+		}
+		if( !timeout) return;
+		local resptr = (retmap[ cmdid] <- ptr( undefined));
+		local reschk(){
+			if( ~resptr != undefined){
+				local r = ~resptr;
+				delete retmap[ cmdid];
+				if( r instanceof Exception) throw r;
+				return true;
+			}
+		}
+		local t0 = skGetTime();
+		for( ;;){
+			sleep( 16);
+			if( reschk()) break;
+			if( skGetTime( t0) > timeout) throw Exception( "IPCConnection: invokeIPCScript timeout.");
+		}
+		return ~resptr;
+	}
+
+	//	IPC通信が可能かどうかを確認する。trueなら通信可能。
+	function ping(){
+		return invokeIPCScript( "return true;");
+	}
+
+	//	peerpidに接続する。接続に成功すると、送信元のプロセスIDが返される。
+	function connect( pid){
+		peerpid = pid;
+		local mypid = skGetProcessID();
+		return invokeIPCScript( "return connectedFrom( %S);" % mypid);	//	実行先のthis=IPCConnection
+	}
+
+	//	peerpidからconnect()で接続された時に呼ばれる。
+	function connectedFrom( pid){
+		peerpid = pid;
+		printf( "IPCConnection connected from process %S.\n", pid);
+		return pid;
+	}
+}

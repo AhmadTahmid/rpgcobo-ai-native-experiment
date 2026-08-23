@@ -98,7 +98,7 @@ RPGSystem.ui ..
 //	上から下に流れる。表示時間とか細かい調整行う？
 
 local makeLogView( t){
-	local v = ::loadSKView( "/resource/ui/message_log.ui");
+	local v = ::loadSKView( ::RPGMain.getUIResource( "message_log.ui"));
 	v.bindValues({
 		text = rtf( t.text)
 	});

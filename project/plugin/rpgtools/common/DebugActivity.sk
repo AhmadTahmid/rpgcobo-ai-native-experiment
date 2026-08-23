@@ -15,11 +15,26 @@ import ModifiersMask;
 //	
 //	あと、マップエディタからのデバッグ起動で、指定したマップからの開始も出来る。更に指定したイベントの即時実行。キャラはそのイベントの真ん前に移動。
 //	
+//	
+//	ツールからゲームに以下の操作が可能
+//	- 一時停止・再開
+//	- デバッグメニューの表示
+//	- ホットリロードもどき。バトル中以外の状態は保存してゲーム再起動。
+//	- マクロ実行など便利な操作
+//	- 任意のスクリプト実行
+//	- MCPコマンドの中継。コントロール操作なども可能。
+//	
+//	これらの機能を使うために、ゲーム側にIPCConnectionをバインドする必要がある。
+//	
+//	
 
 local showDebugMenu( btn){
 	local st = ::skstudio;
 	local menudata = [
+		st.getMenu( "menu_debug_stop"),
+		st.getMenu( "menu_debug_pause"),
 		st.getMenu( "menu_debug_start"),
+		st.getMenu( "menu_debug_restart"),
 		"-",
 		st.getMenu( "menu_debug_selectslot"),
 		st.getMenu( "menu_debug_setting"),
@@ -41,6 +56,14 @@ local activity = {
 	slbl="$T.lbl_debug"
 	
 	func = showDebugMenu,
+}
+
+::debugsession <- null;	//	現在のデバッグセッション。nullならデバッグ中ではない。
+
+local updateActivity(){
+	// activity.icon = ::debugsession ? ("\uf06a",0xff9900ff) : "\uf06a";
+	activity.badge = ::debugsession ? (::debugsession.paused ? ("\ue034",0xff7700ff) : ("\uef4a",0x0077ffff)) : null,
+	::skstudio.refreshActivity( "act_debug");	//	アクティビティの状態を更新
 }
 
 //	セーブ場所は固定
@@ -72,61 +95,248 @@ local gatherWorkingData(){
 	return wd;
 }
 
-
-//	デバッグを開始。タイトルから、選択したセーブから、
-//	※作業中のデータを取得する
-function startDebugMenu( m){
-	local args;
-	switch( m["uid"]){
-	case "menu_debug_start":
-		args = ["-slot", ::workspace.saveslotidx, "-recfx"];	//	-recfx:使用したシェーダーを記録。
-		break;
-	case "menu_debug_here":
-		args = ["-slot", ::workspace.saveslotidx, "-map", m.mapid,  encodeJSON( m.pos)];
-		break;
-	case "menu_debug_battle":
-		args = ["-slot", ::workspace.saveslotidx, "-battle", m.mapid, m.gid];
-		if( m["skillid"]) args .. "-skill" .. m.skillid;
-		if( m["enemyid"]) args .. "-enemy" .. m.enemyid;
-		break;
-	case "menu_debug_event":
-		args = ["-slot", ::workspace.saveslotidx, "-event", m.mapid, m.evid, m.evpage];
-		break;
-	}
+//	startDebugMenu, restartDebugMenu
+local getDebugArgs( m){
+	local args = [];
+	local slotidx = m["slot"]??::workspace.saveslotidx;
+	args .. "-slot" .. slotidx;
+	local lang = m["lang"]??::workspace["debuglang"];
+	if( lang) args .. "-lang" .. lang;
+	local debugtouch = m["debugtouch"]??::workspace["debugtouch"];
+	if( debugtouch) args .. "-debugtouch";
+	local debuglv = int( m["debuglv"]??::workspace["debuglv"]);
+	if( debuglv > 0) args .. "-debuglv" .. debuglv;
+	local debugitems = m["debugitems"]??::workspace["debugitems"];
+	if( debugitems) args .. "-debugitems";
+	//	
 	local wd = gatherWorkingData();
-	if( length( wd.conf) + length( wd.res)){
+	if( wd){
 		local bb = ObjectOutput.encode( wd);
 		local tmpdir = FileRef( "tmp");
 		local wdfile = FileRef( tmpdir, "wd.ser");
 		wdfile.save( bb);
 		args ... ["-wd", wdfile.path];
 	}
+	return args;
+}
+
+//	デバッグを開始。タイトルから、選択したセーブから。。。
+//	既にデバッグが開始されている場合は、デバッグ中のゲームを終了して再起動する。
+//	
+function startDebugMenu( m){
+	if( ::debugsession){
+		return ::debugsession.setPaused( false);
+	}
+	local args;
+	local slotidx = m["slot"]??::workspace.saveslotidx;
+	switch( m["uid"]){
+	case "menu_debug_start":
+		args = ["-recfx"];	//	-recfx:使用したシェーダーを記録。
+		break;
+	case "menu_debug_here":
+		args = ["-map", m.mapid,  encodeJSON( m.pos)];
+		break;
+	case "menu_debug_battle":
+		args = ["-battle", m.mapid, m.gid];
+		if( m["skillid"]) args .. "-skill" .. m.skillid;
+		if( m["enemyid"]) args .. "-enemy" .. m.enemyid;
+		break;
+	case "menu_debug_event":
+		args = ["-event", m.mapid, m.evid, m.evpage];
+		break;
+	}
+	args ... getDebugArgs( m);
+	//	
 	local exe = FileRef( "rpgcobo.exe");
 	local p = popen_s();
 	p.open( exe, ["-testplay", ...args], 0x100);
-	::skstudio.freezeEditorView( true);	//	editorの再描画を抑制して並列処理を高速化
-	Dialogs.showWaiting( "$T.lbl_debug_running", @(){
-		if( p.isrunning()){
-			for( local li; li = p.readLine();){
-				printf( "::: %S\n", li.trim());
-			}
-			suspend();
-			return true;
-		}
-	}, true);
-	p.kill();
-	for( local li; li = p.readLine();){
-		printf( "::: %S\n", li.trim());
+	local sess = DebugSession();
+	sess.connect( p);	//	成功したら::debugsessionにセットされる。失敗したらnullのまま。
+	//	
+	return ::debugsession;
+}
+
+local stopDebugMenu( m){
+	if( ::debugsession){
+		::debugsession.finish();
 	}
-	p.close();
-	::skstudio.freezeEditorView( false);	//	editorの再描画を再開
+}
+
+
+//	開始したデバッグプロセスを監視したり、IPCConnectionを通じてコマンドを実行する。
+//	
+class DebugSession
+{
+	ipc = null;			//	IPCConnection
+	popen = null;		//	popen_s
+	thread = null;		//	watch dog
+	paused = false;		//	ゲームが一時停止中かどうか。pauseChanged()で通知される。
+	debugbar = null;	//	SKView : デバッグバー
+	
+	//	popen_sで開始したデバッグプロセスに接続する。失敗したらfalseを返す。
+	function connect( p){
+		try{
+			popen = p;
+			(thread = newthread( "debug session")).start( run, this);
+			ipc = IPCConnection();
+			ipc.bind();
+			local b = false;
+			for( local l = 0;l < 4;l ++){
+				sleep( 400);
+				try{
+					printf( "IPCConnection connecting...\n");
+					if( b=ipc.connect( popen.processid())) break;
+				}catch( ex){
+				}
+			}
+			if( !b) throw Exception( "Failed to connect to debug process.");
+			printf( "DebugSession connected to debug process %S.\n", popen.processid());
+			::debugsession = this;
+			::rootview.addEventListener( BROADCAST_EVENT, sessionevent);
+			::skstudio.titlebar.showDebugBar( true);
+			debugbar = ::skstudio.titlebar.debugbar;
+			debugbar.addEventListener( ACTION_EVENT, sessionevent);
+			pauseChanged( false);
+			return true;
+		}catch( ex){
+			printexception( ex);
+			finish();
+			return false;
+		}
+	}
+	
+	//	
+	function finish(){
+		if( popen){
+			popen.kill();
+			printLines();
+			popen.close();
+			popen = null;
+		}
+		ipc?.unbind();
+		ipc = null;
+		::debugsession = null;
+		updateActivity();
+		::rootview.removeEventListener( BROADCAST_EVENT, sessionevent);
+		::skstudio.titlebar.showDebugBar( false);
+		debugbar.removeEventListener( ACTION_EVENT, sessionevent);
+	}
+
+	//	
+	function isrunning(){
+		return popen?.isrunning();
+	}
+
+	//	
+	function run(){
+		while( popen?.isrunning()){
+			printLines();
+			suspend();
+		}
+		finish();
+		thread = null;
+	}
+
+	//	
+	function sessionevent( e){
+		printf( "DebugSession sessionevent: %S %S\n", e.id, encodeJSON( e["actioncmd"]));
+		switch( e.id){
+		case BROADCAST:
+			local bc = e["actioncmd"];
+			if( bc["cmd"] == "dir_refreshed"){
+				local p = bc.dir.path;
+				printf( "Directory refreshed: %S\n", p);
+				if( p.startsWith( "/.x/")){	//	データが更新されたら、デバッグ中のゲームに通知する
+					triggerHotReload();
+				}
+			}
+			break;
+		case ACTION_PERFORMED:
+			switch( e.src["name"]){
+			case "dbg_pause":
+				setPaused( true);
+				break;
+			case "dbg_go":
+				setPaused( false);
+				break;
+			case "dbg_stop":
+				finish();
+				break;
+			}
+			break;
+		}
+	}
+
+	//	
+	function printLines(){
+		for( local li; li = popen.readLine();){
+			printf( "::: %S\n", li.trim());
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////
+	//
+	//	コマンド
+
+	function triggerHotReload(){
+		local wd = gatherWorkingData();
+		local wdpath = null;
+		if( wd){
+			local bb = ObjectOutput.encode( wd);
+			local tmpdir = FileRef( "tmp");
+			local wdfile = FileRef( tmpdir, "hotreload.ser");
+			wdfile.save( bb);
+			wdpath = wdfile.path;
+		}
+		return ipc.invokeIPCScript( "return ::hotReload( %S);" % encodeJSON( wdpath), 0);	//	notify
+	}
+	
+	//	デバッグ中のゲームを一時停止する。再開するにはsetPaused(false)を呼ぶ。
+	//	ゲームのポーズは完全な処理中断ではなく、ループは回っているがメイン処理が止まっている状態。でないとコマンドが届かなくなる。
+	//	※ポーズされるとpauseChanged( b)が呼ばれる。
+	function setPaused( b){
+		return ipc.invokeIPCScript( "return ::RPGMain.setPaused( %S);" % b, 0);	//	notify
+	}
+
+	//	デバッグ中のゲームをホットリロードや再起動する。
+	function reloadGame( mode){
+		local b = ipc.invokeIPCScript( "return ::reloadGame( %S);" % mode);
+		if( b){	//	ゲームプロセスのskRestartが挟まるので、再接続する必要がある。
+			for( local l = 0;l < 5;l ++){
+				suspend( 400);
+				try{
+					printf( "IPCConnection reconnecting...\n");
+					if( b = ipc.connect( popen.processid())) break;
+				}catch( ex){
+				}
+			}
+			if( !b){	//	再接続に失敗したら、デバッグセッションを終了する。
+				finish();
+				throw Exception( "Failed to reconnect to debug process.");
+			}
+		}
+		return b;
+	}
+
+	///////////////////////////////////////////////////////////////////
+	//	デバッグプロセスから呼ばれる
+
+	function pauseChanged( p){
+		paused = p;
+		debugbar.findChild( "dbg_pause").setEnabled( !p);
+		debugbar.findChild( "dbg_go").setEnabled( !!p);
+		updateActivity();
+	}
 }
 
 
 with( ::skstudio){
 	registerActivity( activity);
 	registerMenu( { uid="menu_debug", lbl="$T.menu_debug", isdir=true, submenu=[]});
-	registerMenu( { uid="menu_debug_start", parentid="menu_debug", lbl="$T.menu_debug_start", icon="\uf06a", defkey="F5", func=startDebugMenu });
+	registerMenu( { uid="menu_debug_stop", parentid="menu_debug", lbl="$T.menu_debug_stop", icon="\uef71", defkey="_F5", func=stopDebugMenu, hide=@() !::debugsession });
+	registerMenu( { uid="menu_debug_pause", parentid="menu_debug", lbl="$T.menu_debug_pause", icon="\ue034", defkey="F4", func=@() ::debugsession.setPaused( true), hide=@() !::debugsession, disable=@() ::debugsession["paused"] });
+	registerMenu( { uid="menu_debug_start", parentid="menu_debug", lbl=@()::debugsession?"$T.menu_debug_resume":"$T.menu_debug_start", icon="\uf06a", defkey="F5", func=startDebugMenu, disable=@() !!::debugsession && !::debugsession["paused"] });
+	registerMenu( { uid="menu_debug_restart", parentid="menu_debug", lbl="$T.menu_debug_restart", icon="\ue5d5", defkey="^F5", func=@() restartDebugMenu(), hide=@() !::debugsession });
 	registerMenu( { parentid="menu_debug", separator="*1"});
 	registerMenu( { uid="menu_debug_selectslot", parentid="menu_debug", lbl="$T.menu_debug_selectslot", submenu=@(){
 		return (_savedir.getList( "save???.bin").map( @( f){

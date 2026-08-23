@@ -1,0 +1,499 @@
+import VirtualKeyCode;
+import ModifiersMask;
+import PropertyType;
+import RPGPropertyType;
+
+/////////////////////////////////////////////////////////////////////////////////
+//	
+//	MCPServerTools : RPG-Coboツール用のMCPサーバーのツール定義。デバッグ時のツール定義はここではない。
+//	
+//	ツールカテゴリ
+//	rpgcobo_project_*
+//	rpgcobo_editor_*
+//	rpgcobo_log_*
+//	rpgcobo_runtime_*
+//	rpgcobo_debug_*
+//	
+//	詳細な操作
+//	rpgcobo_editor_map_*		//	マップの操作。マップエディタが開いている場合のみ有効。イベント操作、イベントコマンド操作、マップ編集などいろいろ
+//	rpgcobo_editor_ui_*			//	UIの操作。UIエディタが開いている場合のみ有効。UI編集、UIコマンド操作などいろいろ。アニメもできると良いが・・・
+//	rpgcobo_debug_ctrl_*		//	デバッグ時のコントロール入力操作。デバッグ中のみ。
+//	rpgcobo_project_sprite_*	//	スプライトシートの操作。取得、編集、保存。開いてなくても可能。
+//	rpgcobo_project_icon_*		//	アイコン・絵文字の操作。取得、編集、保存。開いてなくても可能。
+//	
+//	
+//	色々な定義
+//	event_commands, options, presetui, props, 
+//	
+
+
+local mcptools = ::MCPServer.MCPServerTools;
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_project_get_info
+
+mcptools .. {
+	name = "rpgcobo_project_get_info",
+	desc = "Returns information about the current RPG-Cobo project.",
+	argdef = {},
+	func = @( args){
+		local projname = ::conf.setting["projname"] || "";
+		local srcpath = FileRef( skGetCurrentDir().."/project").path;
+		local docpath = FileRef( skGetCurrentDir().."/docs/ja").path;
+		local verf = FileRef( "rpgcobo.ver");
+		local ver = verf.exists() ? decodeJSON( verf.load()) : { tag="unknown" };
+		local plugs = ::module.plugs || [];
+		return { content=[
+			{ type="text", text="RPG-Cobo Version: %S" % ver["tag"] },
+			{ type="text", text="Project Name: %S" % projname },
+			{ type="text", text="Project Path: %S" % skGetCurrentDir() },
+			{ type="text", text="Project Source Path: %S" % srcpath },
+			{ type="text", text="Project Language: %S" % (::conf.setting["projlang"] || "unknown") },
+			{ type="text", text="Document Path: %S" % docpath },
+			{ type="text", text="Plugins: %S" % encodeJSON( plugs.map( @( v) v.id)) },
+		]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_project_list_database
+
+local dbtypedesc =
+`Specify a database type. see below.
+"player": Player data (P000~P999), data/player.json
+"enemy": Enemy data (E000~E999), data/enemy.json
+"item": Item data (I000~I999), data/item.json
+"weapon": Weapon data (W000~W999), data/weapon.json
+"armor": Armor data (A000~A999), data/armor.json
+"skill": Skill data (S000~S999), data/skill.json
+"job": Job data (J000~J999), data/job.json
+"cond": Condition data (K000~K999), data/cond.json
+"map": Map data (M000~M999), data/map.json
+"store": Store data (R000~R999), data/store.json
+"macro": Macro data (X000~X999), data/macro.json
+"gvar": Global variable data (G000~G999), data/gvar.json
+`;
+// "type": Type data
+// "setting": Setting data
+
+mcptools .. {
+	name = "rpgcobo_project_list_database",
+	desc = "Returns a list of database items(id,name,description) in the current RPG-Cobo project.",
+	argdef = {
+		type = { type="string", desc=dbtypedesc, required=true },
+	},
+	func = @( args){
+		local dbtype = args["type"];
+		local db = ::conf[dbtype];
+		if( !db) throw Exception( "Database not found: %S" % dbtype, -32602);
+		local a = [];
+		foreach( k, v in db){
+			if( k[0] == '_') continue;
+			a .. { type="text", text="[%S] %S - %S" % (k, v["name"]||"", v["desc"]||"") };
+		}
+		a.sort( @( v) v.text);
+		return { content=a };
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_project_list_resources
+
+local restypedesc =
+`Specify a resource type. see below.
+"chara_vox": Character voxel data (CV000~CV999), resource/chara_vox.json
+"equip_vox": Equipment voxel data (EV000~EV999), resource/equip_vox.json
+"enemy_pic": Enemy picture data (EP000~EP999), resource/enemy_pic.json
+"event_pic": Event picture data (PC000~PC999), resource/event_pic.json
+"map_asset": Map asset data (MA000~MA999), resource/map_asset.json
+"efx": Effect data (FX000~FX999), resource/efx.json
+"snd": Sound data (SE000~SE999), resource/snd.json
+"bgm": Music data (MU000~MU999), resource/bgm.json
+`;
+
+mcptools .. {
+	name = "rpgcobo_project_list_resources",
+	desc = "Returns a list of resources(id,name,model) in the current RPG-Cobo project.",
+	argdef = {
+		type = { type="string", desc=restypedesc, required=true },
+	},
+	func = @( args){
+		local restype = args["type"];
+		local res = ::conf._resource[restype];
+		if( !res) throw Exception( "Resource not found: %S" % restype, -32602);
+		local a = [];
+		foreach( k, v in res){
+			if( k[0] == '_') continue;
+			local mdl = v["vox"] || v["pic3d"] || v["pic"] || v["wav"];
+			a .. { type="text", text="[%S] %S - %S" % (k, ::lang( v["name"]||""), mdl||"") };
+		}
+		a.sort( @( v) v.text);
+		return { content=a };
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_project_list_settings
+
+local settingargs(){
+	local t = {}, data = ::conf.setting;
+	foreach( prop in ::RPGSystem.settingprops){
+		local type = "text";
+		t[prop.pid] <- {
+			type = type,
+			name = lang( prop["lbl"]),
+			desc = lang( prop["desc"])||"",
+			val = data[prop.pid]??prop["defval"],
+		};
+	}
+	return t;
+}
+
+mcptools .. {
+	name = "rpgcobo_project_list_settings",
+	desc = "Returns a list of project settings in the current RPG-Cobo project.\nThe settings could be changed while playing the game.",
+	argdef = {
+	},
+	func = @( args){
+		local sargs = settingargs();
+		local a = [];
+		foreach( k, v in sargs){
+			a .. { type=v.type, text="%S = %S" % (k,encodeJSON( v.val)), pid=k };
+		}
+		a.sort( @( v) v.pid);
+		return { content=a };
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_project_search_database
+
+mcptools .. {
+	name = "rpgcobo_project_search_database",
+	desc = "Searches for database items in the current RPG-Cobo project.",
+	argdef = {
+		query = { type="string", desc="Search query", required=true },
+	},
+	func = @( args){
+		local k = args["query"] || "";
+		if( k == "") throw Exception( "Query is empty", -32602);
+		local dbsearch = GotoDBSearch( null);
+		local a = dbsearch._search( k, ::conf).map( @( v)+{
+			type="text", text="%S - %S" % (v[0].name, v[0].desc),
+		});
+		return { content=a };
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_project_get_database_item
+
+mcptools .. {
+	name = "rpgcobo_project_get_database_item",
+	desc = "Returns a database item data in the current RPG-Cobo project.",
+	argdef = {
+		id = { type="string", desc="Database item ID (can be retrieved from rpgcobo_project_list_database)", required=true },
+	},
+	func = @( args){
+		local dbid = args["id"];
+		local data = ::rpgdata[dbid];
+		if( !data) throw Exception( "Database item not found: %S" % dbid, -32602);
+		return { content=[
+			{ type="text", text=encodeJSON( data) },	//	とりあえずJSON丸ごとエンコード
+		]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_project_set_database_item
+
+mcptools .. {
+	name = "rpgcobo_project_set_database_item",
+	desc = "Sets a database item data in the current RPG-Cobo project.",
+	argdef = {
+		id = { type="string", desc="Database item ID (can be retrieved from rpgcobo_project_list_database)", required=true },
+		data = { type="object", desc="Database item data to set", required=true },
+		override = { type="boolean", desc="If true, override the existing data fields such as name, desc, etc. If false, merge with existing data. Failed when the item does not exist.", "default"=true },
+	},
+	func = @( args){
+		local dbid = args["id"];
+		local newdata = args["data"];
+		local dbtype = RPGData.getDataType( dbid);
+		if( !dbtype) throw Exception( "Invalid database item ID: %S" % dbid, -32602);
+		local olddata = ::rpgdata[dbid] ? deepclone( ::rpgdata[dbid]) : null;
+		local confpath = "/.x/%S/%S" % (dbtype, dbid);
+		//	
+		local conf = {
+			message = "Set database item [%S]" % dbid,
+			commit = @(){
+				local r = ::getResource( confpath);
+				r.save( newdata);
+				::skstudio.fileview.refreshDir( confpath);
+				::skstudio.flushEditor( confpath, true);
+				return true;
+			},
+			rollback = @(){
+				local r = ::getResource( confpath);
+				if( olddata){
+					r.save( olddata);
+					::skstudio.flushEditor( confpath, true);
+				}else{
+					r.clear();
+					::skstudio.fileview.refreshDir( r.pres.path);
+					::skstudio.flushEditor( confpath);
+				}
+				return true;
+			},
+		};
+		return ::mcpserv.processChange( conf);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_editor_get_workspace_info
+
+mcptools .. {
+	name = "rpgcobo_editor_get_workspace_info",
+	desc = "Gets the workspace info such as current editor, file tabs, open history, etc.",
+	argdef = {
+	},
+	func = @( args){
+		::skstudio._savews();
+		return { content=[
+			{ type="text", text=encodeJSON( ::workspace, true) },
+		]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_editor_open_data
+
+mcptools .. {
+	name = "rpgcobo_editor_open_data",
+	desc = "Opens a database item in the editor.",
+	argdef = {
+		id = { type="string", desc="Database item ID (can be retrieved from rpgcobo_project_list_database)", required=true },
+	},
+	func = @( args){
+		local dataid = args["id"];
+		local dbtype = RPGData.getDataType( dataid);
+		local path = ".x/%S/%S" % (dbtype, dataid);
+		::skstudio.openEditor( path);
+		local ed = ::skstudio.editor;
+		if( ed["name"] == "editor_empty"){
+			return {
+				content=[{ type="text", text="Editor open error. path=%S" % path }, ],
+				isError = true,
+			};
+		}
+		return { content=[
+			{ type="text", text="Editor opened. path=%S" % path },
+		]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_log_tail
+
+mcptools .. {
+	name = "rpgcobo_log_tail",
+	desc = "Returns the last N lines of the rpgcobo log file.",
+	argdef = {
+		lines = { type="number", desc="Number of lines to return", "default"=100 },
+	},
+	func = @( args){
+		local lines = int( args["lines"]) || 100;
+		flushStdOut();
+		local f = FileRef( ::logpath);
+		if( !f.exists()){
+			return {
+				content=[{ type="text", text="Log file does not exist." }, ],
+				isError = true,
+			};
+		}
+		local logtext = f.load().asText();
+		local loglines = logtext.split( "\n");
+		local startline = Math.max( 0, length( loglines) - lines);
+		return { content=[
+			{ type="text", text=loglines.slice( startline).join( "\n") }
+		]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_runtime_execute
+
+mcptools .. {
+	name = "rpgcobo_runtime_execute",
+	desc = "Executes any sk script.",
+	argdef = {
+		script = { type="string", desc="SK script to execute", required=true },
+	},
+	func = @( args){
+		local func = compilestring( args.script);
+		local ret = func();
+		return { content=[
+			{ type="text", text=encodeJSON( ret) }
+		]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_runtime_reload_tool
+
+mcptools .. {
+	name = "rpgcobo_runtime_reload_tool",
+	desc = "Reloads the RPG-Cobo tool. All of the data, resources, and programs will be reloaded.",
+	argdef = {
+	},
+	func = @( args){
+		::skstudio.saveAllFiles();
+		newthread().start( @(){
+			sleep( 100);
+			::skstudio.menuRelaunch( {force=1});
+		}, this);
+		return { content=[
+			{ type="text", text="RPG-Cobo tool will be reloaded soon(in a second)." }
+		]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_runtime_save_all
+
+mcptools .. {
+	name = "rpgcobo_runtime_save_all",
+	desc = "Saves all unsaved data in the RPG-Cobo tool. NOTICE: All other tools' calls are referred to the saved data.",
+	argdef = {
+	},
+	func = @( args){
+		::skstudio.saveAllFiles();
+		return { content=[
+			{ type="text", text="All unsaved data has been saved." }
+		]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_runtime_screenshot
+
+mcptools .. {
+	name = "rpgcobo_runtime_screenshot",
+	desc = "Takes a screenshot of the RPG-Cobo tool in debug session.",
+	argdef = {
+	},
+	func = @( args){
+		//	Capture rootview
+		local sp = ::rootview.capture(), tex = sp.tex0;
+		local img = RGBAImage( tex.width, tex.height);
+		local old = skGetRenderTarget();
+		skSetRenderTarget( tex);
+		skReadPixels( 0, 0, img.width, img.height, img);
+		skSetRenderTarget( old);
+		//	Encode and save png
+		local bb = img.encodePNG(); bb.pos = 0;
+		//	ok
+		return { content=[{
+			type = "image",
+			mimeType = "image/png",
+			data = encodeBASE64( bb),
+		}]};
+	},
+}
+
+local debugnotrunning = {
+	content=[ { type="text", text="RPG-Cobo debug session is not running." } ],
+	isError = true,
+};
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_debug_start
+
+mcptools .. {
+	name = "rpgcobo_debug_start",
+	desc = "Starts the RPG-Cobo debug session (Test Play).",
+	argdef = {
+		"saveslot": { type="number", desc="Save slot to use (-2: title, -1: new game, 0-99: existing save slots)", "default"=-1 },
+		"debugitems": { type="boolean", desc="Player has all items", "default"=false },
+		"debugskills": { type="boolean", desc="Player has all skills", "default"=false },
+		"debuglv": { type="number", desc="Specify level of all player characters", "default"=0 },
+	},
+	func = @( args){
+		//	別スレッドでデバッグ開始。プロセスが終了したらdebugpidをクリアする。
+		startDebugMenu( m);
+		//
+		if( ::debugsession){
+			return { content=[ { type="text", text="RPG-Cobo debug session started." } ]};
+		}else{
+			return { content=[ { type="text", text="Failed to start RPG-Cobo debug session." } ], isError = true, };
+		}
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_debug_get_status
+
+mcptools .. {
+	name = "rpgcobo_debug_get_status",
+	desc = "Gets the status of the RPG-Cobo debug session.",
+	argdef = {
+	},
+	func = @( args){
+		if( !::debugsession) return debugnotrunning;
+		local stats = ::debugsession.ipc.invokeIPCScript( "return getDebugStatus();" );
+		local a = { content=[
+			{ type="text", text="Running: true" },
+			...stats.map( @( v)+{ type="text", text=v }),
+		]};
+		return a;
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_debug_pause
+
+mcptools .. {
+	name = "rpgcobo_debug_pause",
+	desc = "Pauses/Resumes the RPG-Cobo debug session.",
+	argdef = {
+		pause = { type="boolean", desc="Whether to pause (true) or resume (false) the RPG-Cobo debug session", required=true, "default"=true },
+	},
+	func = @( args){
+		if( !::debugsession) return debugnotrunning;
+		::debugsession.setPaused( !!args.pause);
+		return { content=[ { type="text", text="RPG-Cobo debug session has " + (args.pause? "paused." : "resumed.") } ]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_debug_screenshot
+
+mcptools .. {
+	name = "rpgcobo_debug_screenshot",
+	desc = "Takes a screenshot of the RPG-Cobo debug session.",
+	argdef = {},
+	func = @( args){
+		if( !::debugsession) return debugnotrunning;
+		local bb = ::debugsession.ipc.invokeIPCScript( "return getDebugScreenShot();" );
+		return { content=[{
+			type = "image",
+			mimeType = "image/png",
+			data = encodeBASE64( bb),
+		}]};
+	},
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//	rpgcobo_debug_stop
+
+mcptools .. {
+	name = "rpgcobo_debug_stop",
+	desc = "Stops the RPG-Cobo debug session.",
+	argdef = {},
+	func = @( args){
+		if( !::debugsession) return debugnotrunning;
+		::debugsession.finish();
+		return { content=[ { type="text", text="RPG-Cobo debug session stopped." } ]};
+	},
+}
+

@@ -130,7 +130,7 @@ function preloaShaders( glob=null){
 	skBeginRender();
 	skClearParam( #ClearParam( 0.0, 0.0, 0.0, 1.0));
 
-	local root = ::rootview = ::loadSKView( "/resource/ui/rpgroot.ui", SKRootView);		//	作った時点のスクリーンサイズで作られる
+	local root = ::rootview = ::loadSKView( ::RPGMain.getUIResource( "rpgroot.ui"), SKRootView);		//	作った時点のスクリーンサイズで作られる
 	root.resizemode = 2;
 	{
 		local sc = skGetScreenSize( [0,0]);
@@ -142,7 +142,7 @@ function preloaShaders( glob=null){
 		if( showsplash){
 			//	スプラッシュスクリーン表示。WebGLの場合は必須でタップを待つ。
 			//	※ここではdictがまだ読み込まれていない。タップ文章もsakana.projにある感じ？
-			local splashview = ::loadSKView( "/resource/ui/splash.ui");
+			local splashview = ::loadSKView( ::RPGMain.getUIResource( "splash.ui"));
 			splashview.stretchSize( rootview.bnd.w, rootview.bnd.h);
 			splashview.action( "show");
 			// rootview.findChild( "menu").addChild( splashview);

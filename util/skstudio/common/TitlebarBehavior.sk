@@ -22,6 +22,7 @@ class TitlebarBehavior
 	selmenu = null;			//	SKView : 
 	menulist = null;		//	[menu,...] : メニュー実体の配列。各メニューはテーブル
 	menupopup = null;		//	bool : 
+	debugbar = null;		//	SKView : デバッグバー
 
 	constructor( v){
 		view = v;
@@ -29,6 +30,8 @@ class TitlebarBehavior
 		v.addEventListener( ACTION_EVENT, actionevent);
 		menug = v.findChild( "titlemenug");
 		menulistview = v.findChild( "titlemenulist");
+		debugbar = v.findChild( "debugbar");
+		showDebugBar( false);
 		if( menulistview) menulistview.content.addEventListener( MOUSE_EVENT, menuevent);
 		if( ::sakana["appicon"]){
 			setAppIcon( sakana.appicon);
@@ -83,6 +86,11 @@ class TitlebarBehavior
 		local sel = btn.isSelected();
 		skMoveScreen( { flags=sel?MOVESCREEN_RESTORE:MOVESCREEN_MAXIMIZE});
 		btn.setSelected( !sel);
+	}
+
+	function showDebugBar( v){
+		if( v) debugbar.layerflags |= 1; else debugbar.layerflags &= ~1;
+		view.repaint();
 	}
 
 	function actionevent( e){

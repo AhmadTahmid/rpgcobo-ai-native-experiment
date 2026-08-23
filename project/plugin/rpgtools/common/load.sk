@@ -11,6 +11,7 @@ runsk( "EventCommandList.sk");
 runsk( "ManualActionDialog.sk");
 runsk( "DBSearch.sk");
 runsk( "PluginDialog.sk");
+runsk( "IPCConnection.sk");
 
 runsk( "AccountActivity.sk");
 runsk( "SettingActivity.sk");
