@@ -505,6 +505,7 @@ import GamepadStateID;
 			r = uimapcache[uipath];
 		}else{	//	uimapを行う
 			r = ::getResource( "/presetui").getResource( uipath);
+			if( !r) r = ::getResource( "/resource/ui").getResource( uipath);
 			r = _mapui( r);
 			uimapcache[uipath] <- r;
 		}
@@ -706,6 +707,10 @@ import GamepadStateID;
 		case MOUSE_PRESSED: //	どこをクリックしても
 			if( !(e.modifiers & GPUI_MASK)){	//	GPUIから発生させたイベントは無視
 				e.computeLocal( e.src.getInvMatrix());
+				// if( e.isMouseDown( BUTTON2_MASK)){	//	右クリックで抜けたほうが良いかも
+				// 	local _e = { ...btneventmap[BTN_B], item=_srcref( ::gpui.gpuitarget["view"]), ismouse=true, };
+				// 	uifunc( "back", _e);
+				// }else
 				if( e.isMouseDown( BUTTON1_MASK) && e.src.name == "listcontent"){
 					//	リストクリックで特殊ケース有り。リストのエンベロープ外をクリックした場合にモーダルと同じ扱いに
 					local lv = e.src.parent.parent;	//	RPGListView
@@ -823,6 +828,7 @@ class PauseSession
 		local sp = mainlayer.capture();	//	ポーズ中に非表示にするビューをキャプチャしておく
 		captureimg = SKImageView( sp);
 		captureimg.setColor( 0x99999999);	//	暗くする
+		view.stretchSize( pauselayer.bnd.w, pauselayer.bnd.h);
 		view.findChild( "blurg").addChild( captureimg);
 		pauselayer.addChild( view);
 		// mainlayer.layerflags &= ~1;	//	非表示じゃだめだ。。。削除しないと

@@ -100,7 +100,7 @@ class PlayerMoveAction
 						if( !::rpgstage.stat.statmap["menuopenable"]){	//	メニュー開閉不能
 							::playSound( "SE002"); break;
 						}
-						rpgstage.mainevent = 100;
+						rpgstage.mainevent = #{evid="menu"};	
 						rpgstage.setTimeScale( 0.0);
 						ctr.setActive( false);
 						newthread().start( @(){	//	このスレッドはブロック不能なので新しいスレッドでメニューを開く。

@@ -1250,6 +1250,7 @@
 	"menu_debug_pause"					: {"ja":"デバッグのポーズ", "en":"Pause Debug"}
 	"menu_debug_resume"					: {"ja":"デバッグのポーズ解除", "en":"Resume Debug"}
 	"menu_debug_restart"				: {"ja":"デバッグを再起動", "en":"Restart Debug"}
+	"menu_debug_switch"					: {"ja":"デバッグのウィンドウに切り替え", "en":"Switch to Debug Window"}
 	"menu_debug_selectslot"				: {"ja":"開始地点の選択", "en":"Select a Start point"}
 	"menu_debug_setting"				: {"ja":"デバッグ設定", "en":"Debug Settings"}
 	"menu_debug_title"					: {"ja":"タイトル画面から", "en":"From Title Scene"}

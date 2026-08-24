@@ -128,7 +128,7 @@ param coc
 	attribute highp vec4 in_pos <ID=POSITION>;
 	attribute highp vec4 in_uv <id=UV1>;
 	
-	uniform mediump usampler2D uztex <id=DEPTHTEX>;
+	uniform highp usampler2D uztex <id=DEPTHTEX>;
 	uniform highp mat4 p0 <id=MISC1MAT>;			//	focus z, focus size, 
 	
 	varying highp vec4 v_uv;
@@ -363,8 +363,8 @@ param reproject
 	uniform mediump sampler2D coltex1 <id=COLORTEX1, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	uniform mediump sampler2D coltex2 <id=COLORTEX2, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	uniform mediump sampler2D coltex3 <id=COLORTEX3, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
-	uniform mediump usampler2D olduztex <id=COLORTEX4, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
-	uniform mediump usampler2D curuztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D olduztex <id=COLORTEX4, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D curuztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	
 	uniform mediump mat4 p0 <id=MISC1MAT>;
 	uniform mediump mat4 pmat <id=MISC2MAT>;
@@ -422,7 +422,7 @@ param ssao
 	
 	uniform highp usampler2D gtex1 <id=GTEX2, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	uniform mediump sampler2D temptex <id=COLORTEX3, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
-	uniform mediump usampler2D uztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D uztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	uniform highp vec2 uztexscale <id=DEPTHTEX_PIX>;
 	
 	uniform highp mat4 p0 <id=MISC1MAT>;
@@ -584,7 +584,7 @@ param ssaoblur
 	attribute mediump vec4 in_uv <id=UV1>;
 	
 	uniform lowp sampler2D aotex <id=COLORTEX1, MIN_FILTER=LINEAR, MAG_FILTER=LINEAR>;
-	uniform mediump usampler2D uztex <id=DEPTHTEX, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D uztex <id=DEPTHTEX, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	
 	uniform mediump mat4 invpmat <id=ENV2MAT>;
 	uniform mediump mat4 p0 <id=MISC1MAT>;
@@ -648,7 +648,7 @@ param ssaoupsample
 	attribute mediump vec4 in_uv <id=UV1>;
 	
 	uniform lowp sampler2D aotex <id=COLORTEX1, MIN_FILTER=LINEAR, MAG_FILTER=LINEAR>;
-	uniform mediump usampler2D uztex <id=DEPTHTEX, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D uztex <id=DEPTHTEX, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	
 	uniform highp mat4 p0 <id=MISC1MAT>;
 	
@@ -712,10 +712,10 @@ param ssshadow
 	attribute highp vec4 in_uv <id=UV1>;
 	
 	uniform highp sampler2D litprmtex <id=LIGHTPARAMTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;		//	4*1024のテクスチャ。
-	uniform mediump usampler3D litidxtex <id=LIGHTINDEXTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, WRAP_R=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;		//	16*16*8のライトインデックスバッファ。
+	uniform highp usampler3D litidxtex <id=LIGHTINDEXTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, WRAP_R=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;		//	16*16*8のライトインデックスバッファ。
 	uniform highp usampler2D gtex1 <id=GTEX2, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	uniform highp usampler2D gtex2 <id=GTEX3, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
-	uniform mediump usampler2D uztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D uztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	uniform highp vec2 uztexscale <id=DEPTHTEX_PIX>;
 	
 	uniform highp mat4 dirlit <id=ENV1MAT>;
@@ -846,7 +846,7 @@ param sssupsample
 	attribute mediump vec4 in_uv <id=UV1>;
 	
 	uniform lowp sampler2D ssstex <id=COLORTEX1, MIN_FILTER=LINEAR, MAG_FILTER=LINEAR>;
-	uniform mediump usampler2D uztex <id=DEPTHTEX, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D uztex <id=DEPTHTEX, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	
 	uniform highp mat4 p0 <id=MISC1MAT>;
 	

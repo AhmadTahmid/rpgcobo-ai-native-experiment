@@ -6,7 +6,7 @@ declare mod_pbrlighting;
 param pbrlighting
 {
 	uniform highp sampler2D litprmtex <id=LIGHTPARAMTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;		//	4*1024のテクスチャ。
-	uniform mediump usampler3D litidxtex <id=LIGHTINDEXTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, WRAP_R=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;		//	16*16*8のライトインデックスバッファ。
+	uniform highp usampler3D litidxtex <id=LIGHTINDEXTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, WRAP_R=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;		//	16*16*8のライトインデックスバッファ。
 	uniform highp samplerCube ibltex <id=ENVTEX, MIN_FILTER=LINEAR_MIP, MAG_FILTER=LINEAR, WRAP_S=CLAMP, WRAP_T=CLAMP, WRAP_R=CLAMP>;
 	uniform mediump sampler2D dfgtex <id=DFGTEX, WRAP_S=CLAMP, WRAP_T=CLAMP>;
 	uniform lowp sampler2D aotex <id=AOTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
@@ -16,7 +16,7 @@ param pbrlighting
 	uniform highp mat3 invvmat3 <id=ENV4MAT>;
 	uniform highp vec3 iblsh[9] <id=IBLSH>;
 
-	uniform mediump usampler2D shadowtex <id=SHADOWTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D shadowtex <id=SHADOWTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	uniform highp vec4 shadow[12] <id=SHADOWPARAM>;	// [3+3*3]	(1-depth,1.0/zfar,1.0/raylen,coeffecient/zfar), (pa,pb,pc,pd), (near0, near1, near2, near3), uvz[0], uvz[1], uvz[2]
 
 	uniform highp vec4 fogp[6]<ID=FOGPARAMVEC>; 

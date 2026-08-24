@@ -65,9 +65,9 @@ class ClientConfig
 	static screenresos = [ 720, 900, 1080, 1440, 2160, ];
 
 	static renderhints = [
-		{ maxreso= 720, antialias=1, upscale=1, ssao_reso=0, ssao_qua=0, ssgi_reso=0, ssgi_qua=0, shadow_qua=0, blur_qua=0, pbr_qua=0 },
-		{ maxreso= 900, antialias=1, upscale=1, ssao_reso=0, ssao_qua=1, ssgi_reso=0, ssgi_qua=1, shadow_qua=1, blur_qua=1, pbr_qua=1 },
-		{ maxreso=1080, antialias=2, upscale=1, ssao_reso=0, ssao_qua=2, ssgi_reso=0, ssgi_qua=2, shadow_qua=2, blur_qua=2, pbr_qua=2 },
+		{ maxreso= 640, antialias=1, upscale=1, ssao_reso=0, ssao_qua=0, ssgi_reso=0, ssgi_qua=0, shadow_qua=0, blur_qua=0, pbr_qua=0 },
+		{ maxreso= 720, antialias=1, upscale=1, ssao_reso=0, ssao_qua=1, ssgi_reso=0, ssgi_qua=1, shadow_qua=1, blur_qua=1, pbr_qua=1 },
+		{ maxreso= 900, antialias=2, upscale=1, ssao_reso=0, ssao_qua=2, ssgi_reso=0, ssgi_qua=2, shadow_qua=2, blur_qua=2, pbr_qua=2 },
 		{ maxreso=1080, antialias=2, upscale=1, ssao_reso=1, ssao_qua=1, ssgi_reso=1, ssgi_qua=1, shadow_qua=2, blur_qua=2, pbr_qua=2 },
 		{ maxreso=2160, antialias=2, upscale=1, ssao_reso=1, ssao_qua=2, ssgi_reso=1, ssgi_qua=2, shadow_qua=2, blur_qua=2, pbr_qua=2 },
 	];
@@ -78,7 +78,7 @@ class ClientConfig
 		[BTN_A] = [VK_Z, VK_SPACE],
 		[BTN_B] = [VK_X, VK_SHIFT],
 		[BTN_X] = [VK_C, VK_TAB],
-		[BTN_Y] = [VK_V, VK_CONTROL],
+		[BTN_Y] = [VK_V, ],
 		[BTN_LB] = [VK_A],
 		[BTN_RB] = [VK_D],
 	};

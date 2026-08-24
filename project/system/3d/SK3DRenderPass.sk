@@ -252,7 +252,6 @@ class reg.ShadowMapRenderPass extends SK3DRenderPass
 			objs.clear();
 			env.passmode = 0;
 			// skPopRenderStates();
-			skInvalidateFrameBuffer( 1<<8);	//	depthは破棄可能
 			s.blurpass?.performPass( r);
 		}
 	}

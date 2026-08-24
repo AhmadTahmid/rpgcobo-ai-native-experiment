@@ -621,7 +621,7 @@ class PropertyBehaviors.Path extends PropertyBehaviors.String
 			{ id="filer", lbl="$T.filetabs_ctxmenu_fileview"},
 			{ id="explor", lbl="$T.filetabs_ctxmenu_explor"},
 			"-",
-			{ id="browse", lbl="$T.lbl_browse"},
+			{ id="browse", lbl="$T.lbl_browse", icon="\ue2c8"},
 		]
 		local ret = MenuPopup.run( menudata);
 		switch( ret["id"]){
@@ -636,6 +636,10 @@ class PropertyBehaviors.Path extends PropertyBehaviors.String
 			local dir = ::getResource( path) || resroot;
 			local newpath = skstudio.showFileOpen( { dirpath=dir.path, });
 			if( newpath){
+				if( newpath.startsWith( "/..")){
+					Popups.showError( "$T.lbl_file_outofproj");
+					return;
+				}
 				edit.setText( newpath);
 				postActionEvent( true);
 			}

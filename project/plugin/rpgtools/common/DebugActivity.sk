@@ -98,7 +98,7 @@ local gatherWorkingData(){
 //	startDebugMenu, restartDebugMenu
 local getDebugArgs( m){
 	local args = [];
-	local slotidx = m["slot"]??::workspace.saveslotidx;
+	local slotidx = m["slot"]??::workspace.saveslotidx??-1;
 	args .. "-slot" .. slotidx;
 	local lang = m["lang"]??::workspace["debuglang"];
 	if( lang) args .. "-lang" .. lang;
@@ -262,6 +262,9 @@ class DebugSession
 			case "dbg_stop":
 				finish();
 				break;
+			case "dbg_restart":
+				restartDebug();
+				break;
 			}
 			break;
 		}
@@ -299,23 +302,35 @@ class DebugSession
 	}
 
 	//	デバッグ中のゲームをホットリロードや再起動する。
-	function reloadGame( mode){
-		local b = ipc.invokeIPCScript( "return ::reloadGame( %S);" % mode);
-		if( b){	//	ゲームプロセスのskRestartが挟まるので、再接続する必要がある。
-			for( local l = 0;l < 5;l ++){
-				suspend( 400);
+	function restartDebug(){
+		local wd = gatherWorkingData();
+		if( wd){
+			local bb = ObjectOutput.encode( wd);
+			local tmpdir = FileRef( "tmp");
+			local wdfile = FileRef( tmpdir, "wd.ser");
+			wdfile.save( bb);
+		}
+		local b = ipc.invokeIPCScript( "return ::restartDebug();");
+		newthread().start( @(){
+			//	もう一度接続が必要。ある程度時間がかかるので別スレッド化
+			local b = false;
+			for( local l = 0;l < 6;l ++){
+				sleep( 200);
 				try{
-					printf( "IPCConnection reconnecting...\n");
-					if( b = ipc.connect( popen.processid())) break;
+					printf( "IPCConnection connecting...\n");
+					if( b=ipc.connect( popen.processid())) break;
 				}catch( ex){
 				}
 			}
-			if( !b){	//	再接続に失敗したら、デバッグセッションを終了する。
+			if( !b){
 				finish();
-				throw Exception( "Failed to reconnect to debug process.");
+				throw Exception( "Failed to connect to debug process.");
 			}
-		}
-		return b;
+		}, this);
+	}
+
+	function switchToDebugWindow(){
+		return ipc.invokeIPCScript( "skMoveScreen( { flags=MoveScreenFlags.MOVESCREEN_FRONT });", 0);
 	}
 
 	///////////////////////////////////////////////////////////////////
@@ -336,7 +351,8 @@ with( ::skstudio){
 	registerMenu( { uid="menu_debug_stop", parentid="menu_debug", lbl="$T.menu_debug_stop", icon="\uef71", defkey="_F5", func=stopDebugMenu, hide=@() !::debugsession });
 	registerMenu( { uid="menu_debug_pause", parentid="menu_debug", lbl="$T.menu_debug_pause", icon="\ue034", defkey="F4", func=@() ::debugsession.setPaused( true), hide=@() !::debugsession, disable=@() ::debugsession["paused"] });
 	registerMenu( { uid="menu_debug_start", parentid="menu_debug", lbl=@()::debugsession?"$T.menu_debug_resume":"$T.menu_debug_start", icon="\uf06a", defkey="F5", func=startDebugMenu, disable=@() !!::debugsession && !::debugsession["paused"] });
-	registerMenu( { uid="menu_debug_restart", parentid="menu_debug", lbl="$T.menu_debug_restart", icon="\ue5d5", defkey="^F5", func=@() restartDebugMenu(), hide=@() !::debugsession });
+	registerMenu( { uid="menu_debug_restart", parentid="menu_debug", lbl="$T.menu_debug_restart", icon="\ue5d5", defkey="^F5", func=@() ::debugsession.restartDebug(), hide=@() !::debugsession });
+	registerMenu( { uid="menu_debug_switch", parentid="menu_debug", lbl="$T.menu_debug_switch", icon="\uef43", defkey="^Enter", func=@() ::debugsession.switchToDebugWindow(), hide=@() !::debugsession });
 	registerMenu( { parentid="menu_debug", separator="*1"});
 	registerMenu( { uid="menu_debug_selectslot", parentid="menu_debug", lbl="$T.menu_debug_selectslot", submenu=@(){
 		return (_savedir.getList( "save???.bin").map( @( f){

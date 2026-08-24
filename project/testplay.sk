@@ -55,6 +55,13 @@ if( !skGetScreenSize( [0,0])[0]){	//	skRestart時にはウィンドウは既に�
 		if( !skSupportsDisplaySize( int( wh[0]), int( wh[1]))) wh = ["1280","720"];
 		skCreateScreen( "RPG-Cobo TestPlay", int( wh[0]), int( wh[1]), 0);
 	}
+}else{
+	module.hookAction( "conf_postload", @(){
+		if( skGetAppActiveState() != AppActiveState.APPACTIVE_ACTIVE){
+			::soundmanager.checkctx();
+			::soundmanager.ctx[SoundID.SK_SND_GAIN] = 0.2;
+		}
+	}, 990);
 }
 
 skBeginRender();
@@ -181,7 +188,7 @@ local applydebugpref(){
 			startfunc = @( st, opt){
 				local p = ev.page[evpage];
 				if( !p["pararun"]){	//	メインイベント実行
-					st.mainevent = "MATTE";	
+					st.mainevent = #{evid="wait"};	
 					newthread().start( @(){
 						sleep( 300);
 						st.mainevent = null;
@@ -288,16 +295,11 @@ function hotReload( wdpath){
 	//	バトルでなんかやることあるかな？
 }
 
-//	skRestartを使ったライブリロード。現在の状態を保存してskRestart()。保存できない状況なら、直前のオートセーブにする。
-//	デバッグ時は3秒に1回の頻度でメモリに自動セーブする。時間巻き戻しの機能にも使える。
-function reloadGame( mode){
-	local a = ::arguments;
-	a.removeValue( "-hotreload");
-	//	現在の状態を保存
-	
-	//	
+//	デバッグを再起動。
+function restartDebug(){
 	newthread().start( @(){
-		sleep( 100);
+		suspend();
+		suspend();
 		skRestart();
 	}, this);
 	return true;
@@ -320,6 +322,8 @@ function getDebugStatus(){
 	return [
 		"Paused: "..!!::RPGMain.pause,
 		"MapID: "..stg.mapid,
+		"MainEvent: ".. (stg.mainevent["evid"]||null),
+		"Is Battle: "..!!stg.isbattle,
 	];
 }
 
@@ -330,7 +334,7 @@ function getDebugStatus(){
 		if( e.keycode == AppActiveState.APPACTIVE_ACTIVE){
 			::soundmanager.ctx[SoundID.SK_SND_GAIN] = 1.0;
 		}else{
-			::soundmanager.ctx[SoundID.SK_SND_GAIN] = 0.2;
+			::soundmanager.ctx[SoundID.SK_SND_GAIN] = 0.25;
 		}
 		break;
 	}
@@ -338,12 +342,22 @@ function getDebugStatus(){
 
 //	flush log
 newthread().start( @(){
-	local paused = false;
+	local paused = false, peerchk = skGetTime();
 	for( ;;){
 		flushStdOut(); suspend();
-		if( !paused != !::RPGMain.pause){
+		if( !paused != !::RPGMain.pause && ::ipcserv.peerpid){
 			paused = !paused;
-			if( ::ipcserv.peerpid) ::ipcserv.invokeIPCScript( "::debugsession?.pauseChanged( %S);" % paused, 0);	//	notify
+			::ipcserv.invokeIPCScript( "::debugsession?.pauseChanged( %S);" % paused, 0);	//	notify
+		}
+		if( skGetTime( peerchk) > 500){	//	0.5秒ごとにpeerpidが生きているか確認する
+			peerchk = skGetTime();
+			if( ::ipcserv.peerpid){
+				local wnd = ::Win32.findWindow( ::ipcserv.peerpid);
+				if( !wnd){
+					printf( "IPCConnection: peer process %S is dead. ShuttingDown...\n", ::ipcserv.peerpid);
+					::rootview.quit = true;
+				}
+			}
 		}
 	}
 }, this);
@@ -365,6 +379,11 @@ local rootevent( e){
 			revertRenderSkip( "stageui");
 			revertRenderSkip( "message");
 			revertRenderSkip( "menu");
+		}
+		break;
+	case VK_ENTER:
+		if( e.isCommandDown()){
+			::ipcserv.invokeIPCScript( "skMoveScreen( { flags=MoveScreenFlags.MOVESCREEN_FRONT });", 0);
 		}
 		break;
 	}

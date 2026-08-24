@@ -103,7 +103,7 @@ fs reconstwvp
 		return vec3( wvpxy * v.xy * mix( vz, 1.0, step( v.w, 0.0)), -vz);  //  step( v.w, 0.0) == float( v.w<=0.0)
 	}
 
-	highp vec3 reconstructWVPtex( mediump usampler2D ztex, highp vec2 uv, highp vec4 v){
+	highp vec3 reconstructWVPtex( highp usampler2D ztex, highp vec2 uv, highp vec4 v){
 		return reconstructWVP( (uv-0.5)*vec2(2.0,-2.0), texture( ztex, uv+0.0002).x, v);	//	0.0002 : nearest offset
 	}
 }

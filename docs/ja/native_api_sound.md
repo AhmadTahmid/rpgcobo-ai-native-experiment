@@ -87,6 +87,11 @@ SakanaGL Sound API は、波形データの管理、オーディオ再生、3D�
 
 **説明**: 再生終了（`SK_SND_DONE`状態）のサウンドソースを解放します。定期的に呼び出すことでメモリリークを防ぎます。
 
+##### `getPlayingSounds()`
+再生中のサウンドソースを取得します。
+
+**戻り値**: SoundSource[] - 再生中のサウンドソース配列
+
 ##### `setReverb(index, Reverb | null)`
 リバーブスロットを設定します。
 

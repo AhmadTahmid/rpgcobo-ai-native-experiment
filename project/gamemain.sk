@@ -124,17 +124,23 @@ function preloaShaders( glob=null){
 				override( conf._map, trans.transdict, false);
 			}
 		}
-		::rootview.setValue( "apptitle", conf.setting.title);
 	}, -9999);
 
 	skBeginRender();
 	skClearParam( #ClearParam( 0.0, 0.0, 0.0, 1.0));
 
-	local root = ::rootview = ::loadSKView( ::RPGMain.getUIResource( "rpgroot.ui"), SKRootView);		//	作った時点のスクリーンサイズで作られる
-	root.resizemode = 2;
+	//	ここで全てのロード。これまでには/systemしか読まれてない
+	//	※uiの差し替えを行うためにはconf読むしかない・・・
+	runsk( "/load.sk");
+	::soundmanager.setBGMVolume( clientconf.sound.bgmvol * 0.008);	//	BGMはちょっと小さめに。。。
+	::soundmanager.setSEVolume( clientconf.sound.sevol * 0.012);	//	SEは大き目。。。
+	::renderhint.set( ClientConfig.renderhints[clientconf["render"]["quality"]]);	//	保存されたレンダリング品質を設定
+	//
+	RPGMain.setupUI();
+	::rootview.setValue( "apptitle", conf.setting.title);
 	{
 		local sc = skGetScreenSize( [0,0]);
-		root.screenResized( sc[0], sc[1]);
+		::rootview.stretchSize( sc[0], sc[1]);
 	}
 	
 	//	起動プロセスは別スレッドで実行。
@@ -145,18 +151,11 @@ function preloaShaders( glob=null){
 			local splashview = ::loadSKView( ::RPGMain.getUIResource( "splash.ui"));
 			splashview.stretchSize( rootview.bnd.w, rootview.bnd.h);
 			splashview.action( "show");
-			// rootview.findChild( "menu").addChild( splashview);
 			rootview.addChild( splashview);	//	mmm
 			splashview.waitAction();
 			local t0 = skGetTime();
-			//	ここで全てのロード。これまでには/systemしか読まれてない
-			runsk( "/load.sk");
-			::soundmanager.setBGMVolume( clientconf.sound.bgmvol * 0.008);	//	BGMはちょっと小さめに。。。
-			::soundmanager.setSEVolume( clientconf.sound.sevol * 0.012);	//	SEは大き目。。。
-			::renderhint.set( ClientConfig.renderhints[clientconf["render"]["quality"]]);	//	保存されたレンダリング品質を設定
 			//	
 			preloaShaders();
-			RPGMain.setupUI();
 			RPGMain.loadSetting();		//	適度にsuspendを挟むように。
 			suspend(); suspend();
 			if( webgl){

@@ -96,8 +96,6 @@ vs zblur
 
 fs zblur
 {
-	#define TEXZ( UV) (texture2D( ztex, UV).x)
-	
 	void main(){
 		highp uint pix;
 		$(COLORTEX1) {
@@ -119,7 +117,7 @@ fs zblur
 			highp float zw = 0.0;
 			for( int y = -1; y <= 1; y ++){
 				for( int x = -1; x <= 1; x ++){
-					zw += TEXZ( v_uv + duv*vec2( x, y));
+					zw += texture( ztex, v_uv + duv*vec2( x, y)).x;
 				}
 			}
 			zw = zw*(1.0/9.0) * 2.0 - 1.0;
@@ -127,10 +125,10 @@ fs zblur
 			highp float w = dot( vec2( zw, 1.0), dotzw.zw);
 			pix = uint( ((z / w - normz.y) * normz.x) * 65535.0);
 #endif	//	quality=0 no blur
-			// highp float zw = TEXZ( v_uv) * 2.0 - 1.0;
+			// highp float zw = texture( ztex, v_uv).x * 2.0 - 1.0;
 			// highp float z = dot( vec2( zw, 1.0), dotzw.xy);
 			// highp float w = dot( vec2( zw, 1.0), dotzw.zw);
-			// pix = uint( clamp( ((z / w - normz.y) * normz.x + 0.008), 0.0, 1.0) * 65535.0);
+			// pix = uint( ((z / w - normz.y) * normz.x) * 65535.0);
 		} : {
 			pix = 65535u;
 		}
@@ -140,7 +138,7 @@ fs zblur
 
 technique zblur
 {
-	apilevel = 30, 31;
+	apilevel = 30, 31, 32;
 	
 	pass {
 		param = zblur;

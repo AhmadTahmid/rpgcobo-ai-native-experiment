@@ -48,12 +48,15 @@ class MapCanvas extends CanvasBehavior
 	topbdr = null;
 	btmbdr = null;
 
+	autoupdate = true;
+
 	constructor( e){
 		super( e.findChild( "3D"), e.findChild( "head"));
 		editor = e;
 		camwork.znear = 0.1;
 		camwork.zfar = 300.0;
 		local rsetid = "pbr_mapedit";	//	pbr
+		view.setUpdateFunc( updateMapCanvasFunc.bindenv( this));
 		
 		poslbl = head.findChild( "poslbl");
 		sellbl = head.findChild( "sellbl");
@@ -253,12 +256,17 @@ class MapCanvas extends CanvasBehavior
 		foreach( g in mkgizmomap) g.setState( s);
 	}
 
-	function updateFunc( dt){
-		local b = super.updateFunc( dt);
+	//	SK3DView, CanvasBehaviorの更新メソッドは呼ばれない
+	function updateMapCanvasFunc( dt){
+		local active = /*!::dialogcnt && */(skGetAppActiveState() == AppActiveState.APPACTIVE_ACTIVE);
+		if( active){
+			view.updateScene( dt);
+		}
+		camwork.updateCamera( dt);
 		if( bw3d){
 			bw3d.checkUpdateInCameraMesh( camwork.cam);
 		}
-		return b;
+		return true;
 	}
 
 	function loadInCameraMesh( slp){

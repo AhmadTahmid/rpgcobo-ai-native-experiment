@@ -66,7 +66,7 @@ class BattleRunnerBase
 	stoleitems = null;				//	盗みでゲットしたアイテム
 
 	isauto = false;					//	オートバトル ON
-	xbtn = false;					//	オートバトルのボタン状態
+	ybtn = false;					//	オートバトルのボタン状態
 
 
 	//	
@@ -420,7 +420,7 @@ class BattleRunnerBase
 			local skill = pc.getAttackSkill();
 			local dst = chooseRandomTarget( pc, skill.cmdtgt);
 			local cmd = SkillCommand( pc, skill, [dst]);
-			if( cmd) cmds .. cmd;
+			if( cmd) cmds = [cmd];
 		}
 		return cmds;
 	}
@@ -711,11 +711,11 @@ class BattleRunnerBase
 	//	オートバトル
 
 	function updateAutoBattle( dt){
-		local x = ::gpui.isButtonDown( GamepadButtonCode.BTN_X);
-		if( x && !xbtn){
+		local y = ::gpui.isButtonDown( GamepadButtonCode.BTN_Y);
+		if( y && !ybtn){
 			setAutoBattle( !isauto);
 		}
-		xbtn = x;
+		ybtn = y;
 	}
 
 	function setAutoBattle( b){

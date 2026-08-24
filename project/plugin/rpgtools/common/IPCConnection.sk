@@ -12,6 +12,7 @@ import ModifiersMask;
 class IPCConnection
 {
 	peerpid = null;			//	通信先のプロセスID。通信前にセットされなければならない。
+	peerwnd = null;			//	通信先のウィンドウハンドル。peerpidから取得される。
 	retmap = null;			//	ツールからの応答を処理するためのマップ。
 	nextid = 1;				//	次のコマンドID。1から始まる。
 
@@ -67,7 +68,7 @@ class IPCConnection
 			local bb = ObjectOutput.encode( r);
 			local str = encodeBASE64( bb);
 			printf( "execIPCScript return : %S peer: %S\n", str, peerpid);
-			::Win32.sendMessage( EXEC_RESPONSE, peerpid, cmdid, str);	//	戻り値ビットを立てて返す
+			::Win32.sendMessage( EXEC_RESPONSE, peerwnd, cmdid, str);	//	戻り値ビットを立てて返す
 		}
 	}
 
@@ -75,8 +76,9 @@ class IPCConnection
 	//	
 	function invokeIPCScript( scp, timeout=1000){
 		if( !peerpid) throw Exception( "IPCConnection: peerpid is not set.");
+		if( !peerwnd) throw Exception( "IPCConnection: peerwnd is not set.");
 		local cmdid = (++nextid)&0x0fffffff;
-		if( ::Win32.sendMessage( timeout? EXEC_INVOKE : EXEC_NOTIFY, peerpid, cmdid, scp) == 0){
+		if( ::Win32.sendMessage( timeout? EXEC_INVOKE : EXEC_NOTIFY, peerwnd, cmdid, scp) == 0){
 			throw Exception( "IPCConnection: failed to send message.");
 		}
 		if( !timeout) return;
@@ -106,6 +108,7 @@ class IPCConnection
 	//	peerpidに接続する。接続に成功すると、送信元のプロセスIDが返される。
 	function connect( pid){
 		peerpid = pid;
+		peerwnd = ::Win32.findWindow( pid);
 		local mypid = skGetProcessID();
 		return invokeIPCScript( "return connectedFrom( %S);" % mypid);	//	実行先のthis=IPCConnection
 	}
@@ -113,6 +116,7 @@ class IPCConnection
 	//	peerpidからconnect()で接続された時に呼ばれる。
 	function connectedFrom( pid){
 		peerpid = pid;
+		peerwnd = ::Win32.findWindow( pid);
 		printf( "IPCConnection connected from process %S.\n", pid);
 		return pid;
 	}

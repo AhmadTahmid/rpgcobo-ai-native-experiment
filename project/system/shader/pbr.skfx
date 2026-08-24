@@ -285,7 +285,7 @@ param gblur
 
 	uniform highp mat4 p0 <id=MISC1MAT>;
 	uniform highp usampler2D gtex1 <id=COLORTEX1, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
-	uniform mediump usampler2D uztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
+	uniform highp usampler2D uztex <id=DEPTHTEX, WRAP_S=CLAMP, WRAP_T=CLAMP, MIN_FILTER=NEAREST, MAG_FILTER=NEAREST>;
 	uniform highp vec2 gtexscale <id=COLORTEX1_PIX>;
 	
 	fragout highp uint fragcolor;
