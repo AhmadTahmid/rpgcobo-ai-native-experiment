@@ -20,8 +20,8 @@ import RPGPropertyType;
 //	EDR, CDR, 							//	±100の耐性力。
 //	PHIT, PEVA, MHIT, MEVA, CRI, CEVA, TGR	//	これらは1.0基準のレート値。TGR=Target Rate
 //	
-//	Attack/Defence
-//	M.Attack/M.Defence
+//	Attack/Defense
+//	M.Attack/M.Defense
 
 local playerprops = RPGSystem.playerprops;
 local enemyprops = RPGSystem.enemyprops;

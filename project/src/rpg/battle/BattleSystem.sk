@@ -57,7 +57,7 @@ function isCommandTarget( src, dst, cmdtgt){
 }
 
 //	属性や状態の防御率を計算する。各defは高い方が防御率も高くなる。100だと完全防御。-100だと倍。
-function defenceRate( deflist, bits){
+function defenseRate( deflist, bits){
 	if( !bits) return 1.0;
 	local dr = 0;
 	foreach( i, v in deflist){
@@ -575,7 +575,7 @@ class DamageFormula
 	}
 	
 	static function _calcedr(){
-		return ::defenceRate( dst.EDR, skill["elembits"]|0);
+		return ::defenseRate( dst.EDR, skill["elembits"]|0);
 	}
 
 	////////////////////////////////////////////////////////////
