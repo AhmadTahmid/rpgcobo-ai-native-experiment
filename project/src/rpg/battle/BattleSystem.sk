@@ -60,7 +60,9 @@ function isCommandTarget( src, dst, cmdtgt){
 function defenceRate( deflist, bits){
 	if( !bits) return 1.0;
 	local dr = 0;
-	foreach( i, v in deflist) if( bits&(1<<i)) dr += v;
+	foreach( i, v in deflist){
+		if( bits&(1<<i)) dr += v;
+	}
 	return Math.clamp( 100-dr, 0, 400) * 0.01;	//	0~4倍
 }
 
@@ -573,7 +575,7 @@ class DamageFormula
 	}
 	
 	static function _calcedr(){
-		return ::defenceRate( skill["elembits"], dst.EDR);
+		return ::defenceRate( dst.EDR, skill["elembits"]|0);
 	}
 
 	////////////////////////////////////////////////////////////

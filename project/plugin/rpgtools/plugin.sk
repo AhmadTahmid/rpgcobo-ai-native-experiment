@@ -61,6 +61,9 @@ function loadPlugin( args, opt){
 	FileIcons.evpic <- ("\ue416",0xddcc44ff);
 	FileIcons.circle <- ("\uef4a",0xddcc44ff);
 
+	//	renderhits
+	::renderhint.set( ClientConfig.renderhints[::workspace["renderquality"]??2]);
+
 	module.hookAction( "editor_postload", @(){
 		::skstudio.titlebar.setTitle( "RPG-Cobo : %S" % ::conf.setting.projname);
 		::TipsRunner.tipsjsonlist .. "/plugin/rpgtools/rpgtips.json";

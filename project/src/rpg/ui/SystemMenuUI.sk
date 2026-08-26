@@ -355,6 +355,8 @@ local fullconf = {		//	PCのみ
 	disable = (osname!="Windows")
 
 	set = @( val){
+		::clientconf.screen.fullscreen = !!val;
+		if( isfullscreen == val) return;
 		if( !val){
 			local wh = clientconf.screen.reso_window.split( "x");
 			skCreateScreen( "GAME TITLE", int( wh[0]), int( wh[1]), 5|16);
@@ -363,7 +365,7 @@ local fullconf = {		//	PCのみ
 			if( !skSupportsDisplaySize( int( wh[0]), int( wh[1]))) wh = ["1280","720"];
 			skCreateScreen( "GAME TITLE", int( wh[0]), int( wh[1]), 0);
 		}
-		::clientconf.screen.fullscreen = val;
+		::isfullscreen = val;
 	}
 };
 
@@ -373,12 +375,15 @@ local winresoconf = {		//	PCのみ
 	pid = "screen.reso_window"
 	type = "choice"
 	list = @() ClientConfig.getAvailableWindowSizes().map( @( v)({ lbl="[f2]"..v, val=v}))
-	disable = @() (osname!="Windows") || ::clientconf.screen.fullscreen
+	disable = @() (osname!="Windows")// || ::clientconf.screen.fullscreen
 	
 	set = @( val){
-		local wh = val.split( "x");	//	"1920x1080"のような文字列
-		skCreateScreen( "GAME TITLE", int( wh[0]), int( wh[1]), 5);
-		::clientconf.screen.reso_window = val;
+		if( ::clientconf.screen.reso_window == val) return;
+		if( !::clientconf.screen.fullscreen){
+			local wh = val.split( "x");	//	"1920x1080"のような文字列
+			skCreateScreen( "GAME TITLE", int( wh[0]), int( wh[1]), 5);
+		}
+		::isfullscreen = ::clientconf.screen.reso_window = val;
 	}
 };
 
@@ -388,7 +393,16 @@ local scresoconf = {		//	PCのみ
 	pid = "screen.reso_screen"
 	type = "choice"
 	list = @() ClientConfig.getAvailableDisplaySizes().map( @( v)({ lbl="[f2]"..v, val=v}))
-	disable = @() (osname!="Windows") || !::clientconf.screen.fullscreen
+	disable = @() (osname!="Windows")// || !::clientconf.screen.fullscreen
+
+	set = @( val){
+		if( ::clientconf.screen.reso_screen == val) return;
+		if( ::clientconf.screen.fullscreen){
+			local wh = val.split( "x");	//	"1920x1080"のような文字列
+			skCreateScreen( "GAME TITLE", int( wh[0]), int( wh[1]), 0);
+		}
+		::isfullscreen = ::clientconf.screen.reso_screen = val;
+	}
 };
 
 local quaconf = {		//	描画品質。5段階

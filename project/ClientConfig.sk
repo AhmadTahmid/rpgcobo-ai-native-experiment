@@ -10,6 +10,9 @@ import VirtualKeyCode;
 import ModifiersMask;
 import GamepadButtonCode;
 
+//	起動時点のディスプレイ解像度を取得する
+local dispsize = skGetDisplaySize( []);	//	w, h, xdpi, ydpi, fps
+
 class ClientConfig
 {
 	static resolist = ["3840x2160","2560x1440","1920x1080","1600x900","1280x720"];	//	大きい順
@@ -95,9 +98,18 @@ class ClientConfig
 		return 2;
 	}
 
+	function getResolutionBits(){
+		local resobits = 16;
+		if( skSupportsDisplaySize( 3840, 2160)) { resobits = 31; }
+		else if( skSupportsDisplaySize( 2560, 1440)){ resobits = 30; }
+		else if( skSupportsDisplaySize( 1920, 1080)){ resobits = 28; }
+		else if( skSupportsDisplaySize( 1600, 900)){ resobits = 24; }
+		return resobits;
+	}
+
 	//	現在のディスプレイ解像度を元に最大で表示できるウィンドウ幅を返す
 	function getAvailableWindowSizes(){
-		local d = skGetDisplaySize( []);	//	w, h, xdpi, ydpi, fps
+		local d = dispsize;
 		return resolist.filter( @( v){
 			local wh = v.split( "x"), w = int( wh[0]), h = int( wh[1]);
 			return (w<d[0]-320 && h<d[1]-128);
@@ -106,12 +118,10 @@ class ClientConfig
 	
 	//	
 	function getAvailableDisplaySizes(){
-		local d = skGetDisplaySize( []);	//	w, h, xdpi, ydpi, fps
+		local b = getResolutionBits();
 		return [
-			d[0].."x"..d[1],
-			...resolist.map( @( v){
-				local wh = v.split( "x"), w = int( wh[0]), h = int( wh[1]);
-				return (w!=d[0] && h!=d[1] && skSupportsDisplaySize( w, h)) ? v : undefined;
+			...resolist.map( @( v, i){
+				return ( b & (1<<i)) ? v : undefined;
 			})
 		];
 	}

@@ -976,6 +976,7 @@ class RPGEnemy extends RPGCharaBase
 		name = data.name;
 		updateBaseScore();
 		baseoptions = data.option.map( @( v) v?RPGOption( v):undefined);		//	ランダムあってもいいかも
+		updateOptions();
 		updateScoreMap();
 		HP = scoremap.MAXHP;	//	DQみたいにランダムしてもいい
 		// MP = scoremap.MAXMP;

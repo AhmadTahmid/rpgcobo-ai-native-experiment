@@ -46,6 +46,7 @@ if( (i=args.indexOf( "-wd")) >= 0){
 
 runsk( "/ClientConfig.sk");
 ::clientconf = ClientConfig.load();
+::isfullscreen <- ::clientconf.screen.fullscreen;
 if( !skGetScreenSize( [0,0])[0]){	//	skRestart時にはウィンドウは既にできている
 	if( !clientconf.screen.fullscreen){
 		local wh = clientconf.screen.reso_window.split( "x");	//	"1920x1080"のような文字列
@@ -323,7 +324,8 @@ function getDebugStatus(){
 		"Paused: "..!!::RPGMain.pause,
 		"MapID: "..stg.mapid,
 		"MainEvent: ".. (stg.mainevent["evid"]||null),
-		"Is Battle: "..!!stg.isbattle,
+		"Is Battle: "..!!stg.battle,
+		"FPS: "..RPGMain.fps.fps,
 	];
 }
 

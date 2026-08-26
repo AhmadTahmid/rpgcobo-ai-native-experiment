@@ -695,6 +695,8 @@ class VirtualPad
 	btn_b = null;
 	btn_x = null;
 	btn_y = null;
+	btn_rb = null;
+	btn_lb = null;
 	btn_back = null;
 
 	//	Gamepad fields
@@ -720,6 +722,7 @@ class VirtualPad
 		setupButton( btn_b = view.findChild( "vpad_b"), BTN_B);
 		setupButton( btn_x = view.findChild( "vpad_x"), BTN_X);
 		setupButton( btn_y = view.findChild( "vpad_y"), BTN_Y);
+		setupButton( btn_rb = view.findChild( "vpad_rb"), BTN_RB);
 		setupButton( btn_back = view.findChild( "vpad_back"), BTN_BACK);
 	}
 
@@ -731,6 +734,7 @@ class VirtualPad
 	function poll( dt){}	//	何もしないで良い
 	
 	function setupButton( v, btnid){
+		if( !v) return;
 		local bit = 1<<btnid;
 		v.multitouch = true;
 		local self = this;

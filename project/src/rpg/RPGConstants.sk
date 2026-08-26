@@ -224,7 +224,7 @@ import AnimationPart;
 	];
 
 	function battlecmdlist(){
-		local a = [{ lbl="$T.lbl_none", }, ];
+		local a = [{ lbl="$T.lbl_none", val=null}, ];
 		foreach( v in ::RPGSystem.battlecmd._list){
 			a .. { lbl=(v["toolname"]||v.name), submenu=fget( v, "submenu"), val=v.key};
 		}

@@ -63,7 +63,8 @@ fs packg
 
 	void packg_standard( const G g, out mediump vec4 f0, out highp uint u1, out highp uint u2){
 		f0 = vec4( g.col.xyz, g.gsel);
-		u1 = packn( g.n) | (uint( g.rough*63.5)<<23u);	//	| (0<<29)
+		highp uint r = uint( g.rough*63.5);		//	Android taiou....
+		u1 = packn( g.n) | (r<<23u);	//	| (0<<29)
 		highp uvec4 u = uvec4( vec4( g.metal, g.mparam.xyz) * vec4( 63.5, 255.5, 255.5, 255.5)) << uvec4( 26, 16, 8, 0);
 		u2 = u.x|u.y|u.z|u.w;
 	}
@@ -78,7 +79,8 @@ fs packg
 
 	void packg_subsurf( const G g, out mediump vec4 f0, out highp uint u1, out highp uint u2){
 		f0 = vec4( g.col.xyz, g.gsel);
-		u1 = packn( g.n) | (2u<<29u) | (uint( g.rough*63.5)<<23u);
+		highp uint r = uint( g.rough*63.5);		//	Android taiou....
+		u1 = packn( g.n) | (2u<<29u) | (r<<23u);
 		highp uvec2 u = uvec2( vec2( g.metal, g.mparam.w) * 63.5) << uvec2( 26, 20);
 		highp uint tint = uint( dot( floor( g.mparam.xyz*63.5), vec3( 1.0, 64.0, 64.0*64.0)));
 		u2 = u.x|u.y|tint;

@@ -146,7 +146,7 @@ RPGSystem.ui ..
 	key = "store_sellitem"
 	lbl = "$T.ui_store_sellitem"
 	type = "store"			//	mainmanu, submenu, choose, dialog, message, info, debug, misc, 
-	topinfo = "$T.ui_store_sellitem";
+	topinfo = "$T.sellitems";	//	DictProps
 	icon = "\ue54c"
 
 	props = [					//	金額レートぐらいかな

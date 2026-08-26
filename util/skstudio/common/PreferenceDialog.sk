@@ -122,6 +122,9 @@ preferenceprops .. {
 		{lbl="3:$T.quality3",val=3},
 		{lbl="4:$T.quality4",val=4},
 	]
+	applypref = @( prop, val){
+		Popups.showInfo( "$T.pop_renderquality_changed");
+	}
 }
 
 

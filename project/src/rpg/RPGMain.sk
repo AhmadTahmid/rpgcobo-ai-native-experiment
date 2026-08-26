@@ -34,6 +34,19 @@ import GamepadStateID;
 	uistack = [];
 	picmap = {};
 	pause = null;		//	PauseSession : ゲームの一時停止状態を管理する。nullの場合は一時停止していない。
+	fps = {
+		count = 0,
+		time = 0,
+		fps = 0,
+		update = @( dt){
+			++count;
+			if( (time+=dt) >= 2000){
+				fps = count*1000.0 / time;
+				count = 0;
+				time = 0;
+			}
+		}
+	};
 	
 	//////////////////////////////////////////////////////////////////////////////
 	//	ゲーム初期化。
@@ -60,6 +73,7 @@ import GamepadStateID;
 		root.addPostEventListener( ACTION_EVENT, uiloopevent);
 		root.addPostEventListener( MOUSE_EVENT, uiloopevent);
 		root.addPostEventListener( GPUI_EVENT, gamepadevent);
+		root.addPostEventListener( KEY_EVENT, keyevent);
 		//	
 		local bkmap = { ...ClientConfig.def_keybtnmap, ...clientconf["keyboard"]};
 		::gpui.setButtonKeyMap( bkmap);
@@ -78,6 +92,7 @@ import GamepadStateID;
 	
 	//	ゲームループを1フレーム処理する。
 	function update( dt){
+		fps.update( dt);
 		if( pause){
 			pause.update( dt);
 		}else{
@@ -766,6 +781,27 @@ import GamepadStateID;
 		}
 	}
 
+	function keyevent( e){
+		switch( e.id){
+		case KEY_PRESSED:
+			if( e.keycode == VK_F10){
+				toggleFullscreen();
+			}
+			break;
+		}
+	}
+
+	function toggleFullscreen(){
+		if( ::isfullscreen=!::isfullscreen){
+			local wh = clientconf.screen.reso_screen.split( "x");
+			if( !skSupportsDisplaySize( int( wh[0]), int( wh[1]))) wh = ["1280","720"];
+			skCreateScreen( "GAME TITLE", int( wh[0]), int( wh[1]), 0);
+		}else{
+			local wh = clientconf.screen.reso_window.split( "x");
+			skCreateScreen( "GAME TITLE", int( wh[0]), int( wh[1]), 5|16);
+		}
+	}
+
 	function appevent( e){
 		switch( e.id){
 		case NOTIFY_ERROR:	//	表示するべきエラー
@@ -826,10 +862,25 @@ class PauseSession
 		pauselayer = ::rootview.findChild( "pauselayer");
 		view = ::loadSKView( ::RPGMain.getUIResource( "paused.ui"));
 		local sp = mainlayer.capture();	//	ポーズ中に非表示にするビューをキャプチャしておく
+		//	キャプチャ画像がフルスクリーン切り替えでズレないように色々調整・・・
+		local pbnd = pauselayer.getOriginalSize();
+		sp.bnd.w /= mainlayer.scale.x; sp.bnd.h /= mainlayer.scale.y;
+		local px = pbnd[0]/2, py = pbnd[1]/2;
 		captureimg = SKImageView( sp);
+		captureimg.pos( px, py, 0.0);
+		captureimg.bnd.x = -sp.bnd.w/2; captureimg.bnd.y = -sp.bnd.h/2;
 		captureimg.setColor( 0x99999999);	//	暗くする
-		view.stretchSize( pauselayer.bnd.w, pauselayer.bnd.h);
+		captureimg.stretchalign = 0;
+		captureimg.scale( mainlayer.scale);
+		local m = MotionTimeline( SKViewPropertyID.POSITION); m.put( 0, (px,py)); m.build();
+		captureimg.motion = [m];
 		view.findChild( "blurg").addChild( captureimg);
+		//	フルスクリーン切り替えはWindowsの時のみ
+		if( skGetOSName() != "Windows"){
+			view.findChild( "btn_fullscreen").visible = false;
+		}
+		//
+		view.stretchSize( pauselayer.bnd.w, pauselayer.bnd.h);
 		pauselayer.addChild( view);
 		// mainlayer.layerflags &= ~1;	//	非表示じゃだめだ。。。削除しないと
 		oldcurs = ::gpui.gpuitarget;
@@ -859,6 +910,8 @@ class PauseSession
 			::gpui.updateGPUIMap();
 			::gpui.moveCursorTo( oldcurs);
 		}
+		local sc = skGetScreenSize( [0,0]);
+		::rootview.stretchSize( sc[0], sc[1], true);
 		//	bgm
 		::soundmanager.currentbgm?.pause( false);
 	}
@@ -881,6 +934,8 @@ class PauseSession
 		case ACTION_PERFORMED:
 			if( e.src["name"] == "btn_gotitle"){
 				gotitle();
+			}else if( e.src["name"] == "btn_fullscreen"){
+				::RPGMain.toggleFullscreen();
 			}
 			break;
 		}

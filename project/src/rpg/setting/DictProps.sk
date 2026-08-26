@@ -61,6 +61,7 @@ dictprops .. { category = 1, key = "newgame", lbl = {ja="ニューゲーム",en=
 dictprops .. { category = 1, key = "loadgame", lbl = {ja="コンティニュー",en="Continue" } };
 dictprops .. { category = 1, key = "gotitle", lbl = {ja="タイトルに戻る",en="Return to Title" } };
 dictprops .. { category = 1, key = "exitgame", lbl = {ja="ゲームを終了",en="Exit Game" } };
+dictprops .. { category = 1, key = "sellitems", lbl = {ja="所持品の売却", en="Sell Posessions"} };
 dictprops .. { category = 1, key = "buy", lbl = {ja="購入する",en="Buy" } };
 dictprops .. { category = 1, key = "sell", lbl = {ja="売却する",en="Sell" } };
 dictprops .. { category = 1, key = "enchant", lbl = {ja="強化する",en="Enchant" } };

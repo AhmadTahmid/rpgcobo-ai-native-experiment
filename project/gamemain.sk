@@ -95,6 +95,7 @@ function preloaShaders( glob=null){
 	//	ここでclient.confを読んでスクリーンサイズ、言語などを読む。
 	runsk( "/ClientConfig.sk");	//	$savedata/client.json
 	::clientconf = ClientConfig.load();
+	::isfullscreen = ::clientconf.screen.fullscreen;
 	if( !skGetScreenSize( [0,0])[0]){	//	skRestart時にはウィンドウは既にできている
 		if( osname=="Windows"){
 			if( !clientconf.screen.fullscreen){

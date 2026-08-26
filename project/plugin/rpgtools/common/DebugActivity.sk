@@ -181,8 +181,8 @@ class DebugSession
 			ipc = IPCConnection();
 			ipc.bind();
 			local b = false;
-			for( local l = 0;l < 4;l ++){
-				sleep( 400);
+			for( local l = 0;l < 6;l ++){
+				sleep( 200);
 				try{
 					printf( "IPCConnection connecting...\n");
 					if( b=ipc.connect( popen.processid())) break;
@@ -219,7 +219,7 @@ class DebugSession
 		updateActivity();
 		::rootview.removeEventListener( BROADCAST_EVENT, sessionevent);
 		::skstudio.titlebar.showDebugBar( false);
-		debugbar.removeEventListener( ACTION_EVENT, sessionevent);
+		debugbar?.removeEventListener( ACTION_EVENT, sessionevent);
 	}
 
 	//	

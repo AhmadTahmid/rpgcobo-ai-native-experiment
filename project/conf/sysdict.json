@@ -87,6 +87,7 @@
 	"pause":{"ja":"ポーズ", "en":"Pause"},
 	"resume_btn":{"ja":"ポーズ解除", "en":"Resume"},
 	"resume_tap":{"ja":"タップでポーズ解除", "en":"Tap to Resume"},
+	"toggle_fullscreen": {"ja":"フルスクリーン切り替え", "en":"Toggle Fullscreen"},
 	
 	"equip":{ "ja":"装備", "en":"Equipment"},
 	"weapon":{ "ja":"武器", "en":"Weapon"},

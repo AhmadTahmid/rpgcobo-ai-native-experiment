@@ -301,6 +301,10 @@ class SystemVarAccessor
 			key = "EXITMAP", name = "$T.svar_exitmap", type = VAR_ANY, readonly = true,
 			func = @( key, val=undefined) ::rpgstage.stat.statmap["exitmap"]["dest"],
 		},
+		{
+			key = "FPS", name = "FPS", type = VAR_ANY, readonly = true,
+			func = @( key, val=undefined) ::RPGMain.fps.fps,
+		},
 	]);
 
 	static function add( t){
