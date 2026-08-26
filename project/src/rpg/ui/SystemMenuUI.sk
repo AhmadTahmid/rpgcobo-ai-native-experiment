@@ -355,7 +355,7 @@ local fullconf = {		//	PCのみ
 	disable = (osname!="Windows")
 
 	set = @( val){
-		::clientconf.screen.fullscreen = !!val;
+		::clientconf.screen.fullscreen = val;
 		if( isfullscreen == val) return;
 		if( !val){
 			local wh = clientconf.screen.reso_window.split( "x");

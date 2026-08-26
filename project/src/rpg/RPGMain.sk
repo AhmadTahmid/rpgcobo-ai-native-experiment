@@ -792,7 +792,7 @@ import GamepadStateID;
 	}
 
 	function toggleFullscreen(){
-		if( ::isfullscreen=!::isfullscreen){
+		if( ::isfullscreen = ::isfullscreen ? 0 : 1){
 			local wh = clientconf.screen.reso_screen.split( "x");
 			if( !skSupportsDisplaySize( int( wh[0]), int( wh[1]))) wh = ["1280","720"];
 			skCreateScreen( "GAME TITLE", int( wh[0]), int( wh[1]), 0);
