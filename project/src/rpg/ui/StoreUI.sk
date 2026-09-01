@@ -17,9 +17,12 @@ local shopitemlist( sid){
 	return rpgdata[sid].items.map( @( v, i){
 		local b = ::reqchk( v["reqs"]) ? 4 : v["reqfail"];
 		local itemid = v.dataid, idata = rpgdata[itemid];
-		local iname = idata.icon .. idata.name, price = ::commanum( v["price"]||idata["price"]);
+		local item = RPGItem();
+		item.setDataID( itemid);
+		item.setLV( v["LV"]||0);
+		local iname = item.iconname(), price = ::commanum( v["price"]||idata["price"]);
 		if( !b) return undefined;	//	詰めて消去
-		local prms = { item=v, stat=b, _name="i"..i, };
+		local prms = { item=v, stat=b, _name="i"..i, LV = item.LV};
 		switch( b){
 		case 1: return { lbl="", rlbl="", ...prms };	//	空欄
 		case 2: return { lbl="[G]"..iname, rlbl="[G]"..price, ...prms };	//	グレーアウト
@@ -49,11 +52,12 @@ local equipinfo( pc, itemid, idata){
 
 //	選択されたアイテムの情報を表示する
 //	所持数、説明、装備可能情報
-local itemselected( view, itemid){
-	local idata = rpgdata[itemid];
+local itemselected( view, prm){
+	local itemid = prm.dataid, idata = rpgdata[itemid];
 	local stacknum = idata["stacknum"] || 8;
 	local item = RPGItem();
 	item.setDataID( itemid);
+	item.setLV( prm["LV"]||0);
 	local eqinfo = "";
 	if( itemid[0]=='W' || itemid[0]=='A'){
 		eqinfo = rtf( rpgstat.members.map( @( pc) equipinfo( pc, itemid, idata)).join( "\n"));
@@ -112,7 +116,7 @@ RPGSystem.ui ..
 				return e.item;
 			}
 			"select" : @( e){
-				itemselected( view, e.item.item.dataid);
+				itemselected( view, e.item.item);
 			}
 			"back" : @( e){
 				::playSound( "SE004");
@@ -126,6 +130,7 @@ RPGSystem.ui ..
 				if( RPGMain.showUI( {
 					key = "dialog_buyitem"
 					itemid = selitem.item.dataid
+					LV = selitem["LV"]
 				})){
 					view.setValue( "itemlist", shopitemlist( storeid));
 				}
