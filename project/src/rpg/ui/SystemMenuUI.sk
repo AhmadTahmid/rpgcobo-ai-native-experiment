@@ -423,7 +423,6 @@ local quaconf = {		//	描画品質。5段階
 		t.quality <- val;
 		t ... ClientConfig.renderhints[val];
 		::renderhint.set( t);
-		printf( "RENDERHINT CHANGED: %S\n", encodeJSON( t, 5));
 		
 		if( ::rpgstage){
 			local r = ::rpgstage.view3d.renderer;
@@ -580,6 +579,7 @@ RPGSystem.ui ..
 					tab = v,
 				})),
 				itemlist = list0,
+				desclbl = "",
 			},
 			action = "show"
 			focus = list0[0]["_name"] .. ".btn";

@@ -95,6 +95,7 @@ dictprops .. { category = 2, key = "learnoption", lbl = {ja="習得オプショ�
 
 dictprops .. { category = 2, key = "soldout", lbl = {ja="売り切れ",en="Sold out"} };
 dictprops .. { category = 2, key = "ownnum", lbl = {ja="所持数",en="Num of owns"} };
+dictprops .. { category = 2, key = "sellprice", lbl = {ja="売却価格",en="Sell Price"} };
 
 dictprops .. { category = 2, key = "victory", lbl = {ja="バトルに勝利！",en="Won the Battle!"} };
 dictprops .. { category = 2, key = "gotnoitem", lbl = {ja="入手アイテム無し",en="No items obtained"} };

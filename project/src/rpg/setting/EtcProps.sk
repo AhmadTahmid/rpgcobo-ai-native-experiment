@@ -218,14 +218,23 @@ jobprops .. {
 ////////////////////////////////////////////////////////////////////////////////
 //	武器
 
+local maxlvprop = {
+	pid = "MAXLV"
+	lbl = "$T.MAXLV"
+	type = SCALAR
+	range = (1, 99)
+	defval = 1
+};
+
 local weaponprops = RPGSystem.weaponprops;
 
 weaponprops .. {
 	pid = "PATK"
 	lbl = "$T.PATK"
 
-	type = SCALAR
-	range = (0,9999)
+	// type = SCALAR
+	// range = (0,9999)
+	type=VARIABLE, varbits=0, constbits=2|8|16, defscp = "10+LV*5",
 	defval = 100
 };
 
@@ -233,8 +242,9 @@ weaponprops .. {
 	pid = "MATK"
 	lbl = "$T.MATK"
 	
-	type = SCALAR
-	range = (0,9999)
+	// type = SCALAR
+	// range = (0,9999)
+	type=VARIABLE, varbits=0, constbits=2|8|16, defscp = "10+LV*5",
 	defval = 100
 };
 
@@ -247,7 +257,6 @@ weaponprops .. {
 
 	defval = 0
 };
-
 
 weaponprops .. {
 	pid = "skillid"
@@ -260,6 +269,9 @@ weaponprops .. {
 	defval = "S000"
 };
 
+weaponprops .. maxlvprop;
+
+
 weaponprops .. memoprop
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -270,9 +282,10 @@ local armorprops = RPGSystem.armorprops;
 armorprops .. {
 	pid = "PDEF"
 	lbl = "$T.PDEF"
-
-	type = SCALAR
-	range = (0,9999)
+	
+	// type = SCALAR
+	// range = (0,9999)
+	type=VARIABLE, varbits=0, constbits=2|8|16, defscp = "10+LV*5",
 	defval = 100
 };
 
@@ -280,8 +293,9 @@ armorprops .. {
 	pid = "MDEF"
 	lbl = "$T.MDEF"
 	
-	type = SCALAR
-	range = (0,9999)
+	// type = SCALAR
+	// range = (0,9999)
+	type=VARIABLE, varbits=0, constbits=2|8|16, defscp = "10+LV*5",
 	defval = 100
 };
 
@@ -294,5 +308,7 @@ armorprops .. {
 
 	defval = 0
 };
+
+armorprops .. maxlvprop;
 
 armorprops .. memoprop

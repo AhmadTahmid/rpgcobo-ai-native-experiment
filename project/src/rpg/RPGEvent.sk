@@ -396,7 +396,7 @@ class RPGEventRunner
 			}
 			break;
 		default:	//	+
-			::rpgstat.addItemID( cmd.itemid, cmd.num);	//	追加時にはエラーは出ない？
+			::rpgstat.addItemID( cmd.itemid, cmd.num, cmd["LV"]);	//	追加時にはエラーは出ない？
 			break;
 		}
 	}

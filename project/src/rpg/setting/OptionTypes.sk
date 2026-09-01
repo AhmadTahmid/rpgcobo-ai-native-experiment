@@ -227,7 +227,10 @@ RPGSystem.option .. {
 	icon = icon_param,
 	info = null,
 	modifyscore = @( opd, pid, cval){
-		if( opd[pid]){ cval.supply += opd[pid]; }
+		if( opd[pid]){
+			local val = ::getvar( opd[pid], opd);
+			cval.supply += float( val);
+		}
 	},
 };
 

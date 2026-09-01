@@ -426,7 +426,7 @@ local findprop( props, pid){
 
 //	エネミーは各ステータスに計算式を入れることが出来る。スコアプロパティ限定
 local varprop( prop){
-	return { ...prop, type=VARIABLE, varbits=0, constbits=2|8|16 };
+	return { ...prop, type=VARIABLE, varbits=0, constbits=2|8|16, defscp = "10+LV*5", };
 }
 
 //	LV : エネミーのLVは特に使われないが、計算の起点には出来る (スタティックプロパティ)
@@ -498,6 +498,16 @@ enemyprops .. {
 	defval = 10
 };
 
+local eqlvprop = {
+	pid = "LV"
+	lbl = "$T.lbl_eqlv"
+	type = SCALAR
+	range = @( pl) (1, ::rpgdata[pl.getParam( "itemid")]["MAXLV"]||1)
+	defval = 1
+	
+	hide = @( pl) (::rpgdata[pl.getParam( "itemid")]["MAXLV"]||0)<=1
+};
+
 local dropprop = {
 	proptype = "static"
 	pid = "item"
@@ -507,12 +517,16 @@ local dropprop = {
 		name="$T.lbl_dropitem", 
 		props = [
 			{ pid="itemid", lbl="$T.lbl_item", type=DATAID, datatype=["item","weapon","armor","store","point"], nullable=true},
-			{ pid="rate", lbl="$T.lbl_item", type=SCALAR, range=[0.0,100.0], q=100},
+			eqlvprop,
+			{ pid="rate", lbl="$T.lbl_droprate", type=SCALAR, range=[0.0,100.0], q=100},
 			{ pid="issteal", lbl="$T.lbl_issteal", type=BOOL, },
 		],
 		tostring = @( v){
 			if( !v.itemid) return "$T.lbl_notset";
-			return sprintf( "%S %S:%S    %.1f％", v.issteal?"\uf321":"\uf255", v.itemid, ::rpgdata[v.itemid]["name"]||"???", v.rate);
+			local ri = RPGItem();
+			ri.setDataID( v.itemid);
+			ri.setLV( v["LV"]);
+			return sprintf( "%S %S:%S    %.1f％", v.issteal?"\uf321":"\uf255", v.itemid, ri.name || "???", v.rate);
 		}
 	},
 	defval={ itemid=null, rate=50.0, issteal=false},

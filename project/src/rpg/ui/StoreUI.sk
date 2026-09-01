@@ -97,6 +97,9 @@ RPGSystem.ui ..
 			focus = _list[0]["_name"]
 			binds = {
 				itemlist = _list
+				desc = ""
+				num = ""
+				equipinfo = ""
 			}
 		};
 		RPGMain.showUI( { key="info_money"});
@@ -178,12 +181,13 @@ RPGSystem.ui ..
 				})),
 				//	アイテム一覧
 				itemlist = makelist( ~tabptr);
+				desclbl = ""
 			},
 			action = "show"
 			focus = "i0"
 		});
 		local setdesc( v){
-			view.setValue( "desclbl", v["item"]? RPGSystem.getDescription( v.item, "売却価格  \uf25f"..commanum( v.item.data.price/2)) : "");
+			view.setValue( "desclbl", v["item"]? RPGSystem.getDescription( v.item, "$T.sellprice  \uf25f"..commanum( v.item.data.price/2)) : "");
 		}
 		local remakelist(){
 			local a = makelist( ~tabptr);

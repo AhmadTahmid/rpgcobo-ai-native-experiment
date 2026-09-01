@@ -760,6 +760,7 @@
 	"lbl_enemyuse"						: {"ja":"エネミーが使用可能", "en":"Enemy Useable"}
 	"lbl_dropitem"						: {"ja":"取得アイテム", "en":"Drop Item"}
 	"lbl_droprate"						: {"ja":"ドロップ率", "en":"Drop Rate"}
+	"lbl_eqlv"							: {"ja":"装備LV", "en":"Equip LV"}
 	"lbl_issteal"						: {"ja":"盗むの対象", "en":"For Steal skill"}
 	"lbl_actnum"						: {"ja":"行動回数", "en":"Action Num"}
 	"lbl_ailv"							: {"ja":"AIレベル", "en":"AI Level"}
@@ -1258,7 +1259,7 @@
 	"menu_debug_clearsavedata"			: {"ja":"セーブデータを初期化", "en":"Clear Save Data"}
 	
 	"confirm_clearsavedata"				: {"ja":"セーブデータを全てクリアしますか？", "en":"Are you sure to clear all save data?"}
-	"lbl_debug_running"					: {"ja":"デバッグを実行中…", "en":"Debug is running..."}
+	"lbl_debug_connecting"				: {"ja":"デバッグのプロセスに接続中…", "en":"Connecting to debug process..."}
 
 	//	debug settings
 	"pref_debuglang"					: {"ja":"デバッグする言語", "en":"Language to Debug"}

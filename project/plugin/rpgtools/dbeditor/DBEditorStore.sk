@@ -78,6 +78,13 @@ class DBEditorStore extends DBEditor
 						data.price <- (rpgdata[data.dataid]["price"]==val) ? null : val;
 					}
 				},
+				{
+					pid = "LV"
+					lbl = "$T.lbl_eqlv"
+					type = SCALAR
+					range = @( pl) (1, ::rpgdata[pl.getParam( "dataid")]["MAXLV"]||1)
+					hide = @( pl) (::rpgdata[pl.getParam( "dataid")]["MAXLV"]||0)<=1
+				},
 				reqsprop,
 				reqfailprop,
 			],
@@ -108,7 +115,7 @@ class DBEditorStore extends DBEditor
 		},
 		[2] = {	//	ランダム宝箱
 			datatype = ["item","weapon","armor","point"],		//	リストに追加可能なアイテムの種類
-			defval = { dataid="I000", num=1, rate=100, reqs=null }
+			defval = { dataid="I000", num=1, LV=1, rate=100, reqs=null }
 			props = [
 				{ pid="dataid", lbl="$T.lbl_item", type=DATAID, datatype=["item","weapon","armor","point"], refresh=true, },
 				{
@@ -123,14 +130,20 @@ class DBEditorStore extends DBEditor
 						local dataid = pl.getParam( "dataid"), item = RPGData.getData( dataid);
 						return (1,item["stacknum"]||1);
 					}
-				}
-				{ pid="rate", lbl="$T.lbl_rate", type=SCALAR, range=(0,100), q=1, ui="bar"},
+				},
+				{
+					pid = "LV"
+					lbl = "$T.lbl_eqlv"
+					type = SCALAR
+					range = @( pl) (1, ::rpgdata[pl.getParam( "dataid")]["MAXLV"]||1)
+					hide = @( pl) (::rpgdata[pl.getParam( "dataid")]["MAXLV"]||0)<=1
+				},
+				{ pid="rate", lbl="$T.lbl_rate", type=SCALAR, range=(0,100), q=10, barrange=(0,100,1), ui="bar"},
 				reqsprop,
 			],
 			setview = @( la, v, i, idata){
 				local sb = (#StringBuffer()).clear();
-				if( (idata["stacknum"]||0)>1) sb .. ("x%S    " % commanum( i.num));
-				sb .. ("%d" % i.rate);
+				sb .. ("$T.lbl_rate %.1f" % i.rate);
 				if( i["reqs"]) sb .. ("    $T.lbl_require x%d" % length( i.reqs));
 				v.setValue( "desc", string( sb));
 			},
@@ -196,9 +209,14 @@ class DBEditorStore extends DBEditor
 			local propdef = ::DBEditorStore.typepropdefmap[self.data.type];
 			v.setValue( "idx", la.items.indexOf( i));
 			if( i["dataid"]){
-				local idata = ::rpgdata[i.dataid];
+				local item = RPGItem();
+				item.setDataID( i.dataid);
+				item.setLV( i["LV"]||1);
+				local idata = item.data;
 				v.setValue( "dataid", i.dataid);
-				v.setValue( "lbl", (idata["icon"]||"")..(idata["name"]||"???"));
+				local s = item.iconname();
+				if( int( i["num"])>0 && (idata["stacknum"]||0)>1) s = s .. (" x%S" % commanum( i["num"]));
+				v.setValue( "lbl", s);
 				propdef.setview( la, v, i, idata);
 			}else{
 				v.setValue( "dataid", "");

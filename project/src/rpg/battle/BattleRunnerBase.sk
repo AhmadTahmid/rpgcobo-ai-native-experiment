@@ -239,6 +239,7 @@ class BattleRunnerBase
 	//	※3Dモデルも追加や位置の更新が必要なので実際の対応はちょっと後回し
 	function syncMemberListUI(){
 		local memberlist = battleui.findChild( "memberlist");
+		local self = this;
 		memberlist.bindValue( members.map( @( v) v?{	//	v:RPGPlayer[] プレイヤーのパラメータを同期させる
 			name = v.name
 			isdead = @() v.isDead() ? 1 : 0
@@ -246,7 +247,7 @@ class BattleRunnerBase
 			mp = @() v.MP
 			tp = @() v.TP
 			cmdgauge = @() v.isDead()?-1 : v.cmdgauge<=0?-1 : v.cmdgauge>=100?11 : (v.cmdgauge*0.1)		//	アクティブバトル時に表示 -1,0-100
-			sel = @() v.selected ? "on" : "off"
+			sel = @() (v.selected || self.getChara3D( v)["selbits"]) ? "on" : "off"
 			conds = @() ::RPGSystem.getConditionString( v.conds)
 		}:{	//	v=nullの場合は非表示
 			g = ptr({ hide=true})
@@ -265,7 +266,8 @@ class BattleRunnerBase
 			return self.enemies.reduce( @( v, x) (v.dataid==eid && !v.isDead())?x+1 : x, 0);
 		}
 		local enemyselected( eid){
-			return !!self.enemies.find( @( v) v.dataid==eid && v.rpgobj["selected"]);
+			local b = !!self.chara3ds.find( @( v) v.rpgobj["dataid"]==eid && v["selbits"]);
+			return b;
 		}
 		//	エネミーリストは名前、数だけ分かれば良し？全部分離すればコンディションとかも表示できるけど、リストが窮屈になる
 		local enemylist = battleui.findChild( "enemylist");
@@ -538,6 +540,7 @@ class BattleRunnerBase
 					if( !di["itemid"]) continue;
 					if( di["issteal"] || ::rnd( 0.0, 100.0) > di.rate) continue;
 					local item = RPGObject.create( di.itemid);
+					item.setLV( di["LV"]);
 					items .. item;	//	スタックできる場合はするように。。。
 					break;
 				}
@@ -604,7 +607,7 @@ class BattleRunnerBase
 		//	その他追加
 		::rpgstat.money += money;
 		foreach( item in items){
-			::rpgstat.addItemID( item.dataid, item.num);
+			::rpgstat.addItemID( item.dataid, item.num, item["LV"]);
 		}
 		//	最後にクリック待ち
 		RPGMain.showUI( { key="misc_waitclick"});	// RPGMain.waitClick();

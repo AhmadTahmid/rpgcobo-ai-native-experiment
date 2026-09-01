@@ -151,8 +151,15 @@ function startDebugMenu( m){
 	local p = popen_s();
 	p.open( exe, ["-testplay", ...args], 0x100);
 	local sess = DebugSession();
-	sess.connect( p);	//	成功したら::debugsessionにセットされる。失敗したらnullのまま。
-	//	
+	newthread().start( @(){
+		sess.connect( p, 30);	//	成功したら::debugsessionにセットされる。失敗したらnullのまま。
+	}, this);
+	local ret = Dialogs.showWaiting( "$T.lbl_debug_connecting", @(){
+		return (::debugsession == sess || !sess.isrunning()) ? false : true;
+	}, true);
+	if( !ret){
+		sess.finish();
+	}
 	return ::debugsession;
 }
 
@@ -174,14 +181,14 @@ class DebugSession
 	debugbar = null;	//	SKView : デバッグバー
 	
 	//	popen_sで開始したデバッグプロセスに接続する。失敗したらfalseを返す。
-	function connect( p){
+	function connect( p, trynum=6){
 		try{
 			popen = p;
 			(thread = newthread( "debug session")).start( run, this);
 			ipc = IPCConnection();
 			ipc.bind();
 			local b = false;
-			for( local l = 0;l < 6;l ++){
+			for( local l = 0;l < trynum;l ++){
 				sleep( 200);
 				try{
 					printf( "IPCConnection connecting...\n");
@@ -377,3 +384,7 @@ with( ::skstudio){
 	// registerMenu( { parentid="menu_help", separator="*1"});
 	// registerMenu( { uid="menu_help_editor", parentid="menu_help", lbl="UIエディタ のマニュアル", icon="\uf1c0", defkey="F1" });
 }
+
+module.hookAction( "editor_closing", @(){
+	stopDebugMenu( null);
+}, 100);

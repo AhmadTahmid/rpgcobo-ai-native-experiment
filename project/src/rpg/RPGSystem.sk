@@ -179,8 +179,9 @@ class SettingMap
 			break;
 		case "weapon": case "armor":	//	攻撃、防御
 			sb .. "[U][-]";
+			local pows = v.getPowers();
 			foreach( pid in eqdescparams){
-				local v = data[pid];
+				local v = pows[pid];
 				if( v) sb .. T[pid] .. " " .. v .. " ";
 			}
 			sb .. "[+][O]";

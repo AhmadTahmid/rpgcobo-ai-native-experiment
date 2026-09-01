@@ -385,6 +385,14 @@ RPGSystem.eventrole .. {
 				local dataid = pl.getParam( "itemid"), item = RPGData.getData( dataid);
 				return (1,item["stacknum"]||1);
 			}
+		},
+		{
+			pid = "LV"
+			lbl = "$T.lbl_eqlv"
+			type = SCALAR
+			range = @( pl) (1, ::rpgdata[pl.getParam( "itemid")]["MAXLV"]||1)
+			
+			hide = @( pl) (::rpgdata[pl.getParam( "itemid")]["MAXLV"]||0)<=1
 		}
 	]
 	
@@ -400,6 +408,7 @@ RPGSystem.eventrole .. {
 			itemid = "I000"
 			num=1,
 			spawndist=1,
+			LV=1,
 		};
 	}
 
@@ -416,7 +425,7 @@ RPGSystem.eventrole .. {
 			standani = {id="close"}
 			trigger = 1
 			reqs = [{lvar="A",op="==",rvar=false}]
-			wvarmap = { W="itemid", X="num" }	//	変数をdataにマップ
+			wvarmap = { W="itemid", X="num", Y="LV" }	//	変数をdataにマップ
 			cmdblock = [
 				{ cmd="cmd_snd", sndid="SE102", vol=100, who=2 }
 				{ cmd="cmd_anime", who=2, ani={id="open"} }

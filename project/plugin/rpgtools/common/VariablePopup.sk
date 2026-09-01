@@ -509,7 +509,7 @@ class VariableBehavior
 		case 0: return ( true);
 		case 1: return ( 1);
 		case 2: return ( "'ABC");
-		case 3: return ( "\tW");
+		case 3: return ( "\t" .. (prop["defscp"]||"W"));
 		case 4: return ( "\rrnd(0,100)");
 		//
 		case 8: 

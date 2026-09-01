@@ -31,8 +31,9 @@ class RPGObject extends Serializable
 	}
 
 	function iconname(){
+		local i = this["icon"] || data["icon"];
 		local n = this["name"] || data.name;
-		return data["icon"] ? (data.icon..n) : n;
+		return i ? (i..n) : n;
 	}
 
 	function getIndex(){
@@ -64,32 +65,70 @@ class RPGObject extends Serializable
 }
 
 //	アイテムの実体。インベントリに入ったり、装備したり。使用時にはdataはskillとしてセットされる
+//	※入手処理でseedに乱数を入れておくと、装備固有の能力値を持たせることができる。
+//	　逆にショップなどでは0のままにしておくと、装備固有の能力差が見えなくなる（最小値になる）
 //	
 class RPGItem extends RPGObject
 {
 	<ser_i> num = 1;				//	スタック数。通常アイテムはスタックすることが多い。装備はしない。
 	<ser_i> LV = 1;					//	装備用の強化レベル。レベルに応じたオプションが付く
 	<ser_o> ownoptions = null;		//	[RPGOption] : アイテム固有で付与されたオプション。名前に+1,-1みたくつく
-	<ser_o> etc = null;				//	{}色々なパラメータ
-	
+	<ser_o> seed = 0;				//	ランダムシード。装備固有の能力値用
+
 	function _cloned( org){
 		ownoptions = deepclone( ownoptions);
-		etc = deepclone( etc);
+	}
+
+	function _get( key){
+		switch( key){
+		case "icon":  return ( LV >= 2) ? sprintf( "%S\b%c", data["icon"], 0xf7d0+LV-2) : data["icon"];
+		case "name": return LV<=1 ? data["name"] : sprintf( "%S+%d", data["name"], LV-1);
+		}
+		return undefined;
 	}
 
 	function setDataID( did){
 		super.setDataID( did);
 	}
+
+	function setLV( lv){
+		LV = Math.clamp( lv, 1, data["MAXLV"]||1);
+	}
 	
-	//	装備したときの能力値を返す。装備画面などの情報表示用。
-	//	強化で威力アップは数字どうすればいいか。オプション見たほうが良いかもしれん
+	function getOptions(){
+		local opd = VarGetter( [data, this]);
+		local opts = [RPGOption( opd)]; //	supplyを追加するオプション。。。。。。。。。。。
+		foreach( opd in data.option){
+			if( !opd["LV"] || LV >= opd.LV) opts .. RPGOption( opd);
+		}
+		foreach( opd in ownoptions) opts .. RPGOption( opd);
+		return opts;
+	}
+	
+	//	装備したときの能力値を返す。装備画面などの情報表示用。オプションで計算。
 	function getPower(){
-		local v = 0;
+		return Table.values( getPowers()).reduce( @( v, x) Math.max( v, x), 0);
+	}
+	
+	//	装備の能力上昇値を全て取得する。オプションから計算し、装備固有ランダムや装備レベルも加味される。
+	function getPowers(){
+		local a = {};
 		foreach( prop in ::RPGSystem.playerprops){
 			if( prop.proptype=="score" && prop.pid in data){
-				v = Math.max( v, data[prop.pid]);
+				local v = compval( 0);
+				foreach( opt in getOptions()){
+					opt.modifyscore( prop.pid, v);
+				}
+				a[prop.pid] <- v.fix();
 			}
 		}
+		return a;
+	}
+
+	//	opt_equipでランダム計算をするときにスコープ上これが呼ばれる。
+	function rnd( mi, ma=undefined){
+		if( ma == undefined){ ma = mi; mi -= mi; }
+		local v = mi+(seed % (ma-mi+1));
 		return v;
 	}
 }
@@ -744,10 +783,7 @@ class RPGPlayer extends RPGCharaBase
 		}
 		//	装備のオプション
 		foreach( eq in equips){
-			if( !eq) continue;
-			opts .. RPGOption( eq.data);	//	supplyを追加するオプション。。。。。。。。。。。
-			foreach( opd in eq.data.option) opts .. RPGOption( opd);
-			opts ... eq.ownoptions;
+			if( eq) opts ... eq.getOptions();
 		}
 		return opts;
 	}
@@ -1333,13 +1369,15 @@ class RPGState extends Serializable
 	//	※スタック数付きのものはそれ以上は持てないで、はみ出た分は破棄される。
 	//	※ポイントを追加可能。N000~
 	//	
-	function addItemID( itemid, n=1){
+	function addItemID( itemid, n=1, lv=0){
 		if( n <= 0) return null;
 		if( itemid[0] == 'N'){
 			return addPointID( itemid, n);
 		}
 		local list = itemlistOf( itemid);
 		local item = RPGObject.create( itemid);
+		item.seed = rnd.nexti();
+		if( lv) item.setLV( lv);
 		return addItem( item, n);
 	}
 

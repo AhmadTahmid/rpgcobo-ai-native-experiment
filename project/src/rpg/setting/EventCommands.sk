@@ -877,10 +877,11 @@ eventcmd .. {
 	props = [
 		{ pid="itemid", lbl="$T.lbl_item", type=DATAID, datatype=["item","weapon","armor"], variable=1, varbits=1|2|4|8 },
 		{ pid="op", lbl="$T.lbl_op", type=LIST, list=[{lbl="＋",val=0},{lbl="ー",val=1},{lbl="＝",val=2},], },
-		{ pid="num", lbl="$T.lbl_num", type=SCALAR, range=(1,99), variable=true },
+		{ pid="num", lbl="$T.lbl_amount", type=SCALAR, range=(1,99), variable=true },
+		{ pid="LV", lbl="$T.lbl_eqlv", type=SCALAR, range=(1,99), variable=true, hide=@( pl) pl.getParam( "op")!=0 },
 	]
 
-	defval = { itemid="I000", op=0, num=1 }
+	defval = { itemid="I000", op=0, num=1, LV=1 }
 
 	cmdinfo = @( cmd){
 		local cmddef = RPGSystem.eventcmd[cmd.cmd];

@@ -236,7 +236,8 @@ local itemuifunc( prms){
 				tgl = @() (i==~tabptr)?10:0,
 			})),
 			//	アイテム一覧
-			itemlist = makelist( ~tabptr);
+			itemlist = makelist( ~tabptr),
+			desclbl = "",
 		},
 		action = "show"
 		focus = "i0"
@@ -364,7 +365,7 @@ RPGSystem.ui ..
 				local tabkey = #["items","weapons","armors","keyitems"];
 				local a = ::rpgstat[tabkey[tab]];
 				return a.map( @( v, i) v ? {
-					lbl=(v.data.icon..v.data.name), _name="i"..i, item=v, rlbl=v.num>1 ? v.num : "",
+					lbl=v.iconname(), _name="i"..i, item=v, rlbl=v.num>1 ? v.num : "",
 				} : { lbl="", _name="i"..i, rlbl="", item=null});
 			},
 			usetitle = @( item) ::rtf( sprintf( "$T.useitem :  %S [M] × %d", item.iconname(), item.num)),
@@ -459,9 +460,9 @@ local scorecmplist( props, p0, p1){
 
 local getBestEquip( items){
 	items.sort( @( eq){	//	RPGItem オプション効果とかは加味しない
-		local best=0, sum=0, d = eq.data;
+		local best=0, sum=0, pows = eq.getPowers();
 		foreach( pid in equipmenu_showpids){
-			local v = int( d[pid]);
+			local v = int( pows[pid]);
 			best = Math.max( best, v);
 			sum += v;
 		}
@@ -514,6 +515,7 @@ RPGSystem.ui ..
 					lock = ptr({ hide=true})
 					desc = ""
 				}) ),
+				desc = "",
 			},
 			action = "show"
 			focus = "slot0"

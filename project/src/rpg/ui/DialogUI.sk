@@ -485,6 +485,10 @@ RPGSystem.ui ..
 	
 	uifunc = @( prms){
 		local itemid = prms.itemid, idata = rpgdata[prms.itemid];
+		local item = RPGItem();
+		item.setDataID( itemid);
+		item.setLV( prms["LV"] || 1);
+		//
 		local stacknum = idata["stacknum"] || 8, pr1 = int( prms["price"] || idata.price);
 		local oldc = gpui.backupCursor();
 		local ret = false;
@@ -499,7 +503,7 @@ RPGSystem.ui ..
 			layer = "message"
 			modal = true
 			binds = {
-				msg = lang( T[sell?"sellitem":"buyitem"]) % (idata.icon .. idata.name);
+				msg = lang( T[sell?"sellitem":"buyitem"]) % item.iconname();
 				"x1.lbl" = @() cando( 1) ? "×1" : #rtf( "[G]×1"),
 				"x4.lbl" = @() cando( 4) ? "×4" : #rtf( "[G]×4"),
 				"x10.lbl" = @() cando( 10) ? "×10" : #rtf( "[G]×10"),
@@ -531,7 +535,7 @@ RPGSystem.ui ..
 					rpgstat.reduceItemID( itemid, n);
 					::rpgstat.money += pr1 * n;
 				}else{
-					rpgstat.addItemID( itemid, n);
+					rpgstat.addItemID( itemid, n, item.LV);
 					::rpgstat.money -= pr1 * n;
 				}
 				ret = true;
