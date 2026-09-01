@@ -217,10 +217,12 @@ mcptools .. {
 	},
 	func = @( args){
 		local dbid = args["id"];
-		local newdata = args["data"];
 		local dbtype = RPGData.getDataType( dbid);
 		if( !dbtype) throw Exception( "Invalid database item ID: %S" % dbid, -32602);
 		local olddata = ::rpgdata[dbid] ? deepclone( ::rpgdata[dbid]) : null;
+		local dooverride = args["override"]??true;
+		if( !dooverride && !olddata) throw Exception( "Database item not found for merge: %S" % dbid, -32602);
+		local newdata = dooverride ? args["data"] : { ...olddata, ...args["data"] };
 		local confpath = "/.x/%S/%S" % (dbtype, dbid);
 		//	
 		local conf = {
@@ -419,6 +421,13 @@ mcptools .. {
 		"debuglv": { type="number", desc="Specify level of all player characters", "default"=0 },
 	},
 	func = @( args){
+		// Translate explicit MCP arguments to the menu contract used by DebugActivity.
+		local m = {
+			uid="menu_debug_start",
+			slot=args["saveslot"]??-1,
+			debugitems=!!args["debugitems"],
+			debuglv=args["debuglv"]??0,
+		};
 		//	別スレッドでデバッグ開始。プロセスが終了したらdebugpidをクリアする。
 		startDebugMenu( m);
 		//

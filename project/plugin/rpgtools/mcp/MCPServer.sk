@@ -121,10 +121,10 @@ class MCPServer
 		if( change.accepted){
 			if( change.commit()){
 				change.changed = true;
-				//	processChangeの戻り値は、変更IDと、変更が適用されたかどうかを返す。
-				return {
-					content = [{ type="text", text="Change applied. changeid=%S" % changeid }],
-				};
+				// Include predictable structured details when a tool supplied them.
+				local ret = { changeid=changeid, applied=true };
+				if( change["result"]) ret.details <- change.result();
+				return { content = [{ type="text", text=encodeJSON( ret, 1) }] };
 			}else{
 				delete changemap[changeid];	//	コミットに失敗した場合は、マップから削除する。
 				return {

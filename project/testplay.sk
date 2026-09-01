@@ -329,6 +329,40 @@ function getDebugStatus(){
 	];
 }
 
+// Structured, model-agnostic debug helpers used by dedicated MCP tools.
+function getAgentDebugState(){
+	local stg=::rpgstage, p=stg && stg["player3d"], act=p && p["mainaction"], target=stg && stg["searchdst"];
+	return {
+		running=!!stg, paused=!!::RPGMain.pause,
+		map_id=stg && stg.mapid,
+		player=p?{position=[p.pos.x,p.pos.y,p.pos.z],direction=p.dir,landed=p.landed,moving=!!(act&&act["mvfunc"])}:null,
+		main_event_id=stg && stg["mainevent"] && stg.mainevent["evid"],
+		interaction_target_event_id=target && target["event"] && target.event["evid"],
+		is_battle=!!(stg && stg["battle"]),
+	};
+}
+
+function agentDebugMovePlayer( dx, dz, speed){
+	local stg=::rpgstage;
+	if(!stg||!stg["player3d"]||!stg.player3d["mainaction"])return {accepted=false,reason="player unavailable"};
+	if(::RPGMain.pause)return {accepted=false,reason="debug session is paused"};
+	if(stg.mainevent||stg.ctrlock)return {accepted=false,reason="runtime control is locked by an event"};
+	local p=stg.player3d,target=Vector3D(p.pos.x+dx,p.pos.y,p.pos.z+dz);
+	p.mainaction.mvfunc=p.walkTo({target=target,spd=Math.clamp(float(speed),0.1,20.0),aim=true});
+	return {accepted=true,target=[target.x,target.y,target.z],state=getAgentDebugState()};
+}
+
+function agentDebugInteract(){
+	local stg=::rpgstage;
+	if(!stg||!stg["player3d"])return {accepted=false,reason="player unavailable"};
+	if(::RPGMain.pause)return {accepted=false,reason="debug session is paused"};
+	stg.updateSearchTarget();
+	local target=stg.searchdst;
+	if(!target)return {accepted=false,reason="no reachable interaction target",state=getAgentDebugState()};
+	stg.searchpush=100;
+	return {accepted=true,event_id=target["event"]&&target.event["evid"],state=getAgentDebugState()};
+}
+
 //	ウィンドウが背面になると音量を下げる
 ::rootview.addEventListener( APP_EVENT, @( e){
 	switch( e.id){

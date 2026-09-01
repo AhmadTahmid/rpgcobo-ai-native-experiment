@@ -1,0 +1,191 @@
+import BlockFlagID;
+
+/////////////////////////////////////////////////////////////////////////////////
+// AgentNative
+//
+// Shared, deliberately small helpers for the AI-native MCP tools.  Keeping these
+// helpers in the editor plugin means agents never need to parse or patch .bw data.
+
+class AgentNative
+{
+	static maxRegionVolume = 262144;
+	static resourceTypes = [
+		"map_asset", "chara_vox", "event_pic", "enemy_pic", "efx",
+		"equip_vox", "obj_vox", "snd", "bgm"
+	];
+
+	static function result( value){
+		return { content=[{ type="text", text=encodeJSON( value, 1) }] };
+	}
+
+	static function requireMapEditor(){
+		local ed = ::skstudio["editor"];
+		if( !(ed instanceof ::MapEditor) || !ed["data"] || !ed["mapid"]){
+			throw Exception( "A database-backed map must be open in MapEditor.", -32602);
+		}
+		return ed;
+	}
+
+	static function requireArg( args, id){
+		if( !(id in args) || args[id] == null){
+			throw Exception( "Missing required argument: %S" % id, -32602);
+		}
+		return args[id];
+	}
+
+	static function intArg( args, id, defval=null, minval=null, maxval=null){
+		local v = (id in args && args[id] != null) ? int( args[id]) : defval;
+		if( v == null) throw Exception( "Missing required integer argument: %S" % id, -32602);
+		if( minval != null && v < minval) throw Exception( "%S must be >= %S" % (id,minval), -32602);
+		if( maxval != null && v > maxval) throw Exception( "%S must be <= %S" % (id,maxval), -32602);
+		return v;
+	}
+
+	static function floatArg( args, id, defval=null, minval=null, maxval=null){
+		local v = (id in args && args[id] != null) ? float( args[id]) : defval;
+		if( v == null) throw Exception( "Missing required numeric argument: %S" % id, -32602);
+		if( minval != null && v < minval) throw Exception( "%S must be >= %S" % (id,minval), -32602);
+		if( maxval != null && v > maxval) throw Exception( "%S must be <= %S" % (id,maxval), -32602);
+		return v;
+	}
+
+	static function boolArg( args, id, defval=false){
+		return (id in args && args[id] != null) ? !!args[id] : defval;
+	}
+
+	static function stringArg( args, id, defval=null){
+		local v = (id in args && args[id] != null) ? string( args[id]) : defval;
+		if( v == null) throw Exception( "Missing required string argument: %S" % id, -32602);
+		return v;
+	}
+
+	static function checkPos( bw, x, y, z){
+		if( x < 0 || x >= bw.w || y < 0 || y >= bw.h || z < 0 || z >= bw.d){
+			throw Exception( "Position outside map: (%S,%S,%S), size=(%S,%S,%S)" % (x,y,z,bw.w,bw.h,bw.d), -32602);
+		}
+	}
+
+	static function checkRect( bw, x, y, z, w, h, d){
+		if( w <= 0 || h <= 0 || d <= 0) throw Exception( "Region dimensions must be positive.", -32602);
+		if( x < 0 || y < 0 || z < 0 || x+w > bw.w || y+h > bw.h || z+d > bw.d){
+			throw Exception( "Region outside map: (%S,%S,%S,%S,%S,%S), size=(%S,%S,%S)" % (x,y,z,w,h,d,bw.w,bw.h,bw.d), -32602);
+		}
+		if( w*h*d > maxRegionVolume){
+			throw Exception( "Region volume %S exceeds the safe limit %S." % (w*h*d,maxRegionVolume), -32602);
+		}
+		return IRect3D( x, y, z, w, h, d);
+	}
+
+	static function checkBlock( blockid, allowair=true){
+		blockid = int( blockid);
+		if( !blockid && allowair) return blockid;
+		local bt = ::blks[blockid&31], vari = (blockid>>5)&0xff;
+		if( !bt || !bt["variations"] || !bt.variations[vari]){
+			throw Exception( "Unknown block ID/variation: %S (base=%S, variation=%S)" % (blockid,blockid&31,vari), -32602);
+		}
+		return blockid;
+	}
+
+	static function checkFreeBlock( fbtype, fbparam){
+		local ft = ::fblks[fbtype], vari = fbparam&0xfff;
+		if( !ft || !ft["variations"] || !ft.variations[vari]){
+			throw Exception( "Unknown free block: fbtype=%S, variation=%S" % (fbtype,vari), -32602);
+		}
+		return ft;
+	}
+
+	static function surfaceY( bw, x, z, y0=0, y1=null){
+		if( y1 == null) y1 = bw.h-1;
+		for( local y = Math.min( y1, bw.h-1); y >= Math.max( y0, 0); --y){
+			if( bw.blockat( x, y, z)) return y;
+		}
+		return -1;
+	}
+
+	static function blockInfo( b){
+		if( !b) return { id=0, base=0, variation=0, name="air", flags=0 };
+		local base = b&31, vari = (b>>5)&0xff, bt = ::blks[base];
+		return {
+			id=b, base=base, variation=vari,
+			name=bt ? ::lang( bt["name"]||"") : "<invalid>",
+			"class"=bt && bt["cls"], flags=::Block.getFlags( b), valid=!!(bt && bt["variations"][vari]),
+		};
+	}
+
+	static function freeBlockInfo( fb){
+		local ft = ::fblks[fb.fbtype], vari = fb.fbparam&0xfff, br = fb.br;
+		return {
+			uid=fb.fbuid, fbtype=fb.fbtype, fbparam=fb.fbparam, variation=vari,
+			"class"=ft && ft["cls"], name=ft ? ::lang( ft["name"]||"") : "<invalid>",
+			position=[fb.x,fb.y,fb.z,fb.rot],
+			bounds=br && [br.x,br.y,br.z,br.w,br.h,br.d],
+			flags=fb.flags, valid=!!(ft && ft["variations"][vari]),
+		};
+	}
+
+	static function decodeMapAsset( assetid){
+		local a = ::conf._resource.map_asset[assetid];
+		if( !a || !a["bw64"]) throw Exception( "Map asset not found or has no BlockWorld: %S" % assetid, -32602);
+		local bb = uncompressZSTD( decodeBASE64( a.bw64, ByteBuffer()));
+		return ObjectInput.decode( bb);
+	}
+
+	static function findResource( id){
+		if(!id)return null;
+		local type=::RPGResource.getResourceType(id),group=type&&::conf._resource[type];
+		return group&&group[id];
+	}
+
+	static function invalidateMapShot( ed){
+		ed.mapshottex = null;
+		ed.canvas.view.repaint();
+		ed.refresh();
+	}
+
+	static function submitBlockOperation( ed, bop, message, summary){
+		if( !bop.len()) throw Exception( "The requested operation would not change the map.", -32602);
+		local oldcursor = ed.op.undocurs, self = this;
+		return ::mcpserv.processChange({
+			message=message,
+			commit=@(){ bop.submit( ed, null); self.invalidateMapShot( ed); return true; },
+			rollback=@(){
+				if( ed.op.undocurs != oldcursor+1) return false;
+				local ok = ed.op.undo(); self.invalidateMapShot( ed); return ok;
+			},
+			result=@() summary,
+		});
+	}
+
+	static function submitEditorOperation( ed, redo, undo, message, summary){
+		local oldcursor=ed.op.undocurs, self=this;
+		return ::mcpserv.processChange({
+			message=message,
+			commit=@(){ ed.submitOp(redo,undo,null); self.invalidateMapShot(ed); return true; },
+			rollback=@(){
+				if(ed.op.undocurs!=oldcursor+1)return false;
+				local ok=ed.op.undo(); self.invalidateMapShot(ed); return ok;
+			},
+			result=@()summary,
+		});
+	}
+
+	static function nextEventID( tb, ini=1000000){
+		local maxi = ini;
+		foreach( i, v in tb){ if( i > maxi) maxi = i; }
+		return maxi+1;
+	}
+
+	static function getAssetMetadata(){
+		local f = FileRef( skGetCodebase().."/agent/asset-metadata.json");
+		if( !f.exists()) return { version=1, assets={} };
+		try{ return decodeJSON( f.load()); }catch( ex){ return { version=1, assets={} }; }
+	}
+
+	static function assetPaths( data){
+		local ret = [];
+		foreach( id in ["vox","pic3d","pic","wav","efx","mdl","path","uipath"]){
+			if( data[id]) ret .. data[id];
+		}
+		return ret;
+	}
+}

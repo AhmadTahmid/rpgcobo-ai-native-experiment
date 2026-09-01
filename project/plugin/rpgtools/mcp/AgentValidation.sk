@@ -1,0 +1,63 @@
+import BlockFlagID;
+
+/////////////////////////////////////////////////////////////////////////////////
+// Conservative validator: reports what can be established and labels estimates.
+
+class AgentValidation
+{
+	static function issue( code, message, data=null){ return {code=code,message=message,data=data}; }
+
+	static function validate( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,map=ed.data,errors=[],warnings=[],metrics={};
+		local maxcells=AgentNative.intArg(args,"max_traversability_cells",65536,0,262144);
+		if(map["size"] && (map.size[0]!=bw.w||map.size[1]!=bw.h||map.size[2]!=bw.d))errors..issue("MAP_SIZE_MISMATCH","Map JSON size does not match open BlockWorld.",{json=map.size,blockworld=[bw.w,bw.h,bw.d]});
+
+		local badblocks=0,usedblocks={},cellcount=bw.w*bw.h*bw.d;
+		if(cellcount<=1048576){
+			for(local z=0;z<bw.d;++z)for(local x=0;x<bw.w;++x)for(local y=0;y<bw.h;++y){
+				local b=bw.blockat(x,y,z);if(!b)continue;local base=b&31,vari=(b>>5)&0xff,bt=::blks[base];usedblocks[string(b)]<-(usedblocks[string(b)]||0)+1;if(!bt||!bt["variations"]||!bt.variations[vari])++badblocks;
+			}
+		}else warnings..issue("BLOCK_SCAN_SKIPPED","Full invalid-block scan skipped because map exceeds 1,048,576 cells.",{cells=cellcount});
+		if(badblocks)errors..issue("INVALID_BLOCK_REFERENCE","BlockWorld contains invalid block IDs/variations.",{count=badblocks});
+
+		local fbs=bw.collectFreeBlocks(IRect3D(0,0,0,bw.w,bw.h,bw.d),[]),badfbs=0;
+		foreach(fb in fbs){local ft=::fblks[fb.fbtype],vari=fb.fbparam&0xfff;if(!ft||!ft["variations"]||!ft.variations[vari]){++badfbs;errors..issue("INVALID_FREE_BLOCK_REFERENCE","Free block references an unknown type/variation.",{uid=fb.fbuid,fbtype=fb.fbtype,variation=vari});}local br=fb.br;if(br.x<0||br.y<0||br.z<0||br.x+br.w>bw.w||br.y+br.h>bw.h||br.z+br.d>bw.d)warnings..issue("FREE_BLOCK_OUTSIDE_MAP","Free-block bounds extend outside the map.",{uid=fb.fbuid,bounds=[br.x,br.y,br.z,br.w,br.h,br.d]});}
+		local dups=bw.duplicationCheck();if(length(dups))warnings..issue("DUPLICATE_FREE_BLOCKS","BlockWorld reports duplicate free blocks at identical placement.",{groups=dups});
+
+		local posmap={},portals=[];
+		foreach(id,ev in map["event"]||{}){
+			local p=ev["pos"];
+			if(!p||length(p)<3){errors..issue("MALFORMED_EVENT_POSITION","Event has no valid position array.",{event_id=id});continue;}
+			if(p[0]<0||p[0]>=bw.w||p[1]<0||p[1]>=bw.h||p[2]<0||p[2]>=bw.d)errors..issue("EVENT_OUTSIDE_MAP","Event position is outside BlockWorld bounds.",{event_id=id,position=p});
+			local role=ev["role"];if(!role||!::RPGSystem.eventrole[role])errors..issue("INVALID_EVENT_ROLE","Event role is missing or unregistered.",{event_id=id,role=role});
+			local mdlid=ev["mdlid"];if(mdlid&&!AgentNative.findResource(mdlid))errors..issue("INVALID_EVENT_ASSET","Event model resource does not exist.",{event_id=id,resource_id=mdlid});
+			local key="%S:%S:%S"%(p[0],p[1],p[2]);if(posmap[key])warnings..issue("OVERLAPPING_EVENTS","Multiple events share an exact position.",{event_ids=[posmap[key],id],position=p});else posmap[key]<-id;
+			if(role=="portal"||role=="pdoor"){
+				portals..{id=id,pos=p,dest=ev["dest"]};local dest=ev["dest"];
+				if(!ev["back"]&&!dest)errors..issue("PORTAL_DESTINATION_MISSING","Portal has no destination.",{event_id=id});
+				if(dest){local dm=::conf.map[dest["mapid"]];if(!dm)errors..issue("INVALID_PORTAL_MAP","Portal destination map does not exist.",{event_id=id,destination=dest});else if(dest["evid"]&&!dm.event[dest.evid])errors..issue("INVALID_PORTAL_EVENT","Portal destination event does not exist.",{event_id=id,destination=dest});}
+			}
+		}
+
+		local inimap=::conf.setting["inimap"];
+		if(inimap){if(!::conf.map[inimap["mapid"]])errors..issue("INVALID_INITIAL_MAP","Initial player map does not exist.",{initial=inimap});else if(inimap.mapid==ed.mapid){local ip=inimap["pos"];if(!ip||ip[0]<0||ip[0]>=bw.w*0.5||ip[1]<0||ip[1]>=bw.h*0.5||ip[2]<0||ip[2]>=bw.d*0.5)errors..issue("INITIAL_POSITION_OUTSIDE_MAP","Initial player world position is outside the open map.",{initial=inimap});}}
+
+		foreach(g in map["encount"]||[]){if(g["mapid"]&&!::conf.map[g.mapid])errors..issue("INVALID_ENCOUNTER_MAP","Encounter group references a missing battle map.",{group_id=g["gid"],map_id=g.mapid});foreach(e in g["enemies"]||[]){if(e["id"]&&!::conf.enemy[e.id])errors..issue("INVALID_ENCOUNTER_ENEMY","Encounter group references a missing enemy.",{group_id=g["gid"],enemy_id=e.id});}}
+
+		metrics.map_size<-[bw.w,bw.h,bw.d];metrics.cells<-cellcount;metrics.events<-length(map["event"]||{});metrics.portals<-length(portals);metrics.free_blocks<-length(fbs);metrics.invalid_free_blocks<-badfbs;metrics.used_block_ids<-length(usedblocks);
+		if(bw.w*bw.d<=maxcells && maxcells>0){
+			local n=bw.w*bw.d,walk=array(n),height=array(n),labels=array(n),walkcount=0;
+			for(local z=0;z<bw.d;++z)for(local x=0;x<bw.w;++x){local i=z*bw.w+x,y=AgentNative.surfaceY(bw,x,z);height[i]=y;local b=y>=0?bw.blockat(x,y,z):0;walk[i]=!!(b&&(Block.getFlags(b)&BLK_SOLID)&&(y+1>=bw.h||!bw.blockat(x,y+1,z)));if(walk[i])++walkcount;}
+			local comps=[],label=0,dirs=[[-1,0],[1,0],[0,-1],[0,1]];
+			for(local i=0;i<n;++i){if(!walk[i]||labels[i])continue;++label;local q=[i],qi=0,count=0;labels[i]=label;while(qi<length(q)){local cur=q[qi++],cx=cur%bw.w,cz=cur/bw.w;++count;foreach(dir in dirs){local nx=cx+dir[0],nz=cz+dir[1];if(nx<0||nx>=bw.w||nz<0||nz>=bw.d)continue;local ni=nz*bw.w+nx;if(walk[ni]&&!labels[ni]&&Math.abs(height[ni]-height[cur])<=1){labels[ni]=label;q..ni;}}}comps..count;}
+			comps.sort(@(v)-v);metrics.traversability<-{method="2D solid-surface approximation",walkable_columns=walkcount,components=length(comps),largest_component=comps[0]||0,largest_coverage=walkcount?float(comps[0]||0)/walkcount:0.0};
+			if(length(comps)>1&&(comps[0]||0)<walkcount*0.95)warnings..issue("ISOLATED_WALKABLE_AREAS","Approximate surface graph contains significant disconnected areas.",metrics.traversability);
+			if(inimap&&inimap.mapid==ed.mapid&&inimap["pos"]){local sx=int(inimap.pos[0]*2),sz=int(inimap.pos[2]*2),si=sz*bw.w+sx,sl=(sx>=0&&sx<bw.w&&sz>=0&&sz<bw.d)?labels[si]:0;foreach(p in portals){local pi=p.pos[2]*bw.w+p.pos[0],pl=(p.pos[0]>=0&&p.pos[0]<bw.w&&p.pos[2]>=0&&p.pos[2]<bw.d)?labels[pi]:0;if(sl&&pl&&sl!=pl)warnings..issue("PORTAL_APPROX_UNREACHABLE","Portal is disconnected from initial player position in the approximate surface graph.",{event_id=p.id,spawn_component=sl,portal_component=pl});}}
+		}else metrics.traversability<-{skipped=true,reason="map footprint exceeds max_traversability_cells",map_cells=bw.w*bw.d,limit=maxcells};
+
+		return {map_id=ed.mapid,valid=length(errors)==0,errors=errors,warnings=warnings,metrics=metrics,guarantees=["Coordinates and registered ID references reported as errors were checked against currently loaded project data.","BlockWorld duplicationCheck is used for duplicate free blocks."],limitations=["Traversability is a conservative 2D surface approximation, not physics-backed proof of playability.","Free-block collision, slopes, barriers, event conditions, and runtime state can change reachability.","Baked map-asset provenance is unavailable, so missing source MAxxx references cannot be reconstructed from geometry."]};
+	}
+}
+
+local mcptools=::MCPServer.MCPServerTools;
+mcptools..{name="rpgcobo_map_validate",desc="Validates the open map and returns structured errors, warnings, metrics, guarantees, and explicit limitations.",argdef={max_traversability_cells={type="number",desc="Maximum x*z footprint for approximate connectivity analysis; 0 disables","default"=65536}},func=@(args)AgentNative.result(AgentValidation.validate(args))}

@@ -1,0 +1,26 @@
+/////////////////////////////////////////////////////////////////////////////////
+// Visual capture and minimal collision-aware playtest control.
+
+class AgentPlaytest
+{
+	static function captureOverview( args){
+		local ed=AgentNative.requireMapEditor(),tex=ed.canvas.captureMapShot(),img=RGBAImage(tex.width,tex.height),old=skGetRenderTarget();
+		skSetRenderTarget(tex);skReadPixels(0,0,img.width,img.height,img);skSetRenderTarget(old);
+		local dir=FileRef(skGetCurrentDir().."/work/agent-output");dir.mkdirs();local file=FileRef(dir,"%S-overview.png"%ed.mapid),bb=img.encodePNG();bb.pos=0;file.save(bb);
+		return {map_id=ed.mapid,view="overview",width=img.width,height=img.height,path="work/agent-output/%S-overview.png"%ed.mapid,native_path=file.nativepath};
+	}
+
+	static function requireDebug(){if(!::debugsession)throw Exception("RPG-Cobo debug session is not running.",-32602);return ::debugsession;}
+	static function state(){local sess=requireDebug(),v=sess.ipc.invokeIPCScript("return getAgentDebugState();");return v;}
+	static function move( args){
+		local sess=requireDebug(),dx=AgentNative.floatArg(args,"dx",null,-100.0,100.0),dz=AgentNative.floatArg(args,"dz",null,-100.0,100.0),speed=AgentNative.floatArg(args,"speed",3.0,0.1,20.0);
+		return sess.ipc.invokeIPCScript("return agentDebugMovePlayer(%S,%S,%S);"%(dx,dz,speed));
+	}
+	static function interact(){local sess=requireDebug();return sess.ipc.invokeIPCScript("return agentDebugInteract();");}
+}
+
+local mcptools=::MCPServer.MCPServerTools;
+mcptools..{name="rpgcobo_editor_map_capture_view",desc="Renders the open map with the editor's existing orthographic overview renderer and saves a deterministic PNG path.",argdef={},func=@(args)AgentNative.result(AgentPlaytest.captureOverview(args))}
+mcptools..{name="rpgcobo_debug_get_player_state",desc="Returns structured current map, player position/direction, interaction target, event lock, pause, and battle state.",argdef={},func=@(args)AgentNative.result(AgentPlaytest.state())}
+mcptools..{name="rpgcobo_debug_player_move",desc="Requests a short relative, collision-aware runtime walk and returns its accepted target; poll player state for completion.",argdef={dx={type="number",desc="Relative world-space x (-100..100)",required=true},dz={type="number",desc="Relative world-space z (-100..100)",required=true},speed={type="number",desc="Movement speed","default"=3.0}},func=@(args)AgentNative.result(AgentPlaytest.move(args))}
+mcptools..{name="rpgcobo_debug_player_interact",desc="Refreshes the runtime interaction target and presses interact when a reachable event is available.",argdef={},func=@(args)AgentNative.result(AgentPlaytest.interact())}

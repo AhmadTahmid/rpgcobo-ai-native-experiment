@@ -1,0 +1,105 @@
+/////////////////////////////////////////////////////////////////////////////////
+// Project resource discovery.  Semantic tags are optional overlays, never guesses.
+
+class AgentAssetTools
+{
+	static function selectedTypes( s){
+		if( !s || s=="all") return clone AgentNative.resourceTypes;
+		local ret=[];
+		foreach( v in s.split(",")){
+			v=v.trim();
+			if( !AgentNative.resourceTypes.contains(v)) throw Exception("Unsupported resource type: %S"%v,-32602);
+			if( !ret.contains(v)) ret..v;
+		}
+		return ret;
+	}
+
+	static function compactProperties( d){
+		local p={};
+		foreach(k,v in d){
+			if(k=="bw64" || k=="pal" || k=="mot" || k=="motions")continue;
+			local ty=typeof(v);
+			if(ty==SS_STRING||ty==SS_INTEGER||ty==SS_FLOAT||ty==SS_BOOL||v==null||ty==SS_ARRAY)p[k]<-v;
+		}
+		return p;
+	}
+
+	static function record( type, id, data, metadata, withDetails=false){
+		local hasmeta=id in metadata.assets, md=metadata.assets[id]||{}, paths=AgentNative.assetPaths(data), bounds=null, stats=null;
+		if(type=="map_asset" && data["bw64"]){
+			try{
+				local bw=AgentNative.decodeMapAsset(id), br=bw.wholebnd(), st=bw.getStatics();
+				bounds={size=[bw.w,bw.h,bw.d],content_bounds=[br.x,br.y,br.z,br.w,br.h,br.d]};
+				stats={blocks=st.blks,free_blocks=st.fblks,chunks=st.chunks};
+			}catch(ex){ bounds={error=ex.message}; }
+		}
+		local r={
+			id=id,type=type,name=::lang(data["name"]||""),paths=paths,
+			tags=md["tags"]||[],category=md["category"],bounds=bounds,stats=stats,
+			metadata_source=hasmeta?"project/agent/asset-metadata.json":null,
+		};
+		if(withDetails)r.properties<-compactProperties(data);
+		return r;
+	}
+
+	static function search( args){
+		local query=AgentNative.stringArg(args,"query","").trim().toLowerCase();
+		local types=selectedTypes(AgentNative.stringArg(args,"types","all"));
+		local limit=AgentNative.intArg(args,"limit",50,1,500), metadata=AgentNative.getAssetMetadata(), found=[];
+		foreach(type in types){
+			local resources=::conf._resource[type];
+			if(!resources)continue;
+			foreach(id,data in resources){
+				if(id[0]=='_')continue;
+				local r=record(type,id,data,metadata,false), hay=(id.." "..r.name.." "..r.paths.join(" ").." "..r.tags.join(" ").." "..(r.category||"")).toLowerCase();
+				if(query==""||hay.contains(query))found..r;
+			}
+		}
+		found.sort(@(v) v.type..":"..v.id);
+		return {query=query,types=types,total=length(found),returned=Math.min(limit,length(found)),assets=found.slice(0,Math.min(limit,length(found))),semantic_metadata={path="project/agent/asset-metadata.json",authoritative=false,tagged_assets=length(metadata.assets)}};
+	}
+
+	static function getInfo( args){
+		local id=AgentNative.stringArg(args,"id"), type=::RPGResource.getResourceType(id);
+		if(!type || !::conf._resource[type] || !::conf._resource[type][id])throw Exception("Resource not found: %S"%id,-32602);
+		return record(type,id,::conf._resource[type][id],AgentNative.getAssetMetadata(),true);
+	}
+
+	static function searchMapMaterials( args){
+		local query=AgentNative.stringArg(args,"query","").trim().toLowerCase(),kind=AgentNative.stringArg(args,"kind","all"),limit=AgentNative.intArg(args,"limit",100,1,1000),found=[];
+		if(kind!="all"&&kind!="block"&&kind!="free_block")throw Exception("kind must be all, block, or free_block",-32602);
+		if(kind=="all"||kind=="block")foreach(base,bt in ::blks){
+			if(!bt||!bt["variations"])continue;
+			foreach(vari,v in bt.variations){
+				if(!v)continue;local rec={kind="block",id=(vari<<5)|base,base=base,variation=vari,group=::lang(bt["name"]||""),type=v["type"],model=v["vp0"],hidden=!!v["hide"]};
+				local hay=(rec.id.." "..rec.group.." "..(rec.type||"").." "..(rec.model?rec.model.join(" "):"")).toLowerCase();if(query==""||hay.contains(query))found..rec;
+			}
+		}
+		if(kind=="all"||kind=="free_block")foreach(fbtype,ft in ::fblks){
+			if(!ft||!ft["variations"])continue;
+			foreach(vari,v in ft.variations){
+				if(!v)continue;local rec={kind="free_block",fbtype=fbtype,variation=vari,fbparam=vari,group=::lang(ft["name"]||""),type=v["type"],model=v["vp0"],hidden=!!v["hide"]};
+				local hay=(fbtype..":"..vari.." "..rec.group.." "..(rec.type||"").." "..(rec.model?rec.model.join(" "):"")).toLowerCase();if(query==""||hay.contains(query))found..rec;
+			}
+		}
+		found.sort(@(v)"%S:%04d:%04d"%(v.kind,v["id"]||v.fbtype,v.variation));
+		return {query=query,kind=kind,total=length(found),returned=Math.min(limit,length(found)),materials=found.slice(0,Math.min(limit,length(found))),note="Names and types are authored RPG-Cobo voxel configuration; no inferred semantic tags were added."};
+	}
+}
+
+local mcptools=::MCPServer.MCPServerTools;
+mcptools..{
+	name="rpgcobo_project_search_assets",desc="Searches real project resources by ID, localized name, path, and optional authored semantic metadata.",
+	argdef={query={type="string",desc="Case-insensitive text; empty lists matching types","default"=""},types={type="string",desc="Comma-separated resource types or 'all'","default"="all"},limit={type="number",desc="Maximum results (1-500)","default"=50}},
+	func=@(args)AgentNative.result(AgentAssetTools.search(args)),
+}
+mcptools..{
+	name="rpgcobo_project_get_asset_info",desc="Returns structured information for a resource ID without dumping embedded binary/base64 payloads.",
+	argdef={id={type="string",desc="Resource ID such as MA000, CV004, PC001, EP002, or FX001",required=true}},
+	func=@(args)AgentNative.result(AgentAssetTools.getInfo(args)),
+}
+mcptools..{
+	name="rpgcobo_project_search_map_materials",desc="Searches authored block and free-block voxel variations and returns IDs usable by map mutation tools.",
+	argdef={query={type="string",desc="Case-insensitive authored type/model/group query","default"=""},kind={type="string",desc="all, block, or free_block","default"="all"},limit={type="number",desc="Maximum results (1-1000)","default"=100}},
+	func=@(args)AgentNative.result(AgentAssetTools.searchMapMaterials(args)),
+}

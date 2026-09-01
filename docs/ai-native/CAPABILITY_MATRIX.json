@@ -1,0 +1,23 @@
+{
+  "baseline_commit": "4bbeb25",
+  "upstream_tool_count": 19,
+  "fork_tool_count": 28,
+  "capabilities": [
+    {"capability":"project introspection","existing":true,"mcp":"upstream","api":true,"difficulty":"low","priority":"A","notes":"project identity, paths, language, plugins"},
+    {"capability":"database list/get/search/set","existing":true,"mcp":"upstream","api":true,"difficulty":"low","priority":"A","notes":"fork fixes override=false merge"},
+    {"capability":"asset/resource listing","existing":"partial","mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"cross-type search, details, authored material vocabulary"},
+    {"capability":"editor inspection/open","existing":true,"mcp":"upstream","api":true,"difficulty":"low","priority":"A","notes":"workspace and database-backed editor opening"},
+    {"capability":"map inspection","existing":true,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"bounded summaries, events and free-block UIDs"},
+    {"capability":"basic map mutation","existing":true,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"BlockOperation plus editor undo and MCP rollback"},
+    {"capability":"semantic map primitives","existing":false,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"path, pond, forest patch, clearing"},
+    {"capability":"event creation","existing":true,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"basic role-backed event and player start"},
+    {"capability":"arbitrary event modification","existing":true,"mcp":false,"api":true,"difficulty":"medium","priority":"B","notes":"dedicated safe tool not implemented"},
+    {"capability":"validation","existing":false,"mcp":"fork","api":"partial","difficulty":"high","priority":"A","notes":"structural checks plus explicitly approximate connectivity"},
+    {"capability":"editor map capture","existing":true,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"orthographic overview PNG"},
+    {"capability":"test-play lifecycle","existing":true,"mcp":"upstream","api":true,"difficulty":"medium","priority":"A","notes":"fork fixes start argument translation"},
+    {"capability":"debug player control","existing":false,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"state, relative walk and interaction over IPC"},
+    {"capability":"MCP cancellation","existing":"planned","mcp":"stub","api":"partial","difficulty":"medium","priority":"B","notes":"notification handler is a no-op"},
+    {"capability":"UI/sprite/icon editing","existing":"planned","mcp":false,"api":"partial","difficulty":"high","priority":"C","notes":"comments only; no tool implementation"},
+    {"capability":"vision or embedding asset retrieval","existing":false,"mcp":false,"api":"metadata seam","difficulty":"high","priority":"B","notes":"provider-neutral authored metadata overlay added"}
+  ]
+}

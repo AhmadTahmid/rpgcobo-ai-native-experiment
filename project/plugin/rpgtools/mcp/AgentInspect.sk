@@ -1,0 +1,161 @@
+import BlockFlagID;
+
+/////////////////////////////////////////////////////////////////////////////////
+// Bounded, structured map inspection for MCP clients.
+
+class AgentInspect
+{
+	static function mapProperties( ed){
+		local p = {};
+		foreach( k, v in ed.data){
+			if( k=="event" || k=="marker" || k=="encount") continue;
+			p[k] <- v;
+		}
+		return p;
+	}
+
+	static function eventSummary( id, ev){
+		return {
+			id=id, name=ev["name"]||"", role=ev["role"], position=ev["pos"],
+			model_resource_id=ev["mdlid"], visible=!!((ev["flags"]||0)&1),
+			locked=!!((ev["flags"]||0)&2), portal_destination=ev["dest"],
+		};
+	}
+
+	static function getInfo(){
+		local ed = AgentNative.requireMapEditor(), bw = ed.bw, stat = bw.getStatics();
+		local inimap = ::conf.setting["inimap"];
+		return {
+			map_id=ed.mapid, editor_path=ed.filepath, name=ed.data["name"]||"",
+			size={ width=bw.w, height=bw.h, depth=bw.d },
+			properties=mapProperties( ed),
+			counts={
+				events=length( ed.data["event"]||{}), markers=length( ed.data["marker"]||{}),
+				blocks=stat.blks, free_blocks=stat.fblks, chunks=stat.chunks,
+			},
+			player_start=(inimap && inimap["mapid"]==ed.mapid) ? inimap : null,
+			changed=ed.isFileChanged(),
+			representation={
+				semantic_data="project/data/map.json (via ConfigResource)",
+				geometry="BlockWorld loaded by MapEditor from project/data/mapdata/<map-id>.bw",
+				warning="Never edit .bw bytes directly; use MapEditor/BlockOperation/BlockWorld APIs.",
+			},
+		};
+	}
+
+	static function listEvents( args){
+		local ed = AgentNative.requireMapEditor();
+		local offset = AgentNative.intArg( args, "offset", 0, 0), limit = AgentNative.intArg( args, "limit", 100, 1, 500);
+		local all = [];
+		foreach( id, ev in ed.data.event) all .. eventSummary( id, ev);
+		all.sort( @( v) v.id);
+		local fin = Math.min( offset+limit, length( all));
+		return {
+			map_id=ed.mapid, total=length( all), offset=offset, limit=limit,
+			events=(offset < length(all)) ? all.slice( offset, fin) : [],
+		};
+	}
+
+	static function getEvent( args){
+		local ed = AgentNative.requireMapEditor(), id = AgentNative.intArg( args, "event_id", null, 1);
+		local ev = ed.data.event[id];
+		if( !ev) throw Exception( "Map event not found: %S" % id, -32602);
+		return { map_id=ed.mapid, event_id=id, data=ev };
+	}
+
+	static function listAssets( args){
+		local ed = AgentNative.requireMapEditor(), bw = ed.bw;
+		local x = AgentNative.intArg( args,"x",0,0,bw.w-1), y = AgentNative.intArg( args,"y",0,0,bw.h-1), z = AgentNative.intArg( args,"z",0,0,bw.d-1);
+		local w = AgentNative.intArg( args,"width",bw.w-x,1,bw.w-x), h = AgentNative.intArg( args,"height",bw.h-y,1,bw.h-y), d = AgentNative.intArg( args,"depth",bw.d-z,1,bw.d-z);
+		local limit = AgentNative.intArg( args,"limit",200,1,500);
+		local rect = IRect3D( x,y,z,w,h,d), fbs = bw.collectFreeBlocks( rect, []), items = [];
+		foreach( i, fb in fbs){ if( i < limit) items .. AgentNative.freeBlockInfo( fb); }
+		return {
+			map_id=ed.mapid, region=[x,y,z,w,h,d], total=length(fbs), returned=length(items), free_blocks=items,
+			notes=[
+				"Free blocks are map-voxel objects (trees, rocks, doors, furniture, etc.).",
+				"Map assets are baked into destination blocks/free-blocks on placement; the source MAxxx ID is not retained.",
+			],
+			baked_map_asset_provenance_available=false,
+		};
+	}
+
+	static function regionSummary( args){
+		local ed = AgentNative.requireMapEditor(), bw = ed.bw;
+		local x = AgentNative.intArg( args,"x",null,0,bw.w-1), z = AgentNative.intArg( args,"z",null,0,bw.d-1);
+		local w = AgentNative.intArg( args,"width",null,1,bw.w-x), d = AgentNative.intArg( args,"depth",null,1,bw.d-z);
+		local y0 = AgentNative.intArg( args,"y_min",0,0,bw.h-1), y1 = AgentNative.intArg( args,"y_max",bw.h-1,y0,bw.h-1);
+		local rect = AgentNative.checkRect( bw,x,y0,z,w,y1-y0+1,d);
+		local bcounts = {}, surfacecounts = {}, occupied=0, traversable=0, surfacecols=0;
+		local miny = bw.h, maxy = -1;
+		for( local zz=z; zz<z+d; ++zz) for( local xx=x; xx<x+w; ++xx){
+			local sy = AgentNative.surfaceY( bw,xx,zz,y0,y1);
+			if( sy >= 0){
+				++surfacecols; miny=Math.min(miny,sy); maxy=Math.max(maxy,sy);
+				local sb=bw.blockat(xx,sy,zz), skey=string(sb);
+				surfacecounts[skey] <- (surfacecounts[skey]||0)+1;
+				local sf=::Block.getFlags(sb), above=(sy+1<bw.h)?bw.blockat(xx,sy+1,zz):0;
+				if( (sf&BLK_SOLID) && !above) ++traversable;
+			}
+			for( local yy=y0; yy<=y1; ++yy){
+				local b=bw.blockat(xx,yy,zz);
+				if( b){ local key=string(b); bcounts[key]<-(bcounts[key]||0)+1; ++occupied; }
+			}
+		}
+		local blocks=[]; foreach( key,count in bcounts) blocks .. { block=AgentNative.blockInfo(int(key)), count=count };
+		blocks.sort(@(a,b) b.count-a.count);
+		local surfaces=[]; foreach( key,count in surfacecounts) surfaces .. { block=AgentNative.blockInfo(int(key)), count=count };
+		surfaces.sort(@(a,b) b.count-a.count);
+		local fbcounts={}, fbs=bw.collectFreeBlocks(rect,[]);
+		foreach(fb in fbs){local fi=AgentNative.freeBlockInfo(fb), key=fi["class"]||("fbtype-"..fi.fbtype);fbcounts[key]<-(fbcounts[key]||0)+1;}
+		local events=[];
+		foreach(id,ev in ed.data.event){local p=ev["pos"];if(p && p[0]>=x&&p[0]<x+w&&p[2]>=z&&p[2]<z+d&&p[1]>=y0&&p[1]<=y1)events..eventSummary(id,ev);}
+		return {
+			map_id=ed.mapid, region={x_min=x,x_max=x+w-1,y_min=y0,y_max=y1,z_min=z,z_max=z+d-1},
+			elevation=(maxy>=0)?{min=miny,max=maxy}:null,
+			dominant_surface=surfaces[0]||null, surface_blocks=surfaces.slice(0,Math.min(10,length(surfaces))),
+			block_usage=blocks.slice(0,Math.min(20,length(blocks))), occupied_blocks=occupied,
+			occupancy=float(occupied)/(w*d*(y1-y0+1)),
+			traversable_surface_coverage=surfacecols?float(traversable)/(w*d):0.0,
+			traversability_note="Approximation: solid top block with an empty cell above; free-block collision, slopes, barriers, and runtime flags are not fully modeled.",
+			free_blocks={total=length(fbs),by_class=fbcounts}, events=events,
+		};
+	}
+}
+
+local mcptools = ::MCPServer.MCPServerTools;
+
+mcptools .. {
+	name="rpgcobo_editor_map_get_info", desc="Returns structured information about the map currently open in MapEditor.", argdef={},
+	func=@(args) AgentNative.result( AgentInspect.getInfo()),
+}
+mcptools .. {
+	name="rpgcobo_editor_map_get_size", desc="Returns the BlockWorld dimensions of the map currently open in MapEditor.", argdef={},
+	func=@(args){ local ed=AgentNative.requireMapEditor(); return AgentNative.result({map_id=ed.mapid,width=ed.bw.w,height=ed.bw.h,depth=ed.bw.d}); },
+}
+mcptools .. {
+	name="rpgcobo_editor_map_list_events", desc="Lists map events with compact semantic summaries and bounded pagination.",
+	argdef={offset={type="number",desc="Zero-based result offset","default"=0},limit={type="number",desc="Maximum results (1-500)","default"=100}},
+	func=@(args) AgentNative.result( AgentInspect.listEvents(args)),
+}
+mcptools .. {
+	name="rpgcobo_editor_map_get_event", desc="Returns the full structured data for one map event.",
+	argdef={event_id={type="number",desc="Numeric event ID, normally 1000001 or higher",required=true}},
+	func=@(args) AgentNative.result( AgentInspect.getEvent(args)),
+}
+mcptools .. {
+	name="rpgcobo_editor_map_list_assets", desc="Lists free-block objects in a bounded map region. Baked MAxxx provenance is unavailable by engine design.",
+	argdef={
+		x={type="number",desc="Region x","default"=0},y={type="number",desc="Region y","default"=0},z={type="number",desc="Region z","default"=0},
+		width={type="number",desc="Region width; defaults to map edge"},height={type="number",desc="Region height; defaults to map edge"},depth={type="number",desc="Region depth; defaults to map edge"},
+		limit={type="number",desc="Maximum returned objects (1-500)","default"=200},
+	}, func=@(args) AgentNative.result( AgentInspect.listAssets(args)),
+}
+mcptools .. {
+	name="rpgcobo_editor_map_get_region_summary", desc="Summarizes terrain, elevation, occupancy, free blocks, events, and approximate traversability for a bounded region.",
+	argdef={
+		x={type="number",desc="Region x",required=true},z={type="number",desc="Region z",required=true},
+		width={type="number",desc="Region width",required=true},depth={type="number",desc="Region depth",required=true},
+		y_min={type="number",desc="Minimum y","default"=0},y_max={type="number",desc="Maximum y; defaults to map height - 1"},
+	}, func=@(args) AgentNative.result( AgentInspect.regionSummary(args)),
+}

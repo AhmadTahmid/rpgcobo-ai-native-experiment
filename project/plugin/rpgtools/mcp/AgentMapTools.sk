@@ -1,0 +1,152 @@
+/////////////////////////////////////////////////////////////////////////////////
+// Safe deterministic map mutations and first-generation semantic primitives.
+
+class AgentMapTools
+{
+	static function fill( args, clear=false){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw;
+		local x=AgentNative.intArg(args,"x",null),y=AgentNative.intArg(args,"y",null),z=AgentNative.intArg(args,"z",null);
+		local w=AgentNative.intArg(args,"width",null,1),h=AgentNative.intArg(args,"height",null,1),d=AgentNative.intArg(args,"depth",null,1);
+		AgentNative.checkRect(bw,x,y,z,w,h,d);
+		local block=clear?0:AgentNative.checkBlock(AgentNative.intArg(args,"block",null));
+		local bop=BlockOperation(bw);
+		for(local zz=z;zz<z+d;++zz)for(local xx=x;xx<x+w;++xx)for(local yy=y;yy<y+h;++yy)bop._plcblk(IPos(xx,yy,zz),block);
+		return AgentNative.submitBlockOperation(ed,bop,(clear?"Clear":"Fill").." map region (%S,%S,%S) size (%S,%S,%S)"%(x,y,z,w,h,d),{operation=clear?"clear_region":"fill_region",region=[x,y,z,w,h,d],block=block,changed_cells=bop.len()});
+	}
+
+	static function setBlock( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw;
+		local x=AgentNative.intArg(args,"x",null),y=AgentNative.intArg(args,"y",null),z=AgentNative.intArg(args,"z",null),block=AgentNative.checkBlock(AgentNative.intArg(args,"block",null));
+		AgentNative.checkPos(bw,x,y,z);local bop=BlockOperation(bw);bop._plcblk(IPos(x,y,z),block);
+		return AgentNative.submitBlockOperation(ed,bop,"Set block at (%S,%S,%S) to %S"%(x,y,z,block),{operation="set_block",position=[x,y,z],block=block,changed_cells=bop.len()});
+	}
+
+	static function placeAsset( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,id=AgentNative.stringArg(args,"asset_id");
+		local asset=::conf._resource.map_asset[id];if(!asset)throw Exception("Map asset not found: %S"%id,-32602);
+		local x=AgentNative.intArg(args,"x",null),y=AgentNative.intArg(args,"y",null),z=AgentNative.intArg(args,"z",null),rot=AgentNative.intArg(args,"rotation",0,0,3);
+		if(rot)throw Exception("This upstream build does not expose Block.rotate; non-zero map-asset rotation is disabled to prevent corrupt orientation.",-32602);
+		local abw=AgentNative.decodeMapAsset(id),po=asset["plcoffs"]||[0,0,0],m=IMat(x,y,z).rotate(rot).translate(po[0],po[1],po[2]);
+		local target=m.transform(IRect3D(0,0,0,abw.w,abw.h,abw.d));
+		AgentNative.checkRect(bw,target.x,target.y,target.z,target.w,target.h,target.d);
+		// BlockOperation.drawWorld in this upstream build calls a missing native
+		// collectBlocks method.  Compile the same operation with stable, public
+		// BlockWorld calls instead of touching serialized .bw data.
+		local bop=BlockOperation(bw);
+		for(local az=0;az<abw.d;++az)for(local ax=0;ax<abw.w;++ax)for(local ay=0;ay<abw.h;++ay){
+			local b=abw.blockat(ax,ay,az);if(!b)continue;local pos=m.transform(IPos(ax,ay,az));bop._plcblk(pos,b);
+		}
+		foreach(fb in abw.collectFreeBlocks(IRect3D(0,0,0,abw.w,abw.h,abw.d),[])){
+			local fbp=IPos(fb.x+x+po[0],fb.y+y+po[1],fb.z+z+po[2],fb.rot);bop._plcfblk(fb,fbp,bw.nextfbuid());
+		}
+		return AgentNative.submitBlockOperation(ed,bop,"Bake map asset %S at (%S,%S,%S), rotation %S"%(id,x,y,z,rot),{operation="place_asset",asset_id=id,origin=[x,y,z],rotation=rot,target_bounds=[target.x,target.y,target.z,target.w,target.h,target.d],low_level_operations=bop.len(),provenance_retained=false});
+	}
+
+	static function removeFreeBlock( args){
+		local ed=AgentNative.requireMapEditor(),uid=AgentNative.intArg(args,"uid",null,1),fb=ed.bw.getFreeBlock(uid);
+		if(!fb)throw Exception("Free block not found: %S"%uid,-32602);
+		local old=AgentNative.freeBlockInfo(fb),bop=BlockOperation(ed.bw);bop._ercfblk(uid);
+		return AgentNative.submitBlockOperation(ed,bop,"Remove free block UID %S"%uid,{operation="remove_free_block",removed=old});
+	}
+
+	static function moveFreeBlock( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,uid=AgentNative.intArg(args,"uid",null,1),fb=bw.getFreeBlock(uid);
+		if(!fb)throw Exception("Free block not found: %S"%uid,-32602);
+		local x=AgentNative.intArg(args,"x",null),y=AgentNative.intArg(args,"y",null),z=AgentNative.intArg(args,"z",null),rot=AgentNative.intArg(args,"rotation",fb.rot,0,3);
+		AgentNative.checkPos(bw,x,y,z);local preview=FreeBlock.create({fbtype=fb.fbtype,fbparam=fb.fbparam,pos=[x,y,z],rot=rot}),br=preview.br;
+		if(br.x<0||br.y<0||br.z<0||br.x+br.w>bw.w||br.y+br.h>bw.h||br.z+br.d>bw.d)throw Exception("Moved free block bounds would leave the map.",-32602);
+		local bop=BlockOperation(bw);bop._plcfblk(fb,IPos(x,y,z,rot),uid);
+		return AgentNative.submitBlockOperation(ed,bop,"Move free block UID %S to (%S,%S,%S), rotation %S"%(uid,x,y,z,rot),{operation="move_free_block",uid=uid,position=[x,y,z,rot]});
+	}
+
+	static function createPath( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw;
+		local x0=AgentNative.intArg(args,"start_x",null,0,bw.w-1),z0=AgentNative.intArg(args,"start_z",null,0,bw.d-1),x1=AgentNative.intArg(args,"end_x",null,0,bw.w-1),z1=AgentNative.intArg(args,"end_z",null,0,bw.d-1);
+		local width=AgentNative.intArg(args,"width",2,1,16),block=AgentNative.checkBlock(AgentNative.intArg(args,"block",null),false),seed=AgentNative.intArg(args,"seed",1),curve=AgentNative.floatArg(args,"curvature",0.2,0.0,1.0),fixedy=AgentNative.intArg(args,"y",-1,-1,bw.h-1);
+		local dx=x1-x0,dz=z1-z0,dist=Math.sqrt(dx*dx+dz*dz),rnd=Random(seed,11),bend=(rnd.nextf(-1.0,1.0))*curve*dist;
+		local nx=dist?(-dz/dist):0.0,nz=dist?(dx/dist):0.0,cx=(x0+x1)*0.5+nx*bend,cz=(z0+z1)*0.5+nz*bend,steps=Math.max(1,int(dist*2)),rad=(width-1)*0.5;
+		local bop=BlockOperation(bw),seen={};
+		for(local i=0;i<=steps;++i){
+			local t=float(i)/steps,u=1.0-t,px=int(u*u*x0+2*u*t*cx+t*t*x1+0.5),pz=int(u*u*z0+2*u*t*cz+t*t*z1+0.5);
+			for(local oz=-width;oz<=width;++oz)for(local ox=-width;ox<=width;++ox){
+				if(ox*ox+oz*oz>(rad+0.5)*(rad+0.5))continue;local x=px+ox,z=pz+oz;if(x<0||x>=bw.w||z<0||z>=bw.d)continue;
+				local y=fixedy>=0?fixedy:AgentNative.surfaceY(bw,x,z);if(y<0)continue;local key="%S:%S:%S"%(x,y,z);if(seen[key])continue;seen[key]<-1;bop._plcblk(IPos(x,y,z),block);
+			}
+		}
+		return AgentNative.submitBlockOperation(ed,bop,"Create deterministic path (%S,%S) to (%S,%S), width %S, seed %S"%(x0,z0,x1,z1,width,seed),{primitive="create_path",start=[x0,z0],end=[x1,z1],width=width,block=block,curvature=curve,seed=seed,changed_cells=bop.len()});
+	}
+
+	static function createPond( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,cx=AgentNative.intArg(args,"center_x",null,0,bw.w-1),cz=AgentNative.intArg(args,"center_z",null,0,bw.d-1);
+		local radius=AgentNative.intArg(args,"radius",null,2,32),water=AgentNative.checkBlock(AgentNative.intArg(args,"water_block",null),false),irreg=AgentNative.floatArg(args,"irregularity",0.2,0.0,0.75),seed=AgentNative.intArg(args,"seed",1),wy=AgentNative.intArg(args,"water_y",-1,-1,bw.h-1);
+		if(wy<0)wy=AgentNative.surfaceY(bw,cx,cz);if(wy<0)throw Exception("No surface at pond center; specify water_y.",-32602);
+		local rnd=Random(seed,11),bop=BlockOperation(bw),seen={};
+		for(local z=cz-radius-1;z<=cz+radius+1;++z)for(local x=cx-radius-1;x<=cx+radius+1;++x){
+			if(x<0||x>=bw.w||z<0||z>=bw.d)continue;local dx=x-cx,dz=z-cz,rr=radius*(1.0+rnd.nextf(-irreg,irreg));if(dx*dx+dz*dz>rr*rr)continue;
+			local top=AgentNative.surfaceY(bw,x,z),maxclear=Math.min(top,bw.h-1);for(local y=wy;y<=maxclear;++y)bop._plcblk(IPos(x,y,z),0);bop._plcblk(IPos(x,wy,z),water);
+		}
+		return AgentNative.submitBlockOperation(ed,bop,"Create deterministic pond at (%S,%S), radius %S, seed %S"%(cx,cz,radius,seed),{primitive="create_pond",center=[cx,cz],radius=radius,water_y=wy,water_block=water,irregularity=irreg,seed=seed,low_level_operations=bop.len()});
+	}
+
+	static function parseVariants( s){
+		local a=[];foreach(v in s.split(",")){v=v.trim();if(v!="")a..int(v);}if(!length(a))throw Exception("tree_variants must contain at least one integer variation.",-32602);return a;
+	}
+
+	static function createForest( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,x=AgentNative.intArg(args,"x",null,0,bw.w-1),z=AgentNative.intArg(args,"z",null,0,bw.d-1),w=AgentNative.intArg(args,"width",null,1,bw.w-x),d=AgentNative.intArg(args,"depth",null,1,bw.d-z);
+		local density=AgentNative.floatArg(args,"density",0.25,0.0,1.0),clearRate=AgentNative.floatArg(args,"clearing_rate",0.1,0.0,1.0),spacing=AgentNative.intArg(args,"min_spacing",3,1,16),seed=AgentNative.intArg(args,"seed",1),fbtype=AgentNative.intArg(args,"tree_fbtype",20,1),variants=AgentMapTools.parseVariants(AgentNative.stringArg(args,"tree_variants","0")),maxcount=AgentNative.intArg(args,"max_count",256,1,512);
+		foreach(v in variants)AgentNative.checkFreeBlock(fbtype,v);
+		local rnd=Random(seed,11),bop=BlockOperation(bw),placed=0;
+		for(local zz=z;zz<z+d&&placed<maxcount;zz+=spacing)for(local xx=x;xx<x+w&&placed<maxcount;xx+=spacing){
+			local px=Math.min(x+w-1,xx+rnd.nexti(spacing)),pz=Math.min(z+d-1,zz+rnd.nexti(spacing));if(rnd.nextf()>density||rnd.nextf()<clearRate)continue;
+			if(length(bw.collectFreeBlocks(IRect3D(Math.max(0,px-spacing/2),0,Math.max(0,pz-spacing/2),Math.min(spacing,bw.w-Math.max(0,px-spacing/2)),bw.h,Math.min(spacing,bw.d-Math.max(0,pz-spacing/2))),[])))continue;
+			local sy=AgentNative.surfaceY(bw,px,pz);if(sy<0)continue;local vari=variants[rnd.nexti(length(variants))],fb=FreeBlock.create({fbtype=fbtype,fbparam=vari}),py=sy+fb.br.h/2+1;if(py>=bw.h)continue;
+			bop._plcfblk(fb,IPos(px,py,pz,rnd.nexti(4)),bw.nextfbuid());++placed;
+		}
+		return AgentNative.submitBlockOperation(ed,bop,"Create deterministic forest patch at (%S,%S), size (%S,%S), seed %S"%(x,z,w,d,seed),{primitive="create_forest_patch",bounds=[x,z,w,d],density=density,clearing_rate=clearRate,min_spacing=spacing,tree_fbtype=fbtype,tree_variants=variants,seed=seed,placed=placed});
+	}
+
+	static function createClearing( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,x=AgentNative.intArg(args,"x",null,0,bw.w-1),z=AgentNative.intArg(args,"z",null,0,bw.d-1),w=AgentNative.intArg(args,"width",null,1,bw.w-x),d=AgentNative.intArg(args,"depth",null,1,bw.d-z),fbtype=AgentNative.intArg(args,"tree_fbtype",20,1),ground=AgentNative.intArg(args,"ground_block",-1,-1);
+		if(ground>=0)AgentNative.checkBlock(ground);local bop=BlockOperation(bw),removed=[];
+		foreach(fb in bw.collectFreeBlocks(IRect3D(x,0,z,w,bw.h,d),[])){if(fb.fbtype==fbtype){removed..fb.fbuid;bop._ercfblk(fb.fbuid);}}
+		if(ground>=0)for(local zz=z;zz<z+d;++zz)for(local xx=x;xx<x+w;++xx){local sy=AgentNative.surfaceY(bw,xx,zz);if(sy>=0)bop._plcblk(IPos(xx,sy,zz),ground);}
+		return AgentNative.submitBlockOperation(ed,bop,"Create clearing at (%S,%S), size (%S,%S)"%(x,z,w,d),{primitive="create_clearing",bounds=[x,z,w,d],tree_fbtype=fbtype,removed_free_block_uids=removed,ground_block=ground});
+	}
+
+	static function createEvent( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,role=AgentNative.stringArg(args,"role","villager"),def=::RPGSystem.eventrole[role];if(!def)throw Exception("Unknown event role: %S"%role,-32602);
+		local x=AgentNative.intArg(args,"x",null),y=AgentNative.intArg(args,"y",null),z=AgentNative.intArg(args,"z",null),rot=AgentNative.intArg(args,"rotation",0,0,3);AgentNative.checkPos(bw,x,y,z);
+		local id=AgentNative.nextEventID(ed.data.event),name=AgentNative.stringArg(args,"name","*agent-"..(id%1000000)),defdata=fget(def,"defdata");if(defdata instanceof SS_CLOSURE)defdata=defdata();
+		local ev={role=role,pos=[x,y,z,rot],name=name,col=AgentNative.intArg(args,"color",0,0,7),flags=1,...deepclone(defdata||{})};
+		local mdlid=AgentNative.stringArg(args,"model_resource_id","");if(mdlid!=""){if(!AgentNative.findResource(mdlid))throw Exception("Model resource not found: %S"%mdlid,-32602);ev.mdlid<-mdlid;}
+		local msg=AgentNative.stringArg(args,"message","");if(msg!="")ev.msg<-msg;
+		local self=this,tool=ed.toolmap["tool_event"];
+		local redo=[@(){ed.data.event[id]<-ev;local gz=#ed.canvas.placeEventGizmo(id,ev);if(!gz.scn){gz.alive=true;ed.canvas.scn.addObject(gz);ed.canvas.evgizmomap[id]<-gz;}tool.updateEventList();}];
+		local undo=[@(){delete ed.data.event[id];local gz=delete ed.canvas.evgizmomap[id];gz.kill();tool.updateEventList();}];
+		return AgentNative.submitEditorOperation(ed,redo,undo,"Create %S event %S at (%S,%S,%S)"%(role,id,x,y,z),{operation="create_event",event_id=id,event=ev});
+	}
+
+	static function setPlayerStart( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,x=AgentNative.intArg(args,"x",null),y=AgentNative.intArg(args,"y",null),z=AgentNative.intArg(args,"z",null),rot=AgentNative.intArg(args,"rotation",0,0,3);AgentNative.checkPos(bw,x,y,z);
+		local old=::conf.setting["inimap"]?deepclone(::conf.setting.inimap):null,mk={mapid=ed.mapid,pos=[x*0.5,y*0.5,z*0.5,rot*Math.HPI]};
+		local redo=[@(){::conf.setting.inimap=mk;ed.canvas.placeInimapGizmo(mk);ed.saveinimap=true;}],undo=[@(){::conf.setting.inimap=old;if(old)ed.canvas.placeInimapGizmo(old);else ed.canvas.removeInimapGizmo();ed.saveinimap=true;}];
+		return AgentNative.submitEditorOperation(ed,redo,undo,"Set player start on %S at block (%S,%S,%S)"%(ed.mapid,x,y,z),{operation="set_player_start",map_id=ed.mapid,block_position=[x,y,z,rot],world_position=mk.pos});
+	}
+}
+
+local mcptools=::MCPServer.MCPServerTools;
+mcptools..{name="rpgcobo_editor_map_set_block",desc="Safely sets one BlockWorld cell through the editor undo stack.",argdef={x={type="number",desc="x",required=true},y={type="number",desc="y",required=true},z={type="number",desc="z",required=true},block={type="number",desc="Encoded RPG-Cobo block ID (0 is air)",required=true}},func=AgentMapTools.setBlock}
+mcptools..{name="rpgcobo_editor_map_fill_region",desc="Safely fills a bounded 3D region through BlockOperation and editor undo.",argdef={x={type="number",desc="x",required=true},y={type="number",desc="y",required=true},z={type="number",desc="z",required=true},width={type="number",desc="width",required=true},height={type="number",desc="height",required=true},depth={type="number",desc="depth",required=true},block={type="number",desc="Encoded block ID",required=true}},func=@(args)AgentMapTools.fill(args,false)}
+mcptools..{name="rpgcobo_editor_map_clear_region",desc="Safely clears a bounded 3D region through BlockOperation and editor undo.",argdef={x={type="number",desc="x",required=true},y={type="number",desc="y",required=true},z={type="number",desc="z",required=true},width={type="number",desc="width",required=true},height={type="number",desc="height",required=true},depth={type="number",desc="depth",required=true}},func=@(args)AgentMapTools.fill(args,true)}
+mcptools..{name="rpgcobo_editor_map_place_asset",desc="Bakes a real MAxxx map asset into the open map using BlockOperation. Source provenance is not retained by upstream.",argdef={asset_id={type="string",desc="MAxxx resource ID",required=true},x={type="number",desc="origin x",required=true},y={type="number",desc="origin y",required=true},z={type="number",desc="origin z",required=true},rotation={type="number",desc="Quarter turns (0-3)","default"=0}},func=AgentMapTools.placeAsset}
+mcptools..{name="rpgcobo_editor_map_remove_free_block",desc="Removes one placed free-block object by stable UID with undo support.",argdef={uid={type="number",desc="Free-block UID from map_list_assets",required=true}},func=AgentMapTools.removeFreeBlock}
+mcptools..{name="rpgcobo_editor_map_move_free_block",desc="Moves/rotates one placed free-block object by UID with undo support.",argdef={uid={type="number",desc="Free-block UID",required=true},x={type="number",desc="x",required=true},y={type="number",desc="y",required=true},z={type="number",desc="z",required=true},rotation={type="number",desc="Quarter turns (0-3)"}},func=AgentMapTools.moveFreeBlock}
+mcptools..{name="rpgcobo_editor_map_create_path",desc="Creates a seeded quadratic-curved surface path; intent compiles to reversible block operations.",argdef={start_x={type="number",desc="start x",required=true},start_z={type="number",desc="start z",required=true},end_x={type="number",desc="end x",required=true},end_z={type="number",desc="end z",required=true},width={type="number",desc="path width","default"=2},block={type="number",desc="path block/material ID",required=true},curvature={type="number",desc="0-1 bend magnitude","default"=0.2},seed={type="number",desc="deterministic seed","default"=1},y={type="number",desc="fixed y or -1 for surface","default"=-1}},func=AgentMapTools.createPath}
+mcptools..{name="rpgcobo_editor_map_create_pond",desc="Creates a seeded irregular, level water footprint and clears terrain above its water line.",argdef={center_x={type="number",desc="center x",required=true},center_z={type="number",desc="center z",required=true},radius={type="number",desc="approximate radius (2-32)",required=true},water_block={type="number",desc="water block/material ID",required=true},water_y={type="number",desc="water level or -1 for center surface","default"=-1},irregularity={type="number",desc="0-0.75 boundary variation","default"=0.2},seed={type="number",desc="deterministic seed","default"=1}},func=AgentMapTools.createPond}
+mcptools..{name="rpgcobo_editor_map_create_forest_patch",desc="Places a deterministic bounded patch of real tree free-block variants with spacing and clearing controls.",argdef={x={type="number",desc="x",required=true},z={type="number",desc="z",required=true},width={type="number",desc="width",required=true},depth={type="number",desc="depth",required=true},density={type="number",desc="candidate placement probability 0-1","default"=0.25},clearing_rate={type="number",desc="candidate clearing probability 0-1","default"=0.1},min_spacing={type="number",desc="grid spacing","default"=3},tree_fbtype={type="number",desc="real free-block type (default upstream tree/rock type 20)","default"=20},tree_variants={type="string",desc="comma-separated authored variations","default"="0"},max_count={type="number",desc="safety cap","default"=256},seed={type="number",desc="deterministic seed","default"=1}},func=AgentMapTools.createForest}
+mcptools..{name="rpgcobo_editor_map_create_clearing",desc="Removes a selected free-block type in a bounded region and can repaint its surface.",argdef={x={type="number",desc="x",required=true},z={type="number",desc="z",required=true},width={type="number",desc="width",required=true},depth={type="number",desc="depth",required=true},tree_fbtype={type="number",desc="free-block type to remove","default"=20},ground_block={type="number",desc="surface block ID or -1 to leave terrain","default"=-1}},func=AgentMapTools.createClearing}
+mcptools..{name="rpgcobo_editor_map_create_event",desc="Creates a basic role-backed event using RPG-Cobo's registered role defaults and editor undo stack.",argdef={role={type="string",desc="Registered event role","default"="villager"},x={type="number",desc="block x",required=true},y={type="number",desc="block y",required=true},z={type="number",desc="block z",required=true},rotation={type="number",desc="quarter turns","default"=0},name={type="string",desc="event name"},model_resource_id={type="string",desc="optional model resource ID","default"=""},message={type="string",desc="optional role message/dialogue","default"=""},color={type="number",desc="editor color 0-7","default"=0}},func=AgentMapTools.createEvent}
+mcptools..{name="rpgcobo_editor_map_set_player_start",desc="Sets the project initial player position from block coordinates with editor undo support.",argdef={x={type="number",desc="block x",required=true},y={type="number",desc="block y",required=true},z={type="number",desc="block z",required=true},rotation={type="number",desc="quarter turns","default"=0}},func=AgentMapTools.setPlayerStart}
+mcptools..{name="rpgcobo_change_rollback",desc="Rolls back a previously accepted MCP change when it is still safe to do so.",argdef={change_id={type="string",desc="change-N returned by a mutating MCP tool",required=true}},func=@(args)AgentNative.result(::mcpserv.rollbackChange(AgentNative.stringArg(args,"change_id")))}
+mcptools..{name="rpgcobo_editor_map_undo",desc="Undoes the latest MapEditor operation.",argdef={},func=@(args){local ed=AgentNative.requireMapEditor(),ok=ed.op.undo();if(ok)AgentNative.invalidateMapShot(ed);return AgentNative.result({undone=ok,undo_available=ed.op.undoable(),redo_available=ed.op.redoable()});}}

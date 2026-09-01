@@ -1,3 +1,9 @@
 
 runsk( "MCPServer.sk");
 runsk( "MCPServerTools.sk");
+runsk( "AgentNative.sk");
+runsk( "AgentInspect.sk");
+runsk( "AgentAssetTools.sk");
+runsk( "AgentMapTools.sk");
+runsk( "AgentValidation.sk");
+runsk( "AgentPlaytest.sk");
