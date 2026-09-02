@@ -1,0 +1,66 @@
+{
+  "schema": "rpgcobo.ai-native.bindings.v1",
+  "purpose": "Ground Town DNA semantics in the asset and material vocabulary actually discoverable in this RPG-Cobo project.",
+  "discovered_on": "2026-09-02",
+  "selection_policy": {
+    "buildings": "Resolve semantic query at runtime, then inspect decoded bounds. The recorded expected ID documents this run but is not supplied as the planner's sole source.",
+    "materials": "Resolve authored map material query at runtime. Prefer visible floor variants for paths and surfaces.",
+    "rotation": "All baked MA assets remain rotation 0 because this native build lacks the orientation calls used by upstream placement code.",
+    "provenance": "MA identity is lost after baking; the driver records planned source identity separately."
+  },
+  "buildings": {
+    "town_hall": {"query": "town hall", "result_index": 0, "expected_id": "MA005", "expected_size": [26, 20, 17]},
+    "church": {"query": "church", "result_index": 0, "expected_id": "MA008", "expected_size": [14, 23, 19]},
+    "shop": {"query": "shop", "result_index": 0, "expected_id": "MA006", "expected_size": [16, 13, 16]},
+    "warehouse": {"query": "warehouse", "result_index": 0, "expected_id": "MA010", "expected_size": [18, 12, 10]},
+    "apartment": {"query": "apartment", "result_index": 0, "expected_id": "MA007", "expected_size": [18, 16, 17]},
+    "large_house": {"query": "large house", "result_index": 0, "expected_id": "MA000", "expected_size": [12, 12, 12]},
+    "brick_house_1": {"query": "brick house", "result_index": 0, "expected_id": "MA001", "expected_size": [12, 11, 12]},
+    "brick_house_2": {"query": "brick house", "result_index": 1, "expected_id": "MA002", "expected_size": [14, 11, 12]},
+    "wooden_house": {"query": "wooden house", "result_index": 0, "expected_id": "MA003", "expected_size": [12, 10, 12]},
+    "long_house": {"query": "long house", "result_index": 0, "expected_id": "MA004", "expected_size": [24, 12, 10]}
+  },
+  "infrastructure": {
+    "stone_bridge": {"query": "stone bridge", "result_index": 0, "expected_id": "MA027", "expected_size": [6, 3, 9]},
+    "old_wall": {"query": "retaining wall", "result_index": 0, "expected_id": "MA037", "expected_size": [22, 5, 2]}
+  },
+  "block_materials": {
+    "road": {"query": "brick2", "prefer_type": "struct0", "expected_id": 67},
+    "civic_stone": {"query": "stone2", "prefer_type": "struct0", "expected_id": 707},
+    "water": {"query": "water1", "prefer_type": "water", "expected_id": 8},
+    "dirt_track": {"query": "dirt", "prefer_type": "floor0", "expected_id": 34}
+  },
+  "free_blocks": {
+    "lamp": {"query": "streetlamp", "result_index": 0, "expected_fbtype": 2, "expected_variation": 1},
+    "flowerbed": {"query": "flowerbed", "result_index": 0, "expected_fbtype": 20, "expected_variation": 40},
+    "bench": {"query": "bench", "result_index": 0, "expected_fbtype": 4, "expected_variation": 5},
+    "barrel": {"query": "barrel", "result_index": 0, "expected_fbtype": 4, "expected_variation": 21},
+    "well": {"query": "well", "result_index": 0, "expected_fbtype": 3, "expected_variation": 6},
+    "table": {"query": "table", "result_index": 0, "expected_fbtype": 4, "expected_variation": 7},
+    "bush": {"query": "bush", "result_index": 0, "expected_fbtype": 20, "expected_variation": 9},
+    "rock": {"query": "rock7", "result_index": 0, "expected_fbtype": 20, "expected_variation": 17},
+    "trees": {"query": "tree1", "fbtype": 20, "allowed_variations": [0, 1, 2, 3]}
+  },
+  "reference_to_engine_translations": [
+    {
+      "reference_feature": "many differently oriented small houses",
+      "engine_translation": "eight discovered prefab silhouettes at rotation 0, distributed by varied setbacks and non-repeated connector geometry",
+      "lost_information": "roof direction diversity"
+    },
+    {
+      "reference_feature": "freeform walls and fences",
+      "engine_translation": "one real retaining-wall asset plus short stone block traces and vegetation boundaries",
+      "lost_information": "fine fence vocabulary"
+    },
+    {
+      "reference_feature": "carts, crates, sacks, and sheds",
+      "engine_translation": "warehouse, long house, barrels, tables, paved freight yard, and worn service tracks",
+      "lost_information": "vehicle and crate silhouettes are unavailable by authored semantic query"
+    },
+    {
+      "reference_feature": "diagonal river bridge",
+      "engine_translation": "curved east-west watercourse aligned to the real rotation-0 stone bridge, with bent approach paths",
+      "lost_information": "bridge cannot safely rotate to match arbitrary stream direction"
+    }
+  ]
+}

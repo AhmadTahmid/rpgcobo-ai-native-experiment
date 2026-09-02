@@ -1,0 +1,52 @@
+{
+  "schema": "rpgcobo.ai-native.visual-style.v1",
+  "purpose": "Shared visual constraints extracted from the three generated planning references. This is an evaluative vocabulary, not executable geometry.",
+  "authorship": {
+    "source": "Three built-in ImageGen concept references generated for Experiment 004",
+    "extracted_by": "autonomous agent",
+    "claim_boundary": "The concepts are synthetic inspiration. RPG-Cobo construction uses only discovered project assets and materials."
+  },
+  "camera": {
+    "reference_view": "high oblique bird's-eye",
+    "implementation_views": [
+      "RPG-Cobo orthographic editor overview",
+      "runtime player-scale screenshot for the selected result"
+    ]
+  },
+  "palette": {
+    "ground": ["soft green", "worn green"],
+    "circulation": ["warm tan", "gray stone", "patched brown"],
+    "water": ["restrained blue"],
+    "architecture": ["muted red roof", "brown timber", "charcoal roof", "pale stone"],
+    "vegetation": ["mixed deciduous green", "dark conifer", "small flowering accents"]
+  },
+  "composition": {
+    "target_scale": "eight principal reusable buildings plus infrastructure and props",
+    "hierarchy": "one causal primary route or civic anchor, several secondary paths, and small tertiary traces",
+    "density": "compact clusters interrupted by useful voids rather than uniform plot spacing",
+    "edge_treatment": "partial groves, gardens, or old boundaries; never a perfectly even tree frame",
+    "negative_space": "yards, greens, bends, water, and leftover land must have a legible reason"
+  },
+  "surface_language": {
+    "primary": "consistent authored road material",
+    "secondary": "dirt or alternate paving",
+    "civic_or_freight": "stone surface with uneven relation to surrounding paths",
+    "history_marks": "short obsolete path, wall fragment, repair patch, or displaced use"
+  },
+  "imperfection_rules": [
+    "Vary setbacks because plots were added in different phases.",
+    "Use controlled bends and non-orthogonal path endpoints; do not add random noise cell by cell.",
+    "Let one later use interrupt or repurpose an earlier organizing idea.",
+    "Cluster props by function: barrels at freight, benches at civic space, flowers at domestic or ceremonial plots.",
+    "Preserve continuous walkable routes and visible entrances despite irregularity.",
+    "Accept repeated building orientation as a platform constraint, but prevent repeated orientation from forcing repeated street geometry."
+  ],
+  "avoid": [
+    "axial mirror symmetry",
+    "equal setbacks",
+    "uniform rectangular lawns",
+    "decorative clutter without a land-use explanation",
+    "copying impossible generated-image geometry",
+    "claiming that reference pixels were imported into the world"
+  ]
+}

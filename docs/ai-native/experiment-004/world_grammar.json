@@ -1,0 +1,190 @@
+{
+  "schema": "rpgcobo.ai-native.world-grammar.v1",
+  "purpose": "Normalized, causal town specifications compiled by tools/run_experiment_004.py into three fresh RPG-Cobo maps.",
+  "map_contract": {
+    "size": [128, 64, 128],
+    "ground_block": 1,
+    "ground_layers": 1,
+    "blank_block_count": 16384,
+    "building_rotation": 0,
+    "coordinate_model": "All authored anchors and endpoints are normalized to [0,1]. The compiler derives block coordinates from map dimensions and decoded asset bounds."
+  },
+  "shared_rules": {
+    "building_clearance": 3,
+    "placement_search_radius": 12,
+    "connector_width": 2,
+    "connector_material": "dirt_track",
+    "required_building_count": 8,
+    "required_inhabitant_count": 8,
+    "required_entry_guide": true,
+    "rotation_policy": "rotation 0 for MA assets; quarter-turn variation remains available for free blocks and events"
+  },
+  "variants": [
+    {
+      "id": "crossing",
+      "map_id": "M978",
+      "name": "Rillford",
+      "concept_image": "concept-crossing.png",
+      "founding_cause": "A dependable ford and later stone bridge concentrated movement across a shallow stream.",
+      "history_phases": [
+        "A footpath and chapel appear near the ford.",
+        "A stone bridge fixes the crossing and bends the regional approach road.",
+        "An inn, shop, and market surface occupy the bridgehead.",
+        "Housing follows both banks at unequal setbacks; an older western trace loses importance."
+      ],
+      "paths": [
+        {"label": "river", "material": "water", "start": [0.03, 0.43], "end": [0.97, 0.57], "width": 6, "curvature": 0.38, "seed": 4101},
+        {"label": "south approach", "material": "road", "start": [0.31, 0.97], "end": [0.50, 0.57], "width": 4, "curvature": 0.30, "seed": 4102},
+        {"label": "north approach", "material": "road", "start": [0.50, 0.43], "end": [0.64, 0.03], "width": 4, "curvature": 0.26, "seed": 4103},
+        {"label": "west abandoned trace", "material": "dirt_track", "start": [0.05, 0.70], "end": [0.30, 0.63], "width": 2, "curvature": 0.48, "seed": 4104},
+        {"label": "bridgehead market spur", "material": "dirt_track", "start": [0.51, 0.59], "end": [0.80, 0.69], "width": 3, "curvature": 0.28, "seed": 4105},
+        {"label": "north-bank lane", "material": "dirt_track", "start": [0.18, 0.36], "end": [0.61, 0.39], "width": 2, "curvature": 0.42, "seed": 4106}
+      ],
+      "surfaces": [
+        {"label": "bridgehead market wedge", "material": "civic_stone", "rect": [0.55, 0.61, 0.18, 0.09]},
+        {"label": "old western garden", "material": "dirt_track", "rect": [0.10, 0.73, 0.11, 0.08]},
+        {"label": "south kitchen plot", "material": "dirt_track", "rect": [0.30, 0.82, 0.10, 0.08]}
+      ],
+      "infrastructure": [
+        {"label": "old stone bridge", "binding": "stone_bridge", "anchor": [0.50, 0.50]}
+      ],
+      "buildings": [
+        {"role": "church", "binding": "church", "anchor": [0.40, 0.21], "connect_to": [0.48, 0.37], "inhabitant": "priest", "message": "The chapel stood by the ford before anyone thought to call this a town."},
+        {"role": "bridge inn", "binding": "long_house", "anchor": [0.64, 0.21], "connect_to": [0.55, 0.37], "inhabitant": "bard", "message": "Every traveller bends with the road, and most of them stop for the night."},
+        {"role": "town hall", "binding": "town_hall", "anchor": [0.80, 0.29], "connect_to": [0.61, 0.40], "inhabitant": "mayor", "message": "Rillford was planned only after it had already grown around us."},
+        {"role": "shop", "binding": "shop", "anchor": [0.63, 0.74], "connect_to": [0.56, 0.62], "inhabitant": "merchant", "message": "The market moved south when the bridgehead became too crowded."},
+        {"role": "warehouse", "binding": "warehouse", "anchor": [0.84, 0.75], "connect_to": [0.73, 0.67], "inhabitant": "farmer", "message": "Freight waits here until the bridge traffic thins."},
+        {"role": "apartment", "binding": "apartment", "anchor": [0.23, 0.73], "connect_to": [0.36, 0.66], "inhabitant": "resident", "message": "Our lane follows the old bank, not the newer paving."},
+        {"role": "brick house", "binding": "brick_house_1", "anchor": [0.43, 0.84], "connect_to": [0.44, 0.72], "inhabitant": "old man", "message": "That faint western track used to be the quickest road to the ford."},
+        {"role": "wooden house", "binding": "wooden_house", "anchor": [0.16, 0.34], "connect_to": [0.28, 0.38], "inhabitant": "boy", "message": "There are stepping stones upstream, but the bridge is better after rain."}
+      ],
+      "forest_patches": [
+        {"label": "northwest bank grove", "rect": [0.03, 0.04, 0.23, 0.15], "density": 0.66, "clearing_rate": 0.20, "spacing": 5, "max_count": 24, "seed": 4110},
+        {"label": "east bank grove", "rect": [0.88, 0.42, 0.09, 0.24], "density": 0.62, "clearing_rate": 0.28, "spacing": 5, "max_count": 18, "seed": 4111},
+        {"label": "southwest orchard remnant", "rect": [0.03, 0.82, 0.18, 0.14], "density": 0.55, "clearing_rate": 0.35, "spacing": 6, "max_count": 14, "seed": 4112}
+      ],
+      "props": [
+        {"kind": "lamp", "positions": [[0.47, 0.40], [0.54, 0.42], [0.48, 0.59], [0.57, 0.61], [0.66, 0.66]], "rotations": [0, 2, 0, 2, 1]},
+        {"kind": "well", "positions": [[0.63, 0.66]], "rotations": [0]},
+        {"kind": "bench", "positions": [[0.59, 0.64]], "rotations": [1]},
+        {"kind": "flowerbed", "positions": [[0.37, 0.35], [0.67, 0.75]], "rotations": [0, 2]},
+        {"kind": "barrel", "positions": [[0.76, 0.70], [0.79, 0.71], [0.82, 0.69]], "rotations": [0, 1, 0]},
+        {"kind": "rock", "positions": [[0.24, 0.58], [0.27, 0.60]], "rotations": [0, 1]}
+      ],
+      "entry": {"player": [0.31, 0.94], "guide": [0.34, 0.88], "guide_model": "guard", "message": "Welcome to Rillford. The bent road ahead meets the old stone bridge."},
+      "evaluation_intent": ["crossing dominates orientation", "bank-specific settlement", "obsolete path remains visible", "market is a bridgehead consequence"]
+    },
+    {
+      "id": "accretion",
+      "map_id": "M977",
+      "name": "Oldcourt",
+      "concept_image": "concept-accretion.png",
+      "founding_cause": "A formal civic court was laid out first, then successively enclosed and distorted by private additions.",
+      "history_phases": [
+        "Town hall, chapel, axial approach, and basin establish a planned court.",
+        "Commerce shifts toward the east and west exits.",
+        "Domestic lanes split plots south of the court at inconsistent depths.",
+        "A retaining-wall fragment survives after the original enclosure loses its purpose."
+      ],
+      "paths": [
+        {"label": "formal north axis", "material": "road", "start": [0.50, 0.03], "end": [0.50, 0.34], "width": 4, "curvature": 0.02, "seed": 4201},
+        {"label": "adapted south axis", "material": "road", "start": [0.50, 0.56], "end": [0.42, 0.97], "width": 4, "curvature": 0.24, "seed": 4202},
+        {"label": "west accretion lane", "material": "dirt_track", "start": [0.37, 0.45], "end": [0.06, 0.59], "width": 3, "curvature": 0.44, "seed": 4203},
+        {"label": "east accretion lane", "material": "dirt_track", "start": [0.63, 0.45], "end": [0.96, 0.66], "width": 3, "curvature": 0.36, "seed": 4204},
+        {"label": "southern back lane", "material": "dirt_track", "start": [0.14, 0.80], "end": [0.79, 0.84], "width": 2, "curvature": 0.46, "seed": 4205},
+        {"label": "market relocation trace", "material": "road", "start": [0.63, 0.53], "end": [0.79, 0.58], "width": 3, "curvature": 0.18, "seed": 4206}
+      ],
+      "surfaces": [
+        {"label": "old civic court", "material": "civic_stone", "rect": [0.36, 0.33, 0.28, 0.24]},
+        {"label": "displaced east market", "material": "civic_stone", "rect": [0.65, 0.52, 0.14, 0.08]},
+        {"label": "southwest garden plot", "material": "dirt_track", "rect": [0.18, 0.68, 0.11, 0.09]},
+        {"label": "south garden plot", "material": "dirt_track", "rect": [0.55, 0.86, 0.11, 0.08]}
+      ],
+      "ponds": [
+        {"label": "slightly displaced court basin", "center": [0.51, 0.45], "radius": 4, "irregularity": 0.08, "seed": 4210}
+      ],
+      "infrastructure": [
+        {"label": "obsolete northwest retaining wall", "binding": "old_wall", "anchor": [0.19, 0.24]}
+      ],
+      "buildings": [
+        {"role": "town hall", "binding": "town_hall", "anchor": [0.39, 0.16], "connect_to": [0.46, 0.34], "inhabitant": "mayor", "message": "The court was square once. The town had other ideas."},
+        {"role": "church", "binding": "church", "anchor": [0.63, 0.17], "connect_to": [0.57, 0.34], "inhabitant": "priest", "message": "The basin moved by one plot when the chapel steps were rebuilt."},
+        {"role": "shop", "binding": "shop", "anchor": [0.23, 0.43], "connect_to": [0.36, 0.48], "inhabitant": "merchant", "message": "Trade escaped the court and followed the west lane."},
+        {"role": "warehouse", "binding": "warehouse", "anchor": [0.80, 0.42], "connect_to": [0.66, 0.50], "inhabitant": "farmer", "message": "This yard began as a temporary annex. No one remembers temporary."},
+        {"role": "apartment", "binding": "apartment", "anchor": [0.75, 0.75], "connect_to": [0.69, 0.65], "inhabitant": "resident", "message": "Our plot is narrow because two older gardens meet behind it."},
+        {"role": "large house", "binding": "large_house", "anchor": [0.31, 0.72], "connect_to": [0.38, 0.66], "inhabitant": "bard", "message": "Oldcourt looks orderly only when you stand in the old square."},
+        {"role": "brick house", "binding": "brick_house_2", "anchor": [0.52, 0.78], "connect_to": [0.50, 0.66], "inhabitant": "old man", "message": "The back lane is newer than this house and older than the paving."},
+        {"role": "wooden house", "binding": "wooden_house", "anchor": [0.13, 0.73], "connect_to": [0.22, 0.64], "inhabitant": "boy", "message": "The wall ends in the grass because they sold the stones."}
+      ],
+      "forest_patches": [
+        {"label": "north edge trees", "rect": [0.70, 0.03, 0.25, 0.11], "density": 0.58, "clearing_rate": 0.30, "spacing": 5, "max_count": 18, "seed": 4211},
+        {"label": "west remnant grove", "rect": [0.03, 0.23, 0.10, 0.25], "density": 0.63, "clearing_rate": 0.30, "spacing": 5, "max_count": 18, "seed": 4212},
+        {"label": "southeast orchard", "rect": [0.81, 0.80, 0.16, 0.16], "density": 0.52, "clearing_rate": 0.38, "spacing": 6, "max_count": 14, "seed": 4213}
+      ],
+      "props": [
+        {"kind": "lamp", "positions": [[0.39, 0.35], [0.61, 0.35], [0.37, 0.54], [0.64, 0.54], [0.72, 0.58]], "rotations": [0, 2, 0, 2, 1]},
+        {"kind": "bench", "positions": [[0.42, 0.45], [0.60, 0.46]], "rotations": [1, 3]},
+        {"kind": "well", "positions": [[0.72, 0.56]], "rotations": [0]},
+        {"kind": "flowerbed", "positions": [[0.34, 0.31], [0.64, 0.31], [0.27, 0.69]], "rotations": [0, 2, 1]},
+        {"kind": "barrel", "positions": [[0.73, 0.47], [0.76, 0.47]], "rotations": [0, 1]},
+        {"kind": "bush", "positions": [[0.18, 0.26], [0.24, 0.26], [0.30, 0.26]], "rotations": [0, 0, 0]}
+      ],
+      "entry": {"player": [0.42, 0.95], "guide": [0.43, 0.89], "guide_model": "guard", "message": "Welcome to Oldcourt. Follow the bent southern approach to the original civic square."},
+      "evaluation_intent": ["old order remains legible", "later lanes disrupt symmetry", "wall fragment records lost enclosure", "market use has shifted"]
+    },
+    {
+      "id": "trade_edge",
+      "map_id": "M976",
+      "name": "Barrelstead",
+      "concept_image": "concept-trade-edge.png",
+      "founding_cause": "A regional road acquired a freight turnout, then domestic and civic uses occupied leftover land around it.",
+      "history_phases": [
+        "A diagonal through-road crosses farm tracks.",
+        "An inn and shop front the busiest bend.",
+        "A warehouse and loading yard expand behind commerce.",
+        "Houses, chapel, gardens, and a small hall adapt the remaining wedges; one old boundary survives only as a worn trace."
+      ],
+      "paths": [
+        {"label": "regional road", "material": "road", "start": [0.03, 0.13], "end": [0.97, 0.84], "width": 5, "curvature": 0.18, "seed": 4301},
+        {"label": "freight service track", "material": "dirt_track", "start": [0.45, 0.43], "end": [0.80, 0.25], "width": 3, "curvature": 0.20, "seed": 4302},
+        {"label": "western farm track", "material": "dirt_track", "start": [0.04, 0.86], "end": [0.43, 0.61], "width": 2, "curvature": 0.46, "seed": 4303},
+        {"label": "civic spur", "material": "dirt_track", "start": [0.20, 0.40], "end": [0.45, 0.47], "width": 3, "curvature": 0.30, "seed": 4304},
+        {"label": "eastern housing spur", "material": "dirt_track", "start": [0.62, 0.64], "end": [0.84, 0.50], "width": 2, "curvature": 0.40, "seed": 4305},
+        {"label": "obsolete south boundary", "material": "dirt_track", "start": [0.58, 0.92], "end": [0.94, 0.90], "width": 1, "curvature": 0.08, "seed": 4306}
+      ],
+      "surfaces": [
+        {"label": "freight loading yard", "material": "civic_stone", "rect": [0.62, 0.12, 0.29, 0.25]},
+        {"label": "roadside market widening", "material": "civic_stone", "rect": [0.43, 0.44, 0.19, 0.10]},
+        {"label": "southwest kitchen gardens", "material": "dirt_track", "rect": [0.12, 0.74, 0.16, 0.13]},
+        {"label": "chapel garden", "material": "dirt_track", "rect": [0.10, 0.61, 0.10, 0.08]}
+      ],
+      "buildings": [
+        {"role": "roadside inn", "binding": "long_house", "anchor": [0.36, 0.27], "connect_to": [0.38, 0.39], "inhabitant": "bard", "message": "The inn faces the road because the road was here first."},
+        {"role": "shop", "binding": "shop", "anchor": [0.52, 0.30], "connect_to": [0.49, 0.43], "inhabitant": "merchant", "message": "Market stalls spill into the turnout whenever freight is late."},
+        {"role": "warehouse", "binding": "warehouse", "anchor": [0.76, 0.19], "connect_to": [0.68, 0.38], "inhabitant": "farmer", "message": "Barrels come off the road here, then wait in the stone yard."},
+        {"role": "town hall", "binding": "town_hall", "anchor": [0.22, 0.45], "connect_to": [0.34, 0.47], "inhabitant": "mayor", "message": "The hall occupies the green that commerce could not use."},
+        {"role": "church", "binding": "church", "anchor": [0.16, 0.67], "connect_to": [0.28, 0.62], "inhabitant": "priest", "message": "The chapel keeps the older farm path from disappearing."},
+        {"role": "apartment", "binding": "apartment", "anchor": [0.53, 0.76], "connect_to": [0.55, 0.65], "inhabitant": "resident", "message": "We live between the regional road and the old southern boundary."},
+        {"role": "brick house", "binding": "brick_house_1", "anchor": [0.78, 0.57], "connect_to": [0.70, 0.60], "inhabitant": "old man", "message": "That thin dirt line once divided two farms. Now it divides nothing."},
+        {"role": "wooden house", "binding": "wooden_house", "anchor": [0.35, 0.79], "connect_to": [0.42, 0.67], "inhabitant": "boy", "message": "The farm track is faster than the big road if you know the bends."}
+      ],
+      "forest_patches": [
+        {"label": "north road trees", "rect": [0.03, 0.02, 0.33, 0.09], "density": 0.54, "clearing_rate": 0.34, "spacing": 6, "max_count": 16, "seed": 4310},
+        {"label": "west field edge", "rect": [0.02, 0.57, 0.08, 0.35], "density": 0.58, "clearing_rate": 0.30, "spacing": 5, "max_count": 18, "seed": 4311},
+        {"label": "northeast windbreak", "rect": [0.90, 0.05, 0.07, 0.32], "density": 0.58, "clearing_rate": 0.32, "spacing": 5, "max_count": 18, "seed": 4312},
+        {"label": "south field trees", "rect": [0.65, 0.94, 0.29, 0.04], "density": 0.46, "clearing_rate": 0.40, "spacing": 6, "max_count": 10, "seed": 4313}
+      ],
+      "props": [
+        {"kind": "lamp", "positions": [[0.10, 0.19], [0.29, 0.34], [0.47, 0.47], [0.58, 0.55], [0.77, 0.69]], "rotations": [0, 0, 1, 2, 2]},
+        {"kind": "barrel", "positions": [[0.66, 0.29], [0.69, 0.30], [0.72, 0.31], [0.82, 0.32], [0.85, 0.31]], "rotations": [0, 1, 0, 1, 0]},
+        {"kind": "table", "positions": [[0.57, 0.49], [0.61, 0.50]], "rotations": [1, 3]},
+        {"kind": "well", "positions": [[0.25, 0.58]], "rotations": [0]},
+        {"kind": "bench", "positions": [[0.24, 0.53]], "rotations": [1]},
+        {"kind": "flowerbed", "positions": [[0.13, 0.73], [0.49, 0.80]], "rotations": [0, 2]},
+        {"kind": "bush", "positions": [[0.61, 0.91], [0.70, 0.91], [0.80, 0.90], [0.89, 0.90]], "rotations": [0, 0, 0, 0]}
+      ],
+      "entry": {"player": [0.05, 0.15], "guide": [0.10, 0.19], "guide_model": "guard", "message": "Welcome to Barrelstead. The regional road leads through the market to the freight yard."},
+      "evaluation_intent": ["freight land use creates asymmetry", "road hierarchy is diagonal", "domestic and industrial prop clusters differ", "obsolete boundary survives without becoming a road"]
+    }
+  ]
+}

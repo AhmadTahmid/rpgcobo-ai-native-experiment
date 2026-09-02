@@ -25,6 +25,7 @@ Arbitrary code execution is an escape hatch, not evidence of AI-native design. A
 - **H5 — Intent tools and primitives are both required.** Agents benefit from roads, plots, ponds, and forests, but also need typed placement and inspection primitives for novel compositions.
 - **H6 — Runtime feedback changes the standard of success.** A town that looks correct from above can still fail at spawn, movement, collision, interaction, or dialogue.
 - **H7 — Generalization is the decisive test.** A single successful town demonstrates feasibility. Repeated builds, changed briefs, repairs, and different asset packs are required to distinguish environmental understanding from a town-specific recipe.
+- **H8 — Causal intermediate representations improve creative transfer.** Visual references become useful in a constrained editor when decomposed into visual style, historical/world grammar, and explicit engine bindings rather than treated as literal geometry.
 
 ## Two research tracks
 
@@ -60,7 +61,7 @@ Recurring limitations should become design requirements for a future engine rath
 | 2 | Agent can discover assets, derive coordinates, construct a semantically detailed town, recover from failures, and playtest it | Experiment 002 complete |
 | 2b | Agent can create a template-free map and compose, validate, persist, and playtest a detailed town from a uniform plane | Experiment 003 complete |
 | 3 | Same system can revise an existing town from a changed brief and repair introduced defects | Not run |
-| 4 | Multiple briefs/seeds/templates produce coherent results without task-specific code changes | Not run |
+| 4 | Multiple briefs/seeds/templates produce coherent results without task-specific code changes | Partial: Experiment 004 compiled three causal, template-free grammars through one data-driven generator; cross-asset-pack transfer remains untested |
 | 5 | Interface abstractions transfer to another editor or a purpose-built prototype | Not run |
 
 ## Evaluation dimensions
@@ -76,11 +77,11 @@ Future experiments should report:
 - **Generalization:** whether the same interface handles changed goals and unfamiliar content.
 - **Efficiency:** tool calls, mutation granularity, output volume, and avoidable retries.
 
-## Preliminary answer after Experiment 003
+## Preliminary answer after Experiment 004
 
-RPG-Cobo can be made meaningfully agent-operable, and a constrained editor is a productive setting for AI-native research. Canalwatch demonstrated autonomous semantic infill over authored civil infrastructure. Linden Crossing then demonstrated the stronger from-blank loop: engine-created plane, generated road hierarchy and zoning, semantic asset placement, landscaping, contextual inhabitants, save/reload, runtime movement, and interaction.
+RPG-Cobo can be made meaningfully agent-operable, and a constrained editor is a productive setting for AI-native research. Canalwatch demonstrated autonomous semantic infill over authored civil infrastructure. Linden Crossing demonstrated the stronger from-blank loop. Experiment 004 then generated visual concepts, decomposed them into style/grammar/binding artifacts, and compiled three causal towns through one data-driven generator. All three persisted with zero validation errors; the agent compared their actual captures, selected the trade-edge grammar, refined it, and verified runtime interaction.
 
-It is not yet proof of a generally autonomous game-development platform. Linden Crossing uses a task-specific axial grammar, curated metadata, human-authored source assets, rotation-zero buildings, approximate rather than physics-backed whole-town navigation, and no interiors or quest chain. Its symmetry is visibly more procedural than Canalwatch's inherited irregularity. These boundaries are part of the result.
+The result is materially less axial than Linden Crossing and supports the user's proposed image-to-JSON idea with an important refinement: style alone is insufficient. Founding causes, phase history, negative capability, and concrete engine bindings are required. It is still not proof of a generally autonomous game-development platform. The three histories contain agent-authored normalized route and plot specifications, metadata remains curated, buildings remain rotation zero, navigation is approximate outside the runtime slice, and no interiors or quest chain exist. These boundaries are part of the result.
 
 ## Requirements emerging for a purpose-built platform
 
@@ -93,11 +94,13 @@ It is not yet proof of a generally autonomous game-development platform. Linden 
 - Visual capture needs region, scale, angle, semantic overlays, and stable camera control.
 - Event/dialogue systems need typed schemas for creation, modification, conditions, and stateful quest logic.
 - High-level planners should operate over persistent plots, roads, entrances, districts, and relationships rather than anonymous baked voxels.
+- Creative references should compile through separable visual-style, world-grammar, and engine-binding layers with explicit loss/substitution records.
+- Runtime orchestration should synchronize on observable state transitions such as target acquisition instead of fixed time delays.
 
 ## Recommended next experiments
 
-1. Generate three template-free variants from one brief and compare semantic/spatial metrics, aesthetic diversity, and failure rates.
-2. Apply a changed brief to Canalwatch or Linden Crossing while preserving existing residents and routes.
-3. Replace the task-specific axial grammar with reusable plot/road/district objects and planner constraints.
+1. Replace explicit normalized route/plot endpoints with a historical-growth simulator driven by compact causes, phase rules, population targets, and asset bindings.
+2. Apply a changed brief to Barrelstead, Canalwatch, or Linden Crossing while preserving existing residents, routes, and settlement identity.
+3. Prototype persistent semantic roads, plots, districts, building instances, entrances, and prop clusters.
 4. Introduce deliberate defects—blocked entrance, invalid event reference, isolated spawn—and require autonomous diagnosis and repair.
-5. Prototype persistent semantic building instances and physics-backed path queries as if designing the future platform rather than extending the current representation.
+5. Repeat the concept→grammar→binding pipeline against another asset pack or editor to test real transfer.

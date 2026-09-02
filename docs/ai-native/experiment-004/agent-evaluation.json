@@ -1,0 +1,99 @@
+{
+  "schema": "rpgcobo.ai-native.agent-visual-evaluation.v1",
+  "evaluated_on": "2026-09-02",
+  "evaluator": "autonomous agent visual review",
+  "evidence": {
+    "crossing": "work/agent-output/M978-crossing-reloaded.png",
+    "accretion": "work/agent-output/M977-accretion-reloaded.png",
+    "trade_edge": "work/agent-output/M976-trade_edge-reloaded.png"
+  },
+  "method": "The reloaded RPG-Cobo captures, validation traces, and compiled plans were evaluated together. Concept images were not scored as if they were implementation output.",
+  "criteria": {
+    "causal_legibility": "Can a viewer infer why the settlement formed here?",
+    "coherent_irregularity": "Does asymmetry read as caused rather than noisy?",
+    "historical_signals": "Are earlier and later spatial phases simultaneously visible?",
+    "spatial_hierarchy": "Are primary, secondary, and tertiary spaces readable?",
+    "functional_differentiation": "Do civic, commercial, domestic, and logistical areas behave differently?",
+    "density_and_proportion": "Are buildings and voids balanced at this map scale?",
+    "constraint_translation": "Did the result preserve the concept's intent without inventing unavailable assets or unsafe transforms?"
+  },
+  "visual_scores": {
+    "crossing": {
+      "causal_legibility": 9.2,
+      "coherent_irregularity": 8.4,
+      "historical_signals": 8.1,
+      "spatial_hierarchy": 8.8,
+      "functional_differentiation": 7.8,
+      "density_and_proportion": 6.4,
+      "constraint_translation": 8.3,
+      "overall": 8.14,
+      "strengths": [
+        "The river and real stone bridge immediately explain the town's existence.",
+        "Bent approaches and bank-specific clusters break the Experiment 003 axial recipe.",
+        "The abandoned western trace is visually subordinate to the active crossing."
+      ],
+      "weaknesses": [
+        "Large gaps between buildings weaken the bridgehead pressure seen in the concept.",
+        "Four intended functional props were safely rejected, leaving the market less inhabited.",
+        "Rotation-zero buildings still read as parallel objects despite the non-parallel street system."
+      ]
+    },
+    "accretion": {
+      "causal_legibility": 7.4,
+      "coherent_irregularity": 6.5,
+      "historical_signals": 7.0,
+      "spatial_hierarchy": 7.8,
+      "functional_differentiation": 7.1,
+      "density_and_proportion": 6.2,
+      "constraint_translation": 8.4,
+      "overall": 7.2,
+      "strengths": [
+        "The old square, displaced basin, and wall fragment clearly establish an earlier planned phase.",
+        "Later lanes leave the court in several directions and are materially distinct.",
+        "The town remains readable and technically valid after reload."
+      ],
+      "weaknesses": [
+        "The stone court is visually too large and rectangular, so the old plan still dominates the whole map.",
+        "Later buildings read as scattered satellites more than pressure-built accretion.",
+        "The intended asymmetry is present in paths but weaker in massing and density."
+      ]
+    },
+    "trade_edge": {
+      "causal_legibility": 9.3,
+      "coherent_irregularity": 8.9,
+      "historical_signals": 8.5,
+      "spatial_hierarchy": 9.2,
+      "functional_differentiation": 9.4,
+      "density_and_proportion": 7.6,
+      "constraint_translation": 9.1,
+      "overall": 8.86,
+      "strengths": [
+        "The diagonal through-road organizes the map without centering it.",
+        "The freight yard, roadside market, civic green, farm path, domestic cluster, and obsolete boundary are visually different yet connected.",
+        "Prop clustering follows land use rather than a uniform beautification pass.",
+        "The result retains the reference's practical untidiness using only discovered assets and block materials."
+      ],
+      "weaknesses": [
+        "The freight yard has more empty stone than activity.",
+        "Two domestic flowerbeds were rejected, muting the contrast between freight and residential spaces.",
+        "The inherited warehouse free block still produces one below-map bounds warning."
+      ]
+    }
+  },
+  "selected_variant": "trade_edge",
+  "selection_reason": "Barrelstead is not the most picturesque variant; it is the best proof of the hypothesis. Its irregularity comes from a legible conflict among through-movement, freight handling, inherited farm access, and leftover civic/domestic land. The generated reference materially changed the planning grammar, while the binding layer kept the implementation honest about unavailable carts, fences, sheds, and building rotations.",
+  "selected_refinement": {
+    "intent": "Increase evidence of use in the freight and market spaces, restore a small domestic planting contrast, and clear the known warehouse bounds warning without changing the winning grammar.",
+    "paths": [
+      {"label": "freight yard wheel scar", "material": "dirt_track", "start": [0.64, 0.34], "end": [0.88, 0.29], "width": 2, "curvature": 0.22, "seed": 4391}
+    ],
+    "surfaces": [],
+    "props": [
+      {"kind": "barrel", "positions": [[0.65, 0.34], [0.88, 0.29]], "rotations": [0, 1]},
+      {"kind": "table", "positions": [[0.88, 0.20]], "rotations": [1]},
+      {"kind": "lamp", "positions": [[0.88, 0.14]], "rotations": [2]},
+      {"kind": "bench", "positions": [[0.51, 0.48]], "rotations": [1]},
+      {"kind": "flowerbed", "positions": [[0.25, 0.73], [0.64, 0.80]], "rotations": [0, 2]}
+    ]
+  }
+}
