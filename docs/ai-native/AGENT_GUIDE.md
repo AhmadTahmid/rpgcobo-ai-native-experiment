@@ -10,7 +10,7 @@ Never read, write or patch `.bw` bytes. Open a map with `rpgcobo_editor_open_dat
 ## Recommended loop
 
 1. Call `rpgcobo_project_get_info` and `rpgcobo_editor_get_workspace_info`.
-2. Open an `Mxxx` ID and call `rpgcobo_editor_map_get_info`.
+2. Open an `Mxxx` ID and call `rpgcobo_editor_map_get_info`. For a template-free experiment, first create an unused ID with `rpgcobo_project_create_blank_map`; this uses RPG-Cobo's BlockWorld serializer and does not copy source geometry.
 3. Inspect bounded areas with `rpgcobo_editor_map_get_region_summary`. Use `rpgcobo_editor_map_get_surface_grid` only when per-column spatial planning is required; keep its y range bounded.
 4. Discover visual vocabulary with `rpgcobo_project_search_assets`, `rpgcobo_project_get_asset_info`, and `rpgcobo_project_search_map_materials`.
 5. Prefer `create_path`, `create_pond`, `create_forest_patch`, or `create_clearing` over many individual cell calls. Always provide seeds.
@@ -39,6 +39,8 @@ Map assets are baked. Their source `MAxxx` identity is lost, so later inspection
 ## Validation and visual checks
 
 Validation returns `errors`, `warnings`, `metrics`, `guarantees`, and `limitations`. Its connectivity graph is an approximation: it does not fully model free-block collision, slopes, event state or physics. A valid result is not a proof of fun or playability.
+
+Validation also checks the runtime camera-work record. Experiment 003 showed that a map can open and save in the editor yet fail test play when this template-supplied field is absent.
 
 `rpgcobo_editor_map_capture_view` writes `work/agent-output/Mxxx-overview.png`. The current view is full-map top-down only. Use runtime screenshots for player-scale appearance.
 

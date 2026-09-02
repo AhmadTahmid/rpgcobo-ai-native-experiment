@@ -1,0 +1,83 @@
+/////////////////////////////////////////////////////////////////////////////////
+// Project-level primitives needed for experiments that must not inherit map
+// geometry from a human-authored template.
+
+class AgentProjectTools
+{
+	static function validateMapID( id){
+		id = id.toUpperCase();
+		if( length(id)!=4 || id[0]!='M') throw Exception("map_id must use the M000-M999 form.",-32602);
+		local n;
+		try{ n=int(id.substring(1)); }catch(ex){ throw Exception("map_id must use the M000-M999 form.",-32602); }
+		if( sprintf("M%03d",n)!=id) throw Exception("map_id must use the M000-M999 form.",-32602);
+		return id;
+	}
+
+	static function createBlankMap( args){
+		local mid=AgentProjectTools.validateMapID(AgentNative.stringArg(args,"map_id"));
+		if(::conf.map[mid])throw Exception("Map already exists: %S"%mid,-32602);
+		local name=AgentNative.stringArg(args,"name","Agent blank map").trim();
+		if(name=="")throw Exception("Map name must not be empty.",-32602);
+		local w=AgentNative.intArg(args,"width",128,32,256),h=AgentNative.intArg(args,"height",64,16,128),d=AgentNative.intArg(args,"depth",128,32,256);
+		local layers=AgentNative.intArg(args,"ground_layers",1,1,8),ground=AgentNative.checkBlock(AgentNative.intArg(args,"ground_block",1),false);
+		if(layers>=h)throw Exception("ground_layers must be smaller than map height.",-32602);
+		local gid=AgentNative.intArg(args,"group_id",-1,-4),group=::conf.map._meta.groups.find(@(v)v.id==gid);
+		if(!group)throw Exception("Map group not found: %S"%gid,-32602);
+		local bwpath=`/data/mapdata/${mid}.bw`,bwfile=FileRef(::getResource("/data/mapdata").file,mid..".bw");
+		if(bwfile.exists())throw Exception("Map geometry file already exists: %S"%bwpath,-32602);
+
+		// Build through the engine's public BlockWorld API and serialize with the
+		// same ObjectOutput path used by MapEditor.save().  No external byte-level
+		// parsing, copying, or patching is involved.
+		local bw=BlockWorld();bw.setSize(w,h,d);bw.fillBlock(IRect3D(0,0,0,w,layers,d),ground);
+		local data={
+			name=name,desc="",event={},marker={},encount=null,size=[w,h,d],vs=23,
+			camwork={fovy=40,viewport=12.0,hpb=[0,38,0],yoffs=0.5},
+			mapshot={crop=[0,0,0,0]},
+		};
+		setDefaultProperties(RPGSystem.stageprops.filter(@(v)v["mapedit"]),data);
+		local creationeditor=::skstudio["editor"],maproot=::getResource("/.x/map");
+		return ::mcpserv.processChange({
+			message="Create blank map %S (%Sx%Sx%S)"%(mid,w,h,d),
+			commit=@(){
+				try{
+					local bb=ObjectOutput.encode(bw);bb.pos=0;bwfile.save(bb);
+					::conf.map[mid]<-data;group.maps..mid;maproot.save();
+					::skstudio.fileview.refreshDir("/data/mapdata");::skstudio.fileview.refreshDir("/.x/map");
+					return true;
+				}catch(ex){
+					if(::conf.map[mid])delete ::conf.map[mid];group.maps.removeValue(mid);
+					if(bwfile.exists())bwfile.deleteFile();
+					try{maproot.save();}catch(saveex){}
+					::skstudio.fileview.refreshDir("/data/mapdata");::skstudio.fileview.refreshDir("/.x/map");
+					throw ex;
+				}
+			},
+			rollback=@(){
+				if(::skstudio["editor"]!=creationeditor||!::conf.map[mid]||::conf.map[mid]<>data)return false;
+				delete ::conf.map[mid];group.maps.removeValue(mid);bwfile.deleteFile();
+				maproot.save();
+				::skstudio.fileview.refreshDir("/data/mapdata");::skstudio.fileview.refreshDir("/.x/map");
+				return true;
+			},
+			result=@(){return {
+				operation="create_blank_map",map_id=mid,name=name,size={width=w,height=h,depth=d},
+				ground={block=AgentNative.blockInfo(ground),layers=layers},group_id=gid,
+				baseline={occupied_blocks=w*d*layers,free_blocks=0,events=0,source_map=null,source_asset=null},
+				authorship={geometry="engine-created uniform ground only",semantic_defaults="RPGSystem.stageprops plus MapToolSel runtime/editor defaults",template_copied=false}
+			};},
+		});
+	}
+}
+
+local mcptools=::MCPServer.MCPServerTools;
+mcptools..{
+	name="rpgcobo_project_create_blank_map",
+	desc="Creates a new database-backed map from an engine-generated uniform ground plane without copying a template or handling .bw bytes externally.",
+	argdef={
+		map_id={type="string",desc="Unused map ID in M000-M999 form",required=true},name={type="string",desc="Map name","default"="Agent blank map"},
+		width={type="number",desc="Map width (32-256)","default"=128},height={type="number",desc="Map height (16-128)","default"=64},depth={type="number",desc="Map depth (32-256)","default"=128},
+		ground_block={type="number",desc="Valid authored block material ID","default"=1},ground_layers={type="number",desc="Uniform filled layers (1-8)","default"=1},
+		group_id={type="number",desc="Existing map group ID; -1 is unclassified","default"=-1},
+	},func=AgentProjectTools.createBlankMap,
+}

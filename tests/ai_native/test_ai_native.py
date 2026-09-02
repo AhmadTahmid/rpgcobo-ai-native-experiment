@@ -15,6 +15,7 @@ from ai_native_mcp import MCPError, RPGCoboClient  # noqa: E402
 
 
 REQUIRED_TOOLS = {
+    "rpgcobo_project_create_blank_map",
     "rpgcobo_editor_map_get_info",
     "rpgcobo_editor_map_get_size",
     "rpgcobo_editor_map_list_events",
@@ -55,6 +56,7 @@ class StaticContractTests(unittest.TestCase):
         load = (ROOT / "project/plugin/rpgtools/mcp/load.sk").read_text(encoding="utf-8")
         for module in (
             "AgentNative.sk",
+            "AgentProjectTools.sk",
             "AgentInspect.sk",
             "AgentAssetTools.sk",
             "AgentMapTools.sk",
@@ -81,13 +83,14 @@ class StaticContractTests(unittest.TestCase):
             self.assertIsInstance(metadata.get("category"), str)
             self.assertTrue(metadata.get("tags"))
 
-    def test_no_agent_code_reads_bw_files_as_bytes(self) -> None:
+    def test_agent_code_never_reads_or_copies_bw_files_as_bytes(self) -> None:
         source = "\n".join(
             path.read_text(encoding="utf-8")
             for path in (ROOT / "project/plugin/rpgtools/mcp").glob("Agent*.sk")
         )
-        self.assertNotRegex(source, r'FileRef\([^\n]*\.bw')
+        self.assertNotRegex(source, r'\.bw[^\n]*(?:load|copyTo)\s*\(')
         self.assertIn("ObjectInput.decode", source)
+        self.assertIn("ObjectOutput.encode(bw)", source)
         self.assertIn("BlockOperation", source)
 
     def test_event_colors_follow_the_upstream_palette(self) -> None:
@@ -99,6 +102,14 @@ class StaticContractTests(unittest.TestCase):
         source = (ROOT / "project/plugin/rpgtools/mcp/AgentNative.sk").read_text(encoding="utf-8")
         self.assertIn("catch(ex)", source)
         self.assertIn("if(ed.op.undocurs==oldcursor+1)try{ed.op.undo();}", source)
+
+    def test_blank_map_creation_supplies_runtime_invariants(self) -> None:
+        source = (ROOT / "project/plugin/rpgtools/mcp/AgentProjectTools.sk").read_text(encoding="utf-8")
+        validation = (ROOT / "project/plugin/rpgtools/mcp/AgentValidation.sk").read_text(encoding="utf-8")
+        self.assertIn("ObjectOutput.encode(bw)", source)
+        self.assertIn("source_map=null", source)
+        self.assertIn("camwork={fovy=40", source)
+        self.assertIn("MISSING_CAMERA_WORK", validation)
 
 
 @unittest.skipUnless(os.environ.get("RPGCOBO_LIVE_TEST") == "1", "set RPGCOBO_LIVE_TEST=1 with the editor running")
@@ -175,17 +186,25 @@ class LiveMCPTests(unittest.TestCase):
         sz = max(4, min(size["depth"] - 8, int(spawn[2] * 2)))
         region_args = {"x": sx - 4, "z": sz - 4, "width": 20, "depth": 12}
         baseline = self.client.call("rpgcobo_editor_map_get_region_summary", region_args)
-        dominant = baseline["dominant_surface"]["block"]["id"]
-        alternatives = [x["block"]["id"] for x in baseline["block_usage"] if x["block"]["id"] != dominant]
-        if not alternatives:
-            self.skipTest("inspection region contains no alternate authored block material")
+        start_summary = self.client.call(
+            "rpgcobo_editor_map_get_region_summary",
+            {"x": sx, "z": sz, "width": 1, "depth": 1},
+        )
+        start_material = start_summary["dominant_surface"]["block"]["id"]
+        paint_candidates = [
+            x["block"]["id"]
+            for x in baseline["block_usage"]
+            if x["block"]["id"] != start_material
+        ]
+        if not paint_candidates:
+            self.skipTest("inspection region contains no material different from the path start")
         args = {
             "start_x": sx,
             "start_z": sz,
             "end_x": sx + 10,
             "end_z": sz,
             "width": 1,
-            "block": alternatives[0],
+            "block": paint_candidates[0],
             "curvature": 0.45,
             "seed": 1729,
         }

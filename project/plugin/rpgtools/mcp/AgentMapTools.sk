@@ -114,8 +114,10 @@ class AgentMapTools
 		for(local zz=z;zz<z+d&&placed<maxcount;zz+=spacing)for(local xx=x;xx<x+w&&placed<maxcount;xx+=spacing){
 			local px=Math.min(x+w-1,xx+rnd.nexti(spacing)),pz=Math.min(z+d-1,zz+rnd.nexti(spacing));if(rnd.nextf()>density||rnd.nextf()<clearRate)continue;
 			if(length(bw.collectFreeBlocks(IRect3D(Math.max(0,px-spacing/2),0,Math.max(0,pz-spacing/2),Math.min(spacing,bw.w-Math.max(0,px-spacing/2)),bw.h,Math.min(spacing,bw.d-Math.max(0,pz-spacing/2))),[])))continue;
-			local sy=AgentNative.surfaceY(bw,px,pz);if(sy<0)continue;local vari=variants[rnd.nexti(length(variants))],fb=FreeBlock.create({fbtype=fbtype,fbparam=vari}),py=sy+fb.br.h/2+1;if(py>=bw.h)continue;
-			bop._plcfblk(fb,IPos(px,py,pz,rnd.nexti(4)),bw.nextfbuid());++placed;
+			local sy=AgentNative.surfaceY(bw,px,pz);if(sy<0)continue;local vari=variants[rnd.nexti(length(variants))],proto=FreeBlock.create({fbtype=fbtype,fbparam=vari}),py=sy+proto.br.h/2+1;if(py>=bw.h)continue;
+			local rot=rnd.nexti(4),fb=FreeBlock.create({fbtype=fbtype,fbparam=vari,pos=[px,py,pz],rot=rot}),br=fb.br;
+			if(br.x<0||br.y<0||br.z<0||br.x+br.w>bw.w||br.y+br.h>bw.h||br.z+br.d>bw.d)continue;
+			bop._plcfblk(fb,IPos(px,py,pz,rot),bw.nextfbuid());++placed;
 		}
 		return AgentNative.submitBlockOperation(ed,bop,"Create deterministic forest patch at (%S,%S), size (%S,%S), seed %S"%(x,z,w,d,seed),{primitive="create_forest_patch",bounds=[x,z,w,d],density=density,clearing_rate=clearRate,min_spacing=spacing,tree_fbtype=fbtype,tree_variants=variants,seed=seed,placed=placed});
 	}

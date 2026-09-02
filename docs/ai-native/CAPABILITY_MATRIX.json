@@ -1,12 +1,13 @@
 {
   "baseline_commit": "4bbeb25",
   "upstream_tool_count": 19,
-  "fork_tool_count": 32,
+  "fork_tool_count": 33,
   "capabilities": [
     {"capability":"project introspection","existing":true,"mcp":"upstream","api":true,"difficulty":"low","priority":"A","notes":"project identity, paths, language, plugins"},
     {"capability":"database list/get/search/set","existing":true,"mcp":"upstream","api":true,"difficulty":"low","priority":"A","notes":"fork fixes override=false merge"},
     {"capability":"asset/resource listing","existing":"partial","mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"cross-type search, details, authored material vocabulary"},
     {"capability":"editor inspection/open","existing":true,"mcp":"upstream","api":true,"difficulty":"low","priority":"A","notes":"workspace and database-backed editor opening"},
+    {"capability":"template-free map creation","existing":true,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"engine-created BlockWorld, structured runtime/editor defaults, no template geometry copy"},
     {"capability":"map inspection","existing":true,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"bounded summaries, per-column surface grid, events and free-block UIDs"},
     {"capability":"basic map mutation","existing":true,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"BlockOperation plus editor undo and MCP rollback; direct authored free-block placement has bounds and overlap checks"},
     {"capability":"semantic map primitives","existing":false,"mcp":"fork","api":true,"difficulty":"medium","priority":"A","notes":"path, pond, forest patch, clearing"},

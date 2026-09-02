@@ -12,6 +12,7 @@ Audit baseline: upstream commit `4bbeb25` (`Minor bugfix`). “Existing” means
 | Block/free-block material discovery | yes | yes, fork | yes | medium | A | Exposes authored voxel group/type/model and mutation-ready IDs; no guessed categories |
 | Editor workspace/tabs | yes | yes, upstream | yes | low | A | `rpgcobo_editor_get_workspace_info` |
 | Open database item/editor | yes | yes, upstream | yes | low | A | `rpgcobo_editor_open_data` |
+| Template-free map creation | no upstream | yes, fork | yes | medium | A | Creates an engine-serialized uniform BlockWorld plus runtime/editor defaults without copying template geometry |
 | Current map metadata/size | yes | yes, fork | yes | low | A | Requires a database-backed map open in `MapEditor` |
 | Event list/get | yes | yes, fork | yes | low | A | Compact pagination plus full event retrieval |
 | Bounded terrain/occupancy summary | yes | yes, fork | yes | medium | A | Surface/material counts, elevation, events, free blocks, approximate traversal, plus per-column planning grid |
@@ -43,5 +44,5 @@ Audit baseline: upstream commit `4bbeb25` (`Minor bugfix`). “Existing” means
 ## Counts
 
 - Upstream MCP tools audited: 19.
-- Fork MCP tools added: 32.
-- Total registered and observed through native `tools/list`: 51.
+- Fork MCP tools added: 33.
+- Total registered and observed through native `tools/list`: 52.

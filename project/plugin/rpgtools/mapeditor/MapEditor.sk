@@ -88,7 +88,7 @@ class MapEditor extends EditorViewBase
 			//
 			bwres = ::getResource( `/data/mapdata/${mapid}.bw`);
 			mapshottex = ::getTexture( `/data/mapdata/${mapid}.webp`);
-			mapshottex.ref = false;
+			if( mapshottex) mapshottex.ref = false;
 			w = bwres.getContent();
 			bwres.flush();
 		}else
@@ -279,7 +279,7 @@ class MapEditor extends EditorViewBase
 			bwres.file.save( bb);
 			//	mapshot保存
 			local tex = mapshottex;
-			if( mapshottex["ref"]){
+			if( mapshottex && mapshottex["ref"]){
 				local img = RGBAImage( tex.width, tex.height);
 				local old = skGetRenderTarget();
 				skSetRenderTarget( tex);

@@ -11,6 +11,9 @@ class AgentValidation
 		local ed=AgentNative.requireMapEditor(),bw=ed.bw,map=ed.data,errors=[],warnings=[],metrics={};
 		local maxcells=AgentNative.intArg(args,"max_traversability_cells",65536,0,262144);
 		if(map["size"] && (map.size[0]!=bw.w||map.size[1]!=bw.h||map.size[2]!=bw.d))errors..issue("MAP_SIZE_MISMATCH","Map JSON size does not match open BlockWorld.",{json=map.size,blockworld=[bw.w,bw.h,bw.d]});
+		local cam=map["camwork"];
+		if(!cam)errors..issue("MISSING_CAMERA_WORK","Map has no runtime camera-work record; test play would fail.");
+		else foreach(pid in ["fovy","viewport","hpb","yoffs"])if(!(pid in cam))errors..issue("MALFORMED_CAMERA_WORK","Runtime camera-work is missing a required field.",{field=pid,camwork=cam});
 
 		local badblocks=0,usedblocks={},cellcount=bw.w*bw.h*bw.d;
 		if(cellcount<=1048576){

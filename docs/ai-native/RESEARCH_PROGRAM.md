@@ -58,6 +58,7 @@ Recurring limitations should become design requirements for a future engine rath
 | 0 | Architecture and capability audit | Complete |
 | 1 | Typed control layer can inspect, mutate, validate, capture, and playtest a bounded slice | Experiment 001 complete |
 | 2 | Agent can discover assets, derive coordinates, construct a semantically detailed town, recover from failures, and playtest it | Experiment 002 complete |
+| 2b | Agent can create a template-free map and compose, validate, persist, and playtest a detailed town from a uniform plane | Experiment 003 complete |
 | 3 | Same system can revise an existing town from a changed brief and repair introduced defects | Not run |
 | 4 | Multiple briefs/seeds/templates produce coherent results without task-specific code changes | Not run |
 | 5 | Interface abstractions transfer to another editor or a purpose-built prototype | Not run |
@@ -75,11 +76,11 @@ Future experiments should report:
 - **Generalization:** whether the same interface handles changed goals and unfamiliar content.
 - **Efficiency:** tool calls, mutation granularity, output volume, and avoidable retries.
 
-## Preliminary answer after Experiment 002
+## Preliminary answer after Experiment 003
 
-RPG-Cobo can be made meaningfully agent-operable, and a constrained editor is a productive setting for AI-native research. The autonomous Canalwatch town demonstrates semantic asset discovery, derived spatial planning, typed construction, contextual event creation, runtime interaction, and recovery from real tool defects.
+RPG-Cobo can be made meaningfully agent-operable, and a constrained editor is a productive setting for AI-native research. Canalwatch demonstrated autonomous semantic infill over authored civil infrastructure. Linden Crossing then demonstrated the stronger from-blank loop: engine-created plane, generated road hierarchy and zoning, semantic asset placement, landscaping, contextual inhabitants, save/reload, runtime movement, and interaction.
 
-It is not yet proof of a generally autonomous game-development platform. The experiment adapted an authored city template, used a curated metadata overlay, could not rotate baked building assets, did not verify physics-backed access to every door, and did not create interiors or a quest chain. These boundaries are part of the result.
+It is not yet proof of a generally autonomous game-development platform. Linden Crossing uses a task-specific axial grammar, curated metadata, human-authored source assets, rotation-zero buildings, approximate rather than physics-backed whole-town navigation, and no interiors or quest chain. Its symmetry is visibly more procedural than Canalwatch's inherited irregularity. These boundaries are part of the result.
 
 ## Requirements emerging for a purpose-built platform
 
@@ -95,9 +96,8 @@ It is not yet proof of a generally autonomous game-development platform. The exp
 
 ## Recommended next experiments
 
-1. Apply a changed brief to Canalwatch: add a market district, move civic emphasis, and preserve existing residents and routes.
-2. Run the same town brief on the grassland or flat template with no prebuilt city infrastructure.
-3. Generate three variants from one brief and compare semantic/spatial metrics and failure rates.
+1. Generate three template-free variants from one brief and compare semantic/spatial metrics, aesthetic diversity, and failure rates.
+2. Apply a changed brief to Canalwatch or Linden Crossing while preserving existing residents and routes.
+3. Replace the task-specific axial grammar with reusable plot/road/district objects and planner constraints.
 4. Introduce deliberate defects—blocked entrance, invalid event reference, isolated spawn—and require autonomous diagnosis and repair.
 5. Prototype persistent semantic building instances and physics-backed path queries as if designing the future platform rather than extending the current representation.
-
