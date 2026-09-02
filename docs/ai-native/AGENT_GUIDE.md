@@ -11,10 +11,10 @@ Never read, write or patch `.bw` bytes. Open a map with `rpgcobo_editor_open_dat
 
 1. Call `rpgcobo_project_get_info` and `rpgcobo_editor_get_workspace_info`.
 2. Open an `Mxxx` ID and call `rpgcobo_editor_map_get_info`.
-3. Inspect bounded areas with `rpgcobo_editor_map_get_region_summary`; avoid whole-world cell dumps.
+3. Inspect bounded areas with `rpgcobo_editor_map_get_region_summary`. Use `rpgcobo_editor_map_get_surface_grid` only when per-column spatial planning is required; keep its y range bounded.
 4. Discover visual vocabulary with `rpgcobo_project_search_assets`, `rpgcobo_project_get_asset_info`, and `rpgcobo_project_search_map_materials`.
 5. Prefer `create_path`, `create_pond`, `create_forest_patch`, or `create_clearing` over many individual cell calls. Always provide seeds.
-6. Use fill/clear/set block for small deterministic edits and `place_asset` for real MA resources.
+6. Use fill/clear/set block for small deterministic edits, `place_asset` for real MA resources, and `place_free_block` for authored props with overlap checks.
 7. Re-inspect, call `rpgcobo_map_validate`, capture an overview, then save.
 8. Start test play, poll player state, make short relative moves, interact, and stop the session.
 
@@ -29,6 +29,10 @@ Never read, write or patch `.bw` bytes. Open a map with `rpgcobo_editor_open_dat
 ## Mutation safety
 
 Each mutation validates bounds and resource IDs, uses editor operations, and returns a `changeid` after explicit elicitation approval. Use `rpgcobo_change_rollback` immediately if the result is wrong; later edits can make that guarded rollback unsafe. `rpgcobo_editor_map_undo` follows normal stack order.
+
+Do not use `rpgcobo_runtime_reload_tool` as a discard or transaction-abort command. Experiment 002 observed a partial draft persist across reload. Save, reload, rollback and discard are not interchangeable in this build.
+
+Event editor colors are indices 0–5. The typed create/update tools enforce the upstream palette. Existing event name, dialogue, model and color can be changed with `rpgcobo_editor_map_update_event`; other event fields still require a dedicated future command. Rename an open map with `rpgcobo_editor_map_set_name`, because a generic database write can be overwritten by the active editor's stale copy on save.
 
 Map assets are baked. Their source `MAxxx` identity is lost, so later inspection sees resulting blocks/free blocks, not a movable asset instance. Rotation 0 is currently supported; non-zero asset rotation is explicitly rejected in this upstream binary because the called orientation API is absent.
 
@@ -55,7 +59,9 @@ Movement is relative and collision-aware. Poll state until `moving` is false. In
 - Do not assume a baked MA asset retains provenance.
 - Do not confuse block coordinates with half-scale runtime coordinates.
 - Do not request enormous regions; use bounded summaries.
+- Do not request a surface grid when aggregate inspection is sufficient.
 - Do not save before inspection/validation unless persistence is intentional.
+- Do not assume reload discards unsaved or partially applied work.
 - Do not treat approximate traversability as physics-backed proof.
 
 Use `rpgcobo_runtime_execute` only for diagnosis or an API gap. A repeated workflow deserves a dedicated, typed MCP command; ordinary world synthesis should use the explicit tools.

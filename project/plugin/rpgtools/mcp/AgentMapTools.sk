@@ -59,6 +59,20 @@ class AgentMapTools
 		return AgentNative.submitBlockOperation(ed,bop,"Move free block UID %S to (%S,%S,%S), rotation %S"%(uid,x,y,z,rot),{operation="move_free_block",uid=uid,position=[x,y,z,rot]});
 	}
 
+	static function placeFreeBlock( args){
+		local ed=AgentNative.requireMapEditor(),bw=ed.bw,fbtype=AgentNative.intArg(args,"fbtype",null,1),variation=AgentNative.intArg(args,"variation",null,0),rot=AgentNative.intArg(args,"rotation",0,0,3);
+		AgentNative.checkFreeBlock(fbtype,variation);
+		local x=AgentNative.intArg(args,"x",null,0,bw.w-1),z=AgentNative.intArg(args,"z",null,0,bw.d-1),y=AgentNative.intArg(args,"y",-1,-1,bw.h-1);
+		local proto=FreeBlock.create({fbtype=fbtype,fbparam=variation});
+		if(y<0){local sy=AgentNative.surfaceY(bw,x,z);if(sy<0)throw Exception("No surface at free-block position; specify y.",-32602);y=sy+proto.br.h/2+1;}
+		local fb=FreeBlock.create({fbtype=fbtype,fbparam=variation,pos=[x,y,z],rot=rot}),br=fb.br;
+		if(br.x<0||br.y<0||br.z<0||br.x+br.w>bw.w||br.y+br.h>bw.h||br.z+br.d>bw.d)throw Exception("Placed free block bounds would leave the map.",-32602);
+		local allow=AgentNative.boolArg(args,"allow_overlap",false),hits=bw.collectFreeBlocks(br,[]);
+		if(!allow&&length(hits))throw Exception("Placed free block overlaps %S existing free-block object(s)."%length(hits),-32602);
+		local uid=bw.nextfbuid(),bop=BlockOperation(bw);bop._plcfblk(fb,IPos(x,y,z,rot),uid);
+		return AgentNative.submitBlockOperation(ed,bop,"Place free block %S:%S at (%S,%S,%S), rotation %S"%(fbtype,variation,x,y,z,rot),{operation="place_free_block",uid=uid,free_block=AgentNative.freeBlockInfo(fb),target_bounds=[br.x,br.y,br.z,br.w,br.h,br.d]});
+	}
+
 	static function createPath( args){
 		local ed=AgentNative.requireMapEditor(),bw=ed.bw;
 		local x0=AgentNative.intArg(args,"start_x",null,0,bw.w-1),z0=AgentNative.intArg(args,"start_z",null,0,bw.d-1),x1=AgentNative.intArg(args,"end_x",null,0,bw.w-1),z1=AgentNative.intArg(args,"end_z",null,0,bw.d-1);
@@ -118,7 +132,7 @@ class AgentMapTools
 		local ed=AgentNative.requireMapEditor(),bw=ed.bw,role=AgentNative.stringArg(args,"role","villager"),def=::RPGSystem.eventrole[role];if(!def)throw Exception("Unknown event role: %S"%role,-32602);
 		local x=AgentNative.intArg(args,"x",null),y=AgentNative.intArg(args,"y",null),z=AgentNative.intArg(args,"z",null),rot=AgentNative.intArg(args,"rotation",0,0,3);AgentNative.checkPos(bw,x,y,z);
 		local id=AgentNative.nextEventID(ed.data.event),name=AgentNative.stringArg(args,"name","*agent-"..(id%1000000)),defdata=fget(def,"defdata");if(defdata instanceof SS_CLOSURE)defdata=defdata();
-		local ev={role=role,pos=[x,y,z,rot],name=name,col=AgentNative.intArg(args,"color",0,0,7),flags=1,...deepclone(defdata||{})};
+		local ev={role=role,pos=[x,y,z,rot],name=name,col=AgentNative.intArg(args,"color",0,0,length(::evcolorlist)-1),flags=1,...deepclone(defdata||{})};
 		local mdlid=AgentNative.stringArg(args,"model_resource_id","");if(mdlid!=""){if(!AgentNative.findResource(mdlid))throw Exception("Model resource not found: %S"%mdlid,-32602);ev.mdlid<-mdlid;}
 		local msg=AgentNative.stringArg(args,"message","");if(msg!="")ev.msg<-msg;
 		local self=this,tool=ed.toolmap["tool_event"];
@@ -127,11 +141,37 @@ class AgentMapTools
 		return AgentNative.submitEditorOperation(ed,redo,undo,"Create %S event %S at (%S,%S,%S)"%(role,id,x,y,z),{operation="create_event",event_id=id,event=ev});
 	}
 
+	static function updateEvent( args){
+		local ed=AgentNative.requireMapEditor(),id=AgentNative.intArg(args,"event_id",null,1),current=ed.data.event[id];
+		if(!current)throw Exception("Map event not found: %S"%id,-32602);
+		local old=deepclone(current),updated=deepclone(current),repaired=false,maxcolor=length(::evcolorlist)-1;
+		if(updated.col<0||updated.col>maxcolor){updated.col=0;repaired=true;}
+		if("color" in args&&args.color!=null)updated.col=AgentNative.intArg(args,"color",null,0,maxcolor);
+		if("name" in args&&args.name!=null)updated.name=AgentNative.stringArg(args,"name");
+		if("message" in args&&args.message!=null)updated.msg=AgentNative.stringArg(args,"message");
+		if("model_resource_id" in args&&args.model_resource_id!=null){
+			local mdlid=AgentNative.stringArg(args,"model_resource_id");if(mdlid!=""&&!AgentNative.findResource(mdlid))throw Exception("Model resource not found: %S"%mdlid,-32602);updated.mdlid=mdlid;
+		}
+		// A corrupt pre-existing palette index cannot be safely restored by undo;
+		// use its sanitized value as the rollback baseline and report the repair.
+		local rollback=deepclone(old);if(rollback.col<0||rollback.col>maxcolor)rollback.col=0;
+		local tool=ed.toolmap["tool_event"],apply=@(data){ed.data.event[id]<-data;ed.canvas.placeEventGizmo(id,data);tool.updateEventList();};
+		local redo=[@(){apply(updated);}],undo=[@(){apply(rollback);}];
+		return AgentNative.submitEditorOperation(ed,redo,undo,"Update map event %S"%id,{operation="update_event",event_id=id,before=old,event=updated,repaired_invalid_palette_index=repaired});
+	}
+
 	static function setPlayerStart( args){
 		local ed=AgentNative.requireMapEditor(),bw=ed.bw,x=AgentNative.intArg(args,"x",null),y=AgentNative.intArg(args,"y",null),z=AgentNative.intArg(args,"z",null),rot=AgentNative.intArg(args,"rotation",0,0,3);AgentNative.checkPos(bw,x,y,z);
 		local old=::conf.setting["inimap"]?deepclone(::conf.setting.inimap):null,mk={mapid=ed.mapid,pos=[x*0.5,y*0.5,z*0.5,rot*Math.HPI]};
 		local redo=[@(){::conf.setting.inimap=mk;ed.canvas.placeInimapGizmo(mk);ed.saveinimap=true;}],undo=[@(){::conf.setting.inimap=old;if(old)ed.canvas.placeInimapGizmo(old);else ed.canvas.removeInimapGizmo();ed.saveinimap=true;}];
 		return AgentNative.submitEditorOperation(ed,redo,undo,"Set player start on %S at block (%S,%S,%S)"%(ed.mapid,x,y,z),{operation="set_player_start",map_id=ed.mapid,block_position=[x,y,z,rot],world_position=mk.pos});
+	}
+
+	static function setMapName( args){
+		local ed=AgentNative.requireMapEditor(),name=AgentNative.stringArg(args,"name").trim();
+		if(name=="")throw Exception("Map name must not be empty.",-32602);
+		local old=ed.data["name"]||"",redo=[@(){ed.data.name=name;ed.refresh();}],undo=[@(){ed.data.name=old;ed.refresh();}];
+		return AgentNative.submitEditorOperation(ed,redo,undo,"Rename map %S to %S"%(ed.mapid,name),{operation="set_map_name",map_id=ed.mapid,before=old,name=name});
 	}
 }
 
@@ -142,11 +182,14 @@ mcptools..{name="rpgcobo_editor_map_clear_region",desc="Safely clears a bounded 
 mcptools..{name="rpgcobo_editor_map_place_asset",desc="Bakes a real MAxxx map asset into the open map using BlockOperation. Source provenance is not retained by upstream.",argdef={asset_id={type="string",desc="MAxxx resource ID",required=true},x={type="number",desc="origin x",required=true},y={type="number",desc="origin y",required=true},z={type="number",desc="origin z",required=true},rotation={type="number",desc="Quarter turns (0-3)","default"=0}},func=AgentMapTools.placeAsset}
 mcptools..{name="rpgcobo_editor_map_remove_free_block",desc="Removes one placed free-block object by stable UID with undo support.",argdef={uid={type="number",desc="Free-block UID from map_list_assets",required=true}},func=AgentMapTools.removeFreeBlock}
 mcptools..{name="rpgcobo_editor_map_move_free_block",desc="Moves/rotates one placed free-block object by UID with undo support.",argdef={uid={type="number",desc="Free-block UID",required=true},x={type="number",desc="x",required=true},y={type="number",desc="y",required=true},z={type="number",desc="z",required=true},rotation={type="number",desc="Quarter turns (0-3)"}},func=AgentMapTools.moveFreeBlock}
+mcptools..{name="rpgcobo_editor_map_place_free_block",desc="Places one authored free-block object such as a lamp, tree, rock, or planter with bounds and overlap checks.",argdef={fbtype={type="number",desc="Authored free-block type",required=true},variation={type="number",desc="Authored variation",required=true},x={type="number",desc="x",required=true},y={type="number",desc="center y or -1 for automatic surface placement","default"=-1},z={type="number",desc="z",required=true},rotation={type="number",desc="Quarter turns (0-3)","default"=0},allow_overlap={type="boolean",desc="Allow overlap with an existing free-block object","default"=false}},func=AgentMapTools.placeFreeBlock}
 mcptools..{name="rpgcobo_editor_map_create_path",desc="Creates a seeded quadratic-curved surface path; intent compiles to reversible block operations.",argdef={start_x={type="number",desc="start x",required=true},start_z={type="number",desc="start z",required=true},end_x={type="number",desc="end x",required=true},end_z={type="number",desc="end z",required=true},width={type="number",desc="path width","default"=2},block={type="number",desc="path block/material ID",required=true},curvature={type="number",desc="0-1 bend magnitude","default"=0.2},seed={type="number",desc="deterministic seed","default"=1},y={type="number",desc="fixed y or -1 for surface","default"=-1}},func=AgentMapTools.createPath}
 mcptools..{name="rpgcobo_editor_map_create_pond",desc="Creates a seeded irregular, level water footprint and clears terrain above its water line.",argdef={center_x={type="number",desc="center x",required=true},center_z={type="number",desc="center z",required=true},radius={type="number",desc="approximate radius (2-32)",required=true},water_block={type="number",desc="water block/material ID",required=true},water_y={type="number",desc="water level or -1 for center surface","default"=-1},irregularity={type="number",desc="0-0.75 boundary variation","default"=0.2},seed={type="number",desc="deterministic seed","default"=1}},func=AgentMapTools.createPond}
 mcptools..{name="rpgcobo_editor_map_create_forest_patch",desc="Places a deterministic bounded patch of real tree free-block variants with spacing and clearing controls.",argdef={x={type="number",desc="x",required=true},z={type="number",desc="z",required=true},width={type="number",desc="width",required=true},depth={type="number",desc="depth",required=true},density={type="number",desc="candidate placement probability 0-1","default"=0.25},clearing_rate={type="number",desc="candidate clearing probability 0-1","default"=0.1},min_spacing={type="number",desc="grid spacing","default"=3},tree_fbtype={type="number",desc="real free-block type (default upstream tree/rock type 20)","default"=20},tree_variants={type="string",desc="comma-separated authored variations","default"="0"},max_count={type="number",desc="safety cap","default"=256},seed={type="number",desc="deterministic seed","default"=1}},func=AgentMapTools.createForest}
 mcptools..{name="rpgcobo_editor_map_create_clearing",desc="Removes a selected free-block type in a bounded region and can repaint its surface.",argdef={x={type="number",desc="x",required=true},z={type="number",desc="z",required=true},width={type="number",desc="width",required=true},depth={type="number",desc="depth",required=true},tree_fbtype={type="number",desc="free-block type to remove","default"=20},ground_block={type="number",desc="surface block ID or -1 to leave terrain","default"=-1}},func=AgentMapTools.createClearing}
-mcptools..{name="rpgcobo_editor_map_create_event",desc="Creates a basic role-backed event using RPG-Cobo's registered role defaults and editor undo stack.",argdef={role={type="string",desc="Registered event role","default"="villager"},x={type="number",desc="block x",required=true},y={type="number",desc="block y",required=true},z={type="number",desc="block z",required=true},rotation={type="number",desc="quarter turns","default"=0},name={type="string",desc="event name"},model_resource_id={type="string",desc="optional model resource ID","default"=""},message={type="string",desc="optional role message/dialogue","default"=""},color={type="number",desc="editor color 0-7","default"=0}},func=AgentMapTools.createEvent}
+mcptools..{name="rpgcobo_editor_map_create_event",desc="Creates a basic role-backed event using RPG-Cobo's registered role defaults and editor undo stack.",argdef={role={type="string",desc="Registered event role","default"="villager"},x={type="number",desc="block x",required=true},y={type="number",desc="block y",required=true},z={type="number",desc="block z",required=true},rotation={type="number",desc="quarter turns","default"=0},name={type="string",desc="event name"},model_resource_id={type="string",desc="optional model resource ID","default"=""},message={type="string",desc="optional role message/dialogue","default"=""},color={type="number",desc="editor color 0-5","default"=0}},func=AgentMapTools.createEvent}
+mcptools..{name="rpgcobo_editor_map_update_event",desc="Safely updates an existing event's name, dialogue, model, or editor color and repairs invalid palette indices.",argdef={event_id={type="number",desc="Numeric event ID",required=true},name={type="string",desc="Replacement event name"},model_resource_id={type="string",desc="Replacement model resource ID"},message={type="string",desc="Replacement dialogue"},color={type="number",desc="Editor color 0-5"}},func=AgentMapTools.updateEvent}
 mcptools..{name="rpgcobo_editor_map_set_player_start",desc="Sets the project initial player position from block coordinates with editor undo support.",argdef={x={type="number",desc="block x",required=true},y={type="number",desc="block y",required=true},z={type="number",desc="block z",required=true},rotation={type="number",desc="quarter turns","default"=0}},func=AgentMapTools.setPlayerStart}
+mcptools..{name="rpgcobo_editor_map_set_name",desc="Renames the open map through its editor operation stack so the value persists with the map.",argdef={name={type="string",desc="New non-empty map name",required=true}},func=AgentMapTools.setMapName}
 mcptools..{name="rpgcobo_change_rollback",desc="Rolls back a previously accepted MCP change when it is still safe to do so.",argdef={change_id={type="string",desc="change-N returned by a mutating MCP tool",required=true}},func=@(args)AgentNative.result(::mcpserv.rollbackChange(AgentNative.stringArg(args,"change_id")))}
 mcptools..{name="rpgcobo_editor_map_undo",desc="Undoes the latest MapEditor operation.",argdef={},func=@(args){local ed=AgentNative.requireMapEditor(),ok=ed.op.undo();if(ok)AgentNative.invalidateMapShot(ed);return AgentNative.result({undone=ok,undo_available=ed.op.undoable(),redo_available=ed.op.redoable()});}}

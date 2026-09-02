@@ -21,6 +21,7 @@ REQUIRED_TOOLS = {
     "rpgcobo_editor_map_get_event",
     "rpgcobo_editor_map_list_assets",
     "rpgcobo_editor_map_get_region_summary",
+    "rpgcobo_editor_map_get_surface_grid",
     "rpgcobo_project_search_assets",
     "rpgcobo_project_get_asset_info",
     "rpgcobo_project_search_map_materials",
@@ -30,12 +31,15 @@ REQUIRED_TOOLS = {
     "rpgcobo_editor_map_place_asset",
     "rpgcobo_editor_map_remove_free_block",
     "rpgcobo_editor_map_move_free_block",
+    "rpgcobo_editor_map_place_free_block",
     "rpgcobo_editor_map_create_path",
     "rpgcobo_editor_map_create_pond",
     "rpgcobo_editor_map_create_forest_patch",
     "rpgcobo_editor_map_create_clearing",
     "rpgcobo_editor_map_create_event",
+    "rpgcobo_editor_map_update_event",
     "rpgcobo_editor_map_set_player_start",
+    "rpgcobo_editor_map_set_name",
     "rpgcobo_editor_map_undo",
     "rpgcobo_map_validate",
     "rpgcobo_editor_map_capture_view",
@@ -68,10 +72,14 @@ class StaticContractTests(unittest.TestCase):
         self.assertEqual(len(names), len(set(names)))
         self.assertTrue(REQUIRED_TOOLS.issubset(names), REQUIRED_TOOLS.difference(names))
 
-    def test_asset_metadata_overlay_is_valid_and_empty_by_default(self) -> None:
+    def test_asset_metadata_overlay_is_valid_and_well_formed(self) -> None:
         data = json.loads((ROOT / "project/agent/asset-metadata.json").read_text(encoding="utf-8"))
         self.assertEqual(data["version"], 1)
-        self.assertEqual(data["assets"], {})
+        self.assertIsInstance(data["assets"], dict)
+        for asset_id, metadata in data["assets"].items():
+            self.assertRegex(asset_id, r"^(MA|CV)\d{3}$")
+            self.assertIsInstance(metadata.get("category"), str)
+            self.assertTrue(metadata.get("tags"))
 
     def test_no_agent_code_reads_bw_files_as_bytes(self) -> None:
         source = "\n".join(
@@ -81,6 +89,16 @@ class StaticContractTests(unittest.TestCase):
         self.assertNotRegex(source, r'FileRef\([^\n]*\.bw')
         self.assertIn("ObjectInput.decode", source)
         self.assertIn("BlockOperation", source)
+
+    def test_event_colors_follow_the_upstream_palette(self) -> None:
+        source = (ROOT / "project/plugin/rpgtools/mcp/AgentMapTools.sk").read_text(encoding="utf-8")
+        self.assertIn("length(::evcolorlist)-1", source)
+        self.assertNotIn('desc="editor color 0-7"', source)
+
+    def test_editor_operation_wrapper_reverts_throwing_redo(self) -> None:
+        source = (ROOT / "project/plugin/rpgtools/mcp/AgentNative.sk").read_text(encoding="utf-8")
+        self.assertIn("catch(ex)", source)
+        self.assertIn("if(ed.op.undocurs==oldcursor+1)try{ed.op.undo();}", source)
 
 
 @unittest.skipUnless(os.environ.get("RPGCOBO_LIVE_TEST") == "1", "set RPGCOBO_LIVE_TEST=1 with the editor running")
@@ -179,6 +197,24 @@ class LiveMCPTests(unittest.TestCase):
         self.client.call("rpgcobo_change_rollback", {"change_id": second["changeid"]})
         self.assertEqual(first["details"]["changed_cells"], second["details"]["changed_cells"])
         self.assertEqual(first_summary["surface_blocks"], second_summary["surface_blocks"])
+
+    def test_06_invalid_event_palette_is_rejected_without_mutation(self) -> None:
+        before = self.client.call("rpgcobo_editor_map_list_events", {"offset": 0, "limit": 500})
+        info = self.client.call("rpgcobo_editor_map_get_info")
+        spawn = info.get("player_start", {}).get("pos", [1, 1, 1])
+        with self.assertRaises(MCPError):
+            self.client.call(
+                "rpgcobo_editor_map_create_event",
+                {
+                    "role": "villager",
+                    "x": int(spawn[0] * 2),
+                    "y": max(0, int(spawn[1] * 2)),
+                    "z": int(spawn[2] * 2),
+                    "color": 6,
+                },
+            )
+        after = self.client.call("rpgcobo_editor_map_list_events", {"offset": 0, "limit": 500})
+        self.assertEqual(before["total"], after["total"])
 
 
 if __name__ == "__main__":

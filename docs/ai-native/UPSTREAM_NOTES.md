@@ -20,6 +20,7 @@ Baseline is upstream `djkotori/rpgcobo-tool` commit `4bbeb25`. Work is on branch
 - `project/agent/asset-metadata.json`
 - `tools/ai_native_mcp.py`
 - `tools/run_experiment_001.py`
+- `tools/run_experiment_002.py`
 - `tests/ai_native/test_ai_native.py`
 - `docs/ai-native/*`
 
@@ -35,5 +36,8 @@ Internal assumptions to recheck after an upstream update:
 - Event role defaults remain in `RPGSystem.eventrole`.
 - Debug tool/runtime IPC continues to support `invokeIPCScript`.
 - If native `collectBlocks`, `Block.rotate`, or `IMat.transformv` become available, simplify the local rotation-0 asset placement fallback and add non-zero rotation tests.
+- `OperationStack.submit()` currently advances before redo completes; retain the local exception-atomic wrapper unless upstream changes that ordering.
+- `rpgcobo_runtime_reload_tool` is not a discard boundary in Experiment 002; recheck persistence semantics after upstream changes.
+- Generic database writes can diverge from an active `MapEditor` copy; use editor-backed mutations until synchronization is defined.
 
 No native DLL, renderer, closed engine file, generated map file, downloaded asset pack, cache, secret or machine-specific configuration is committed.

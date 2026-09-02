@@ -38,7 +38,7 @@ This binary also disagrees with the checked-in `BlockOperation.drawWorld()` impl
 
 Resource JSON is registered under `::conf._resource`. Upstream MCP lists one resource type at a time. The fork searches across map assets, character voxels, pictures, enemies, effects, equipment/object voxels and audio; MA bounds are decoded with RPG-Cobo’s own `ObjectInput`, not by parsing the payload.
 
-Voxel block/free-block variations are a separate authored vocabulary in `map_vox`. `rpgcobo_project_search_map_materials` exposes their configured type/model and mutation-ready IDs. Optional human-authored metadata lives in `project/agent/asset-metadata.json`. It starts empty and is never populated with guessed classifications. Later vision or embedding pipelines can write provider-neutral IDs/tags into that overlay without coupling the editor to an online model.
+Voxel block/free-block variations are a separate authored vocabulary in `map_vox`. `rpgcobo_project_search_map_materials` exposes their configured type/model and mutation-ready IDs. Optional human-authored metadata lives in `project/agent/asset-metadata.json`. Experiment 002 populates a small provider-neutral overlay from authored localized names and resource paths; the entries are explicitly curated rather than inferred from rendered appearance. Later vision or embedding pipelines can extend the same seam without coupling the editor to an online model.
 
 ## Runtime and playtesting
 
@@ -53,3 +53,9 @@ Upstream MCP can execute Sakana, save/reload, capture the tool, and start/status
 ## Transaction boundary
 
 Mutating MCP calls validate first, then ask for MCP elicitation, submit one editor operation, return JSON containing a `changeid`, and keep a rollback closure. `rpgcobo_change_rollback` succeeds only while that change remains the newest editor operation. The normal editor undo tool is also exposed. Saving is deliberately separate via upstream `rpgcobo_runtime_save_all`.
+
+Experiment 002 found that `OperationStack.submit()` records and advances an operation before executing its redo array. If a redo tail such as an editor-list refresh throws, state and the undo cursor can change before MCP registers the change. `AgentNative.submitEditorOperation()` now catches that case and immediately invokes editor undo before returning the exception.
+
+The experiment also showed that tool reload is not a reliable revert/discard boundary: a partial draft survived `rpgcobo_runtime_reload_tool`. Agents must use guarded rollback or normal undo before later mutations, and the platform should eventually expose explicit save, reload, discard and restore commands with distinct semantics.
+
+Generic database mutation and live editor state are separate copies. A database-set call can report success while an open `MapEditor` retains stale data and overwrites the resource at its next save. The fork uses editor-backed commands for event updates and map renaming; a future generic setter needs explicit live-editor synchronization.

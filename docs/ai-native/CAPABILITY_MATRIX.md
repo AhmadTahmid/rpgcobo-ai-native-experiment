@@ -14,13 +14,14 @@ Audit baseline: upstream commit `4bbeb25` (`Minor bugfix`). “Existing” means
 | Open database item/editor | yes | yes, upstream | yes | low | A | `rpgcobo_editor_open_data` |
 | Current map metadata/size | yes | yes, fork | yes | low | A | Requires a database-backed map open in `MapEditor` |
 | Event list/get | yes | yes, fork | yes | low | A | Compact pagination plus full event retrieval |
-| Bounded terrain/occupancy summary | yes | yes, fork | yes | medium | A | Surface/material counts, elevation, events, free blocks, approximate traversal |
+| Bounded terrain/occupancy summary | yes | yes, fork | yes | medium | A | Surface/material counts, elevation, events, free blocks, approximate traversal, plus per-column planning grid |
 | Placed-object inspection | partial | yes, fork | yes | medium | A | Free blocks retain UIDs; baked MA source IDs do not retain provenance |
 | Single block/fill/clear mutation | yes | yes, fork | yes | medium | A | `BlockOperation`, editor undo, MCP elicitation and change rollback |
 | Place map asset | partial | yes, fork | partial | medium | A | Rotation 0 works; non-zero rejected because this build lacks upstream-called `Block.rotate` |
-| Move/remove placed object | partial | yes, fork | yes | medium | A | Works for free-block UID; arbitrary baked structures cannot be reconstructed as one asset |
+| Place/move/remove authored free-block object | yes | yes, fork | yes | medium | A | Typed placement has bounds/overlap checks; move/remove use UID; arbitrary baked structures cannot be reconstructed as one asset |
 | Create basic event/player start | yes | yes, fork | yes | medium | A | Uses role defaults, editor gizmos and undo |
-| Modify arbitrary existing event | yes | no | yes | medium | B | Can use database set/runtime execution, but no dedicated safe command yet |
+| Modify existing event | partial | yes, fork | yes | medium | A | Typed name/dialogue/model/color update and invalid-palette repair; role, position, conditions and arbitrary fields remain unsupported |
+| Rename open map | yes | yes, fork | yes | low | A | Editor-backed mutation persists correctly; generic database set can be overwritten by a stale open editor copy |
 | Semantic path | no | yes, fork | yes | medium | A | Seeded quadratic path compiled into reversible surface block operations |
 | Semantic pond | no | yes, fork | yes | medium | A | Seeded irregular footprint, explicit level/material |
 | Semantic forest patch/clearing | no | yes, fork | yes | medium | A | Authored tree free-block variations, density/spacing/cap/seed |
@@ -42,5 +43,5 @@ Audit baseline: upstream commit `4bbeb25` (`Minor bugfix`). “Existing” means
 ## Counts
 
 - Upstream MCP tools audited: 19.
-- Fork MCP tools added: 28.
-- Total registered and observed through native `tools/list`: 47.
+- Fork MCP tools added: 32.
+- Total registered and observed through native `tools/list`: 51.

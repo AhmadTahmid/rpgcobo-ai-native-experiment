@@ -160,7 +160,17 @@ class AgentNative
 		local oldcursor=ed.op.undocurs, self=this;
 		return ::mcpserv.processChange({
 			message=message,
-			commit=@(){ ed.submitOp(redo,undo,null); self.invalidateMapShot(ed); return true; },
+			commit=@(){
+				try{ ed.submitOp(redo,undo,null); self.invalidateMapShot(ed); return true; }
+				catch(ex){
+					// OperationStack records the operation before executing redo. If a
+					// UI refresh or other redo tail throws, undo the partially-applied
+					// operation immediately so an unregistered mutation cannot strand
+					// newer guarded rollbacks.
+					if(ed.op.undocurs==oldcursor+1)try{ed.op.undo();}catch(undoex){}
+					self.invalidateMapShot(ed);throw ex;
+				}
+			},
 			rollback=@(){
 				if(ed.op.undocurs!=oldcursor+1)return false;
 				local ok=ed.op.undo(); self.invalidateMapShot(ed); return ok;

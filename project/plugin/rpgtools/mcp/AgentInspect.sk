@@ -121,6 +121,30 @@ class AgentInspect
 			free_blocks={total=length(fbs),by_class=fbcounts}, events=events,
 		};
 	}
+
+	static function surfaceGrid( args){
+		local ed = AgentNative.requireMapEditor(), bw = ed.bw;
+		local x = AgentNative.intArg( args,"x",null,0,bw.w-1), z = AgentNative.intArg( args,"z",null,0,bw.d-1);
+		local w = AgentNative.intArg( args,"width",null,1,bw.w-x), d = AgentNative.intArg( args,"depth",null,1,bw.d-z);
+		local y0 = AgentNative.intArg( args,"y_min",0,0,bw.h-1), y1 = AgentNative.intArg( args,"y_max",bw.h-1,y0,bw.h-1);
+		AgentNative.checkRect( bw,x,y0,z,w,y1-y0+1,d);
+		local heights = [], blocks = [], traversable = [];
+		for( local zz=z; zz<z+d; ++zz){
+			local hrow=[], brow=[], trow=[];
+			for( local xx=x; xx<x+w; ++xx){
+				local sy=AgentNative.surfaceY(bw,xx,zz,y0,y1), sb=(sy>=0)?bw.blockat(xx,sy,zz):0;
+				hrow..sy; brow..sb;
+				local above=(sy>=0&&sy+1<bw.h)?bw.blockat(xx,sy+1,zz):0;
+				trow..!!(sy>=0 && (::Block.getFlags(sb)&BLK_SOLID) && !above);
+			}
+			heights..hrow; blocks..brow; traversable..trow;
+		}
+		return {
+			map_id=ed.mapid, origin=[x,z], width=w, depth=d, row_axis="z", column_axis="x",
+			y_range=[y0,y1], heights=heights, surface_blocks=blocks, traversable=traversable,
+			note="Each row is one increasing-z coordinate; -1 height means no surface in the requested y range. Traversability is approximate.",
+		};
+	}
 }
 
 local mcptools = ::MCPServer.MCPServerTools;
@@ -158,4 +182,12 @@ mcptools .. {
 		width={type="number",desc="Region width",required=true},depth={type="number",desc="Region depth",required=true},
 		y_min={type="number",desc="Minimum y","default"=0},y_max={type="number",desc="Maximum y; defaults to map height - 1"},
 	}, func=@(args) AgentNative.result( AgentInspect.regionSummary(args)),
+}
+mcptools .. {
+	name="rpgcobo_editor_map_get_surface_grid", desc="Returns a bounded per-column surface height, material, and approximate traversability grid for spatial planning.",
+	argdef={
+		x={type="number",desc="Region x",required=true},z={type="number",desc="Region z",required=true},
+		width={type="number",desc="Region width",required=true},depth={type="number",desc="Region depth",required=true},
+		y_min={type="number",desc="Minimum y","default"=0},y_max={type="number",desc="Maximum y; defaults to map height - 1"},
+	}, func=@(args) AgentNative.result( AgentInspect.surfaceGrid(args)),
 }
