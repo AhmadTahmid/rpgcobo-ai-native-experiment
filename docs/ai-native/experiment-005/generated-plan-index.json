@@ -1,0 +1,86 @@
+{
+  "schema": "rpgcobo.ai-native.generated-town-plan-index.v1",
+  "generated_at": "2026-09-02T17:34:23+0200",
+  "briefs": "docs/ai-native/experiment-005/briefs.json",
+  "input_coordinate_fields": 0,
+  "plans": [
+    {
+      "brief_id": "river_crossing",
+      "map_id": "M975",
+      "name": "Willowford",
+      "path": "docs/ai-native/experiment-005/generated-plan-river_crossing.json",
+      "checksum": "206c5a3c7c346477ab8ca5e496906a1046b377bb46e7be1f89757350d014496c",
+      "metrics": {
+        "generated_spatial_records": 63,
+        "input_coordinate_fields": 0,
+        "nodes": 6,
+        "active_routes": 5,
+        "obsolete_routes": 1,
+        "route_angle_bins_15deg": 5,
+        "districts": 4,
+        "plots": 8,
+        "buildings": 8,
+        "props": 20,
+        "plot_area_cv": 0.2382,
+        "mean_building_distance_by_phase": {
+          "founding": 18.534,
+          "bridge_market": 31.138,
+          "bank_consolidation": 52.996,
+          "late_housing": 37.897
+        }
+      }
+    },
+    {
+      "brief_id": "road_confluence",
+      "map_id": "M974",
+      "name": "Threeways",
+      "path": "docs/ai-native/experiment-005/generated-plan-road_confluence.json",
+      "checksum": "5cd57a53bf8f61369c780777f7db5f2e451931841a579113739c18fd10ba05fe",
+      "metrics": {
+        "generated_spatial_records": 69,
+        "input_coordinate_fields": 0,
+        "nodes": 8,
+        "active_routes": 5,
+        "obsolete_routes": 1,
+        "route_angle_bins_15deg": 6,
+        "districts": 4,
+        "plots": 8,
+        "buildings": 8,
+        "props": 24,
+        "plot_area_cv": 0.245,
+        "mean_building_distance_by_phase": {
+          "roadside_origin": 12.661,
+          "freight_turnout": 38.021,
+          "civic_response": 24.459,
+          "farm_edge_housing": 41.495
+        }
+      }
+    },
+    {
+      "brief_id": "civic_accretion",
+      "map_id": "M972",
+      "name": "Ashcourt",
+      "path": "docs/ai-native/experiment-005/generated-plan-civic_accretion.json",
+      "checksum": "3462c5213265ab31d756a61c90df2771bca5457003918e8898bdd4aea0654d63",
+      "metrics": {
+        "generated_spatial_records": 62,
+        "input_coordinate_fields": 0,
+        "nodes": 5,
+        "active_routes": 4,
+        "obsolete_routes": 1,
+        "route_angle_bins_15deg": 5,
+        "districts": 3,
+        "plots": 8,
+        "buildings": 8,
+        "props": 17,
+        "plot_area_cv": 0.471,
+        "mean_building_distance_by_phase": {
+          "formal_foundation": 14.939,
+          "market_shift": 40.287,
+          "plot_subdivision": 28.369,
+          "outer_accretion": 49.966
+        }
+      }
+    }
+  ]
+}

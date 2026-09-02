@@ -61,7 +61,7 @@ Recurring limitations should become design requirements for a future engine rath
 | 2 | Agent can discover assets, derive coordinates, construct a semantically detailed town, recover from failures, and playtest it | Experiment 002 complete |
 | 2b | Agent can create a template-free map and compose, validate, persist, and playtest a detailed town from a uniform plane | Experiment 003 complete |
 | 3 | Same system can revise an existing town from a changed brief and repair introduced defects | Not run |
-| 4 | Multiple briefs/seeds/templates produce coherent results without task-specific code changes | Partial: Experiment 004 compiled three causal, template-free grammars through one data-driven generator; cross-asset-pack transfer remains untested |
+| 4 | Multiple briefs/seeds/templates produce coherent results without task-specific code changes | Strong partial: Experiment 005 generated all spatial plans for three coordinate-free causal briefs through one deterministic simulator; cause modules and asset bindings remain authored, and cross-asset-pack transfer remains untested |
 | 5 | Interface abstractions transfer to another editor or a purpose-built prototype | Not run |
 
 ## Evaluation dimensions
@@ -77,11 +77,11 @@ Future experiments should report:
 - **Generalization:** whether the same interface handles changed goals and unfamiliar content.
 - **Efficiency:** tool calls, mutation granularity, output volume, and avoidable retries.
 
-## Preliminary answer after Experiment 004
+## Preliminary answer after Experiment 005
 
-RPG-Cobo can be made meaningfully agent-operable, and a constrained editor is a productive setting for AI-native research. Canalwatch demonstrated autonomous semantic infill over authored civil infrastructure. Linden Crossing demonstrated the stronger from-blank loop. Experiment 004 then generated visual concepts, decomposed them into style/grammar/binding artifacts, and compiled three causal towns through one data-driven generator. All three persisted with zero validation errors; the agent compared their actual captures, selected the trade-edge grammar, refined it, and verified runtime interaction.
+RPG-Cobo can be made meaningfully agent-operable, and a constrained editor is a productive setting for AI-native research. Canalwatch demonstrated autonomous semantic infill over authored civil infrastructure. Linden Crossing demonstrated the stronger from-blank loop. Experiment 004 generated visual concepts, decomposed them into style/grammar/binding artifacts, and compiled three causal towns through one data-driven generator. Experiment 005 removed the remaining authored route endpoints and plot rectangles: three briefs with zero coordinate fields produced Willowford, Threeways, and Ashcourt through a deterministic historical-growth simulator. All three persisted with zero validation errors; the agent compared their reloaded captures, selected Ashcourt for historical layering, refined it by semantic node, diagnosed a generated lamp blocking its generated guide, repaired the obstruction, and verified runtime interaction.
 
-The result is materially less axial than Linden Crossing and supports the user's proposed image-to-JSON idea with an important refinement: style alone is insufficient. Founding causes, phase history, negative capability, and concrete engine bindings are required. It is still not proof of a generally autonomous game-development platform. The three histories contain agent-authored normalized route and plot specifications, metadata remains curated, buildings remain rotation zero, navigation is approximate outside the runtime slice, and no interiors or quest chain exist. These boundaries are part of the result.
+The result is materially less axial than Linden Crossing and supports the user's proposed image-to-JSON idea with an important refinement: style alone is insufficient. Founding causes, phase history, negative capability, and concrete engine bindings are required. It is still not proof of a generally autonomous game-development platform. Cause-specific simulator modules and metadata remain authored, semantic identity lives in a sidecar plan rather than the engine, buildings remain rotation-constrained, navigation is approximate outside the runtime slice, no interiors or quest chain exist, and another asset pack has not been tested. These boundaries are part of the result.
 
 ## Requirements emerging for a purpose-built platform
 
@@ -96,11 +96,15 @@ The result is materially less axial than Linden Crossing and supports the user's
 - High-level planners should operate over persistent plots, roads, entrances, districts, and relationships rather than anonymous baked voxels.
 - Creative references should compile through separable visual-style, world-grammar, and engine-binding layers with explicit loss/substitution records.
 - Runtime orchestration should synchronize on observable state transitions such as target acquisition instead of fixed time delays.
+- Creation must atomically commit semantic database records, scene data, editor visibility, undo state, and persistence.
+- Critical interaction routes need reserved affordance envelopes that participate in placement and validation.
+- Placement and relocation tools need one canonical coordinate convention or explicit, typed transforms.
+- Visual captures need map identity, render revision, completion, and content-hash guarantees.
 
 ## Recommended next experiments
 
-1. Replace explicit normalized route/plot endpoints with a historical-growth simulator driven by compact causes, phase rules, population targets, and asset bindings.
-2. Apply a changed brief to Barrelstead, Canalwatch, or Linden Crossing while preserving existing residents, routes, and settlement identity.
-3. Prototype persistent semantic roads, plots, districts, building instances, entrances, and prop clusters.
-4. Introduce deliberate defects—blocked entrance, invalid event reference, isolated spawn—and require autonomous diagnosis and repair.
-5. Repeat the concept→grammar→binding pipeline against another asset pack or editor to test real transfer.
+1. Apply a changed brief to Ashcourt, Barrelstead, Canalwatch, or Linden Crossing while preserving existing residents, routes, phases, and settlement identity.
+2. Prototype persistent semantic roads, plots, districts, building instances, entrances, affordance envelopes, and prop clusters inside the engine rather than a sidecar plan.
+3. Introduce deliberate defects—invalid event reference, isolated spawn, severed district, and blocked entrance—and require autonomous diagnosis and repair across the whole map.
+4. Repeat the cause→history→binding pipeline against another asset pack or editor to test real transfer.
+5. Expand the simulator with a declarative cause language so new settlement pressures do not require new Python branches.

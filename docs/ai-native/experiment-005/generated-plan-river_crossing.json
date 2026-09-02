@@ -1,0 +1,1388 @@
+{
+  "schema": "rpgcobo.ai-native.generated-town-plan.v1",
+  "generator": "tools/historical_growth.py",
+  "brief_id": "river_crossing",
+  "map_id": "M975",
+  "name": "Willowford",
+  "seed": 5501,
+  "cause": {
+    "type": "river_crossing",
+    "river_axis": "east_west",
+    "crossing_band": "central",
+    "bridge_binding": "stone_bridge",
+    "pressure": "regional passage"
+  },
+  "story_motifs": [
+    "ford before bridge",
+    "two banks",
+    "bridgehead market",
+    "superseded approach"
+  ],
+  "map_size": [
+    128,
+    64,
+    128
+  ],
+  "nodes": [
+    {
+      "id": "node-01",
+      "kind": "crossing",
+      "point": [
+        60,
+        63
+      ],
+      "phase": "founding",
+      "cause": "ford"
+    },
+    {
+      "id": "node-02",
+      "kind": "gate",
+      "point": [
+        88,
+        5
+      ],
+      "phase": "founding",
+      "edge": "north"
+    },
+    {
+      "id": "node-03",
+      "kind": "gate",
+      "point": [
+        78,
+        122
+      ],
+      "phase": "founding",
+      "edge": "south"
+    },
+    {
+      "id": "node-04",
+      "kind": "market",
+      "point": [
+        37,
+        73
+      ],
+      "phase": "bridge_market"
+    },
+    {
+      "id": "node-05",
+      "kind": "civic",
+      "point": [
+        82,
+        54
+      ],
+      "phase": "bank_consolidation"
+    },
+    {
+      "id": "node-06",
+      "kind": "residential",
+      "point": [
+        85,
+        91
+      ],
+      "phase": "late_housing"
+    }
+  ],
+  "geography": [
+    {
+      "id": "geography-01",
+      "kind": "river",
+      "phase": "prehistory",
+      "material": "water",
+      "width": 5,
+      "curvature": 0.43,
+      "seed": 5501001,
+      "points": [
+        [
+          5,
+          69
+        ],
+        [
+          32,
+          66
+        ],
+        [
+          60,
+          63
+        ],
+        [
+          91,
+          58
+        ],
+        [
+          122,
+          66
+        ]
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "id": "route-01",
+      "kind": "primary_approach",
+      "phase": "founding",
+      "status": "active",
+      "material": "road",
+      "width": 5,
+      "curvature": 0.207,
+      "seed": 550101,
+      "points": [
+        [
+          88,
+          5
+        ],
+        [
+          74,
+          34
+        ],
+        [
+          60,
+          58
+        ]
+      ]
+    },
+    {
+      "id": "route-02",
+      "kind": "primary_approach",
+      "phase": "founding",
+      "status": "active",
+      "material": "road",
+      "width": 5,
+      "curvature": 0.316,
+      "seed": 550102,
+      "points": [
+        [
+          60,
+          68
+        ],
+        [
+          76,
+          92
+        ],
+        [
+          78,
+          122
+        ]
+      ]
+    },
+    {
+      "id": "route-03",
+      "kind": "bridgehead_lane",
+      "phase": "bridge_market",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.277,
+      "seed": 550103,
+      "points": [
+        [
+          60,
+          68
+        ],
+        [
+          37,
+          73
+        ]
+      ]
+    },
+    {
+      "id": "route-04",
+      "kind": "north_bank_lane",
+      "phase": "bank_consolidation",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.325,
+      "seed": 550104,
+      "points": [
+        [
+          60,
+          58
+        ],
+        [
+          82,
+          54
+        ]
+      ]
+    },
+    {
+      "id": "route-05",
+      "kind": "bank_expansion",
+      "phase": "late_housing",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.332,
+      "seed": 550105,
+      "points": [
+        [
+          37,
+          73
+        ],
+        [
+          85,
+          91
+        ]
+      ]
+    },
+    {
+      "id": "route-06",
+      "kind": "connector",
+      "phase": "founding",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.051,
+      "seed": 550106,
+      "points": [
+        [
+          63,
+          56
+        ],
+        [
+          66,
+          57
+        ]
+      ]
+    },
+    {
+      "id": "route-07",
+      "kind": "connector",
+      "phase": "founding",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.156,
+      "seed": 550107,
+      "points": [
+        [
+          53,
+          87
+        ],
+        [
+          64,
+          75
+        ]
+      ]
+    },
+    {
+      "id": "route-08",
+      "kind": "connector",
+      "phase": "bridge_market",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.156,
+      "seed": 550108,
+      "points": [
+        [
+          80,
+          85
+        ],
+        [
+          70,
+          83
+        ]
+      ]
+    },
+    {
+      "id": "route-09",
+      "kind": "connector",
+      "phase": "bridge_market",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.12,
+      "seed": 550109,
+      "points": [
+        [
+          48,
+          109
+        ],
+        [
+          56,
+          80
+        ]
+      ]
+    },
+    {
+      "id": "route-10",
+      "kind": "connector",
+      "phase": "bank_consolidation",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.151,
+      "seed": 550110,
+      "points": [
+        [
+          89,
+          104
+        ],
+        [
+          76,
+          97
+        ]
+      ]
+    },
+    {
+      "id": "route-11",
+      "kind": "connector",
+      "phase": "bank_consolidation",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.159,
+      "seed": 550111,
+      "points": [
+        [
+          91,
+          122
+        ],
+        [
+          78,
+          115
+        ]
+      ]
+    },
+    {
+      "id": "route-12",
+      "kind": "connector",
+      "phase": "late_housing",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.087,
+      "seed": 550112,
+      "points": [
+        [
+          82,
+          47
+        ],
+        [
+          72,
+          38
+        ]
+      ]
+    },
+    {
+      "id": "route-13",
+      "kind": "connector",
+      "phase": "late_housing",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.139,
+      "seed": 550113,
+      "points": [
+        [
+          73,
+          28
+        ],
+        [
+          79,
+          24
+        ]
+      ]
+    },
+    {
+      "id": "route-14",
+      "kind": "obsolete_route",
+      "phase": "route_abandonment",
+      "status": "obsolete",
+      "material": "dirt_track",
+      "width": 1,
+      "curvature": 0.36,
+      "seed": 550114,
+      "points": [
+        [
+          5,
+          29
+        ],
+        [
+          66,
+          77
+        ]
+      ]
+    }
+  ],
+  "districts": [
+    {
+      "id": "district-01",
+      "kind": "bridgehead",
+      "center_node": "node-01",
+      "phase": "founding",
+      "radius": 20,
+      "uses": [
+        "passage",
+        "inn",
+        "chapel"
+      ]
+    },
+    {
+      "id": "district-02",
+      "kind": "market",
+      "center_node": "node-04",
+      "phase": "bridge_market",
+      "radius": 18,
+      "uses": [
+        "commerce",
+        "meeting"
+      ]
+    },
+    {
+      "id": "district-03",
+      "kind": "civic",
+      "center_node": "node-05",
+      "phase": "bank_consolidation",
+      "radius": 17,
+      "uses": [
+        "administration",
+        "ceremony"
+      ]
+    },
+    {
+      "id": "district-04",
+      "kind": "bank_housing",
+      "center_node": "node-06",
+      "phase": "late_housing",
+      "radius": 26,
+      "uses": [
+        "residential",
+        "gardens"
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "surface-01",
+      "kind": "market_widening",
+      "phase": "bridge_market",
+      "material": "civic_stone",
+      "rect": [
+        28,
+        68,
+        18,
+        11
+      ]
+    },
+    {
+      "id": "surface-02",
+      "kind": "kitchen_garden",
+      "phase": "late_housing",
+      "material": "dirt_track",
+      "rect": [
+        76,
+        48,
+        11,
+        7
+      ],
+      "building": "building-07"
+    },
+    {
+      "id": "surface-03",
+      "kind": "kitchen_garden",
+      "phase": "late_housing",
+      "material": "dirt_track",
+      "rect": [
+        67,
+        8,
+        11,
+        5
+      ],
+      "building": "building-08"
+    }
+  ],
+  "ponds": [],
+  "infrastructure": [
+    {
+      "id": "infrastructure-01",
+      "kind": "bridge",
+      "binding": "stone_bridge",
+      "phase": "bridge_market",
+      "origin": [
+        57,
+        1,
+        58
+      ],
+      "rect": [
+        57,
+        58,
+        6,
+        9
+      ],
+      "asset_size": [
+        6,
+        3,
+        9
+      ]
+    }
+  ],
+  "plots": [
+    {
+      "id": "plot-01",
+      "phase": "founding",
+      "district": "district-01",
+      "rect": [
+        54,
+        34,
+        18,
+        23
+      ],
+      "frontage_route": "route-04",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-02",
+      "phase": "founding",
+      "district": "district-02",
+      "rect": [
+        38,
+        73,
+        30,
+        16
+      ],
+      "frontage_route": "route-02",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-03",
+      "phase": "bridge_market",
+      "district": "district-04",
+      "rect": [
+        68,
+        64,
+        24,
+        24
+      ],
+      "frontage_route": "route-02",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-04",
+      "phase": "bridge_market",
+      "district": "district-02",
+      "rect": [
+        33,
+        89,
+        30,
+        21
+      ],
+      "frontage_route": "route-05",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-05",
+      "phase": "bank_consolidation",
+      "district": "district-04",
+      "rect": [
+        77,
+        90,
+        24,
+        16
+      ],
+      "frontage_route": "route-02",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-06",
+      "phase": "bank_consolidation",
+      "district": "district-04",
+      "rect": [
+        82,
+        106,
+        18,
+        18
+      ],
+      "frontage_route": "route-02",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-07",
+      "phase": "late_housing",
+      "district": "district-03",
+      "rect": [
+        72,
+        30,
+        20,
+        20
+      ],
+      "frontage_route": "route-01",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-08",
+      "phase": "late_housing",
+      "district": "district-03",
+      "rect": [
+        64,
+        12,
+        18,
+        18
+      ],
+      "frontage_route": "route-01",
+      "status": "occupied"
+    }
+  ],
+  "buildings": [
+    {
+      "id": "building-01",
+      "role": "chapel",
+      "binding": "church",
+      "phase": "founding",
+      "district": "district-01",
+      "plot": "plot-01",
+      "rect": [
+        56,
+        36,
+        14,
+        19
+      ],
+      "origin": [
+        56,
+        1,
+        36
+      ],
+      "asset_size": [
+        14,
+        23,
+        19
+      ],
+      "entrance": [
+        63,
+        56
+      ],
+      "connect_to": [
+        66,
+        57
+      ],
+      "frontage_route": "route-04",
+      "inhabitant": "priest",
+      "message": "The old ford still decides where every lane bends. People gathered here before the settlement had a proper name.",
+      "rotation": 0,
+      "placement_score": 18.603,
+      "connector_route": "route-06"
+    },
+    {
+      "id": "building-02",
+      "role": "crossing inn",
+      "binding": "long_house",
+      "phase": "founding",
+      "district": "district-02",
+      "plot": "plot-02",
+      "rect": [
+        41,
+        76,
+        24,
+        10
+      ],
+      "origin": [
+        41,
+        1,
+        76
+      ],
+      "asset_size": [
+        24,
+        12,
+        10
+      ],
+      "entrance": [
+        53,
+        87
+      ],
+      "connect_to": [
+        64,
+        75
+      ],
+      "frontage_route": "route-02",
+      "inhabitant": "bard",
+      "message": "The old ford still decides where every lane bends. Travellers stop where geography makes them slow down.",
+      "rotation": 0,
+      "placement_score": 26.177,
+      "connector_route": "route-07"
+    },
+    {
+      "id": "building-03",
+      "role": "shop",
+      "binding": "shop",
+      "phase": "bridge_market",
+      "district": "district-04",
+      "plot": "plot-03",
+      "rect": [
+        72,
+        68,
+        16,
+        16
+      ],
+      "origin": [
+        72,
+        1,
+        68
+      ],
+      "asset_size": [
+        16,
+        13,
+        16
+      ],
+      "entrance": [
+        80,
+        85
+      ],
+      "connect_to": [
+        70,
+        83
+      ],
+      "frontage_route": "route-02",
+      "inhabitant": "merchant",
+      "message": "The old ford still decides where every lane bends. Trade follows the route people actually use, not the one on the plan.",
+      "rotation": 0,
+      "placement_score": 41.068,
+      "connector_route": "route-08"
+    },
+    {
+      "id": "building-04",
+      "role": "town hall",
+      "binding": "town_hall",
+      "phase": "bridge_market",
+      "district": "district-02",
+      "plot": "plot-04",
+      "rect": [
+        35,
+        91,
+        26,
+        17
+      ],
+      "origin": [
+        35,
+        1,
+        91
+      ],
+      "asset_size": [
+        26,
+        20,
+        17
+      ],
+      "entrance": [
+        48,
+        109
+      ],
+      "connect_to": [
+        56,
+        80
+      ],
+      "frontage_route": "route-05",
+      "inhabitant": "mayor",
+      "message": "The old ford still decides where every lane bends. We keep records of additions that were never meant to be permanent.",
+      "rotation": 0,
+      "placement_score": 43.86,
+      "connector_route": "route-09"
+    },
+    {
+      "id": "building-05",
+      "role": "warehouse",
+      "binding": "warehouse",
+      "phase": "bank_consolidation",
+      "district": "district-04",
+      "plot": "plot-05",
+      "rect": [
+        80,
+        93,
+        18,
+        10
+      ],
+      "origin": [
+        80,
+        1,
+        93
+      ],
+      "asset_size": [
+        18,
+        12,
+        10
+      ],
+      "entrance": [
+        89,
+        104
+      ],
+      "connect_to": [
+        76,
+        97
+      ],
+      "frontage_route": "route-02",
+      "inhabitant": "farmer",
+      "message": "The old ford still decides where every lane bends. Goods need space, so the road always widens around us.",
+      "rotation": 0,
+      "placement_score": 20.504,
+      "connector_route": "route-10"
+    },
+    {
+      "id": "building-06",
+      "role": "large house",
+      "binding": "large_house",
+      "phase": "bank_consolidation",
+      "district": "district-04",
+      "plot": "plot-06",
+      "rect": [
+        85,
+        109,
+        12,
+        12
+      ],
+      "origin": [
+        85,
+        1,
+        109
+      ],
+      "asset_size": [
+        12,
+        12,
+        12
+      ],
+      "entrance": [
+        91,
+        122
+      ],
+      "connect_to": [
+        78,
+        115
+      ],
+      "frontage_route": "route-02",
+      "inhabitant": "resident",
+      "message": "The old ford still decides where every lane bends. The lane arrived after the garden, then cut it in half.",
+      "rotation": 0,
+      "placement_score": 42.922,
+      "connector_route": "route-11"
+    },
+    {
+      "id": "building-07",
+      "role": "brick house",
+      "binding": "brick_house_1",
+      "phase": "late_housing",
+      "district": "district-03",
+      "plot": "plot-07",
+      "rect": [
+        76,
+        34,
+        12,
+        12
+      ],
+      "origin": [
+        76,
+        1,
+        34
+      ],
+      "asset_size": [
+        12,
+        11,
+        12
+      ],
+      "entrance": [
+        82,
+        47
+      ],
+      "connect_to": [
+        72,
+        38
+      ],
+      "frontage_route": "route-01",
+      "inhabitant": "old man",
+      "message": "The old ford still decides where every lane bends. The old boundary survives as a shortcut now.",
+      "rotation": 0,
+      "placement_score": 47.576,
+      "connector_route": "route-12"
+    },
+    {
+      "id": "building-08",
+      "role": "wooden house",
+      "binding": "wooden_house",
+      "phase": "late_housing",
+      "district": "district-03",
+      "plot": "plot-08",
+      "rect": [
+        67,
+        15,
+        12,
+        12
+      ],
+      "origin": [
+        67,
+        1,
+        15
+      ],
+      "asset_size": [
+        12,
+        10,
+        12
+      ],
+      "entrance": [
+        73,
+        28
+      ],
+      "connect_to": [
+        79,
+        24
+      ],
+      "frontage_route": "route-01",
+      "inhabitant": "boy",
+      "message": "The old ford still decides where every lane bends. The newest homes always know the oldest back paths.",
+      "rotation": 0,
+      "placement_score": 62.492,
+      "connector_route": "route-13"
+    }
+  ],
+  "props": [
+    {
+      "id": "prop-01",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        89,
+        13
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-02",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        84,
+        24
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-03",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        82,
+        30
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-04",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        68,
+        76
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-05",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        68,
+        85
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-06",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        76,
+        89
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-07",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        73,
+        100
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-08",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        73,
+        108
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-09",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        75,
+        119
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-10",
+      "kind": "table",
+      "cluster": "market",
+      "point": [
+        28,
+        73
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-11",
+      "kind": "table",
+      "cluster": "market",
+      "point": [
+        36,
+        76
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-12",
+      "kind": "bench",
+      "cluster": "market",
+      "point": [
+        36,
+        82
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-13",
+      "kind": "well",
+      "cluster": "market",
+      "point": [
+        29,
+        79
+      ],
+      "rotation": 3,
+      "radius": 3
+    },
+    {
+      "id": "prop-14",
+      "kind": "lamp",
+      "cluster": "market",
+      "point": [
+        41,
+        72
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-15",
+      "kind": "bench",
+      "cluster": "civic",
+      "point": [
+        78,
+        52
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-16",
+      "kind": "bench",
+      "cluster": "civic",
+      "point": [
+        92,
+        50
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-17",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-05",
+      "point": [
+        86,
+        88
+      ],
+      "rotation": 3,
+      "radius": 3
+    },
+    {
+      "id": "prop-18",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-06",
+      "point": [
+        101,
+        110
+      ],
+      "rotation": 3,
+      "radius": 3
+    },
+    {
+      "id": "prop-19",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-07",
+      "point": [
+        92,
+        42
+      ],
+      "rotation": 3,
+      "radius": 3
+    },
+    {
+      "id": "prop-20",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-08",
+      "point": [
+        62,
+        24
+      ],
+      "rotation": 2,
+      "radius": 3
+    }
+  ],
+  "forest_patches": [
+    {
+      "id": "forest-01",
+      "kind": "edge_grove",
+      "rect": [
+        6,
+        49,
+        11,
+        28
+      ],
+      "density": 0.597,
+      "clearing_rate": 0.403,
+      "spacing": 6,
+      "max_count": 19,
+      "seed": 55011
+    },
+    {
+      "id": "forest-02",
+      "kind": "edge_grove",
+      "rect": [
+        6,
+        6,
+        25,
+        13
+      ],
+      "density": 0.578,
+      "clearing_rate": 0.392,
+      "spacing": 6,
+      "max_count": 12,
+      "seed": 55012
+    },
+    {
+      "id": "forest-03",
+      "kind": "edge_grove",
+      "rect": [
+        97,
+        6,
+        25,
+        13
+      ],
+      "density": 0.582,
+      "clearing_rate": 0.382,
+      "spacing": 5,
+      "max_count": 22,
+      "seed": 55013
+    }
+  ],
+  "phases": [
+    {
+      "id": "founding",
+      "growth_rule": "cluster_at_cause",
+      "program": [
+        {
+          "role": "chapel",
+          "binding": "church",
+          "inhabitant": "priest"
+        },
+        {
+          "role": "crossing inn",
+          "binding": "long_house",
+          "inhabitant": "bard"
+        }
+      ],
+      "created_buildings": [
+        "building-01",
+        "building-02"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 0,
+        "routes": 5,
+        "infrastructure": 1
+      },
+      "after": {
+        "buildings": 2,
+        "routes": 7,
+        "infrastructure": 1
+      }
+    },
+    {
+      "id": "bridge_market",
+      "growth_rule": "market_frontage",
+      "program": [
+        {
+          "role": "shop",
+          "binding": "shop",
+          "inhabitant": "merchant"
+        },
+        {
+          "role": "town hall",
+          "binding": "town_hall",
+          "inhabitant": "mayor"
+        }
+      ],
+      "created_buildings": [
+        "building-03",
+        "building-04"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 2,
+        "routes": 7,
+        "infrastructure": 1
+      },
+      "after": {
+        "buildings": 4,
+        "routes": 9,
+        "infrastructure": 1
+      }
+    },
+    {
+      "id": "bank_consolidation",
+      "growth_rule": "route_frontage",
+      "program": [
+        {
+          "role": "warehouse",
+          "binding": "warehouse",
+          "inhabitant": "farmer"
+        },
+        {
+          "role": "large house",
+          "binding": "large_house",
+          "inhabitant": "resident"
+        }
+      ],
+      "created_buildings": [
+        "building-05",
+        "building-06"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 4,
+        "routes": 9,
+        "infrastructure": 1
+      },
+      "after": {
+        "buildings": 6,
+        "routes": 11,
+        "infrastructure": 1
+      }
+    },
+    {
+      "id": "late_housing",
+      "growth_rule": "edge_expansion",
+      "program": [
+        {
+          "role": "brick house",
+          "binding": "brick_house_1",
+          "inhabitant": "old man"
+        },
+        {
+          "role": "wooden house",
+          "binding": "wooden_house",
+          "inhabitant": "boy"
+        }
+      ],
+      "created_buildings": [
+        "building-07",
+        "building-08"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 6,
+        "routes": 11,
+        "infrastructure": 1
+      },
+      "after": {
+        "buildings": 8,
+        "routes": 13,
+        "infrastructure": 1
+      }
+    },
+    {
+      "id": "route_abandonment",
+      "growth_rule": "leave_obsolete_trace",
+      "program": [],
+      "created_buildings": [],
+      "created_history_marks": [
+        "route-14"
+      ],
+      "before": {
+        "buildings": 8,
+        "routes": 13,
+        "infrastructure": 1
+      },
+      "after": {
+        "buildings": 8,
+        "routes": 14,
+        "infrastructure": 1
+      }
+    }
+  ],
+  "entry": {
+    "gate_node": "node-03",
+    "player": [
+      78,
+      120
+    ],
+    "guide": [
+      78,
+      115
+    ],
+    "guide_model": "guard",
+    "message": "Welcome to Willowford. Follow the oldest active route toward the river crossing."
+  },
+  "decisions": [
+    {
+      "decision": "derive causal geometry from seed and topology",
+      "cause_type": "river_crossing",
+      "input_coordinates": 0,
+      "generated_nodes": 6,
+      "generated_routes": 5
+    }
+  ],
+  "metrics": {
+    "generated_spatial_records": 63,
+    "input_coordinate_fields": 0,
+    "nodes": 6,
+    "active_routes": 5,
+    "obsolete_routes": 1,
+    "route_angle_bins_15deg": 5,
+    "districts": 4,
+    "plots": 8,
+    "buildings": 8,
+    "props": 20,
+    "plot_area_cv": 0.2382,
+    "mean_building_distance_by_phase": {
+      "founding": 18.534,
+      "bridge_market": 31.138,
+      "bank_consolidation": 52.996,
+      "late_housing": 37.897
+    }
+  },
+  "checksum": "206c5a3c7c346477ab8ca5e496906a1046b377bb46e7be1f89757350d014496c"
+}

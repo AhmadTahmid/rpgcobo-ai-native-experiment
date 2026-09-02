@@ -1,0 +1,168 @@
+{
+  "schema": "rpgcobo.ai-native.historical-growth-briefs.v1",
+  "purpose": "Compact causal inputs for Experiment 005. Spatial coordinates, road endpoints, plot rectangles, and building anchors are forbidden in this file.",
+  "shared_constraints": {
+    "map_size": [128, 64, 128],
+    "ground_block": 1,
+    "ground_layers": 1,
+    "edge_margin_blocks": 5,
+    "building_clearance_blocks": 3,
+    "target_building_count": 8,
+    "target_inhabitant_count": 8,
+    "primary_road_width": 5,
+    "secondary_road_width": 3,
+    "tertiary_road_width": 2,
+    "plot_depth_variation": "high",
+    "building_rotation": 0,
+    "preserve_semantic_instances": true
+  },
+  "settlements": [
+    {
+      "id": "river_crossing",
+      "map_id": "M975",
+      "name": "Willowford",
+      "seed": 5501,
+      "cause": {
+        "type": "river_crossing",
+        "river_axis": "east_west",
+        "crossing_band": "central",
+        "bridge_binding": "stone_bridge",
+        "pressure": "regional passage"
+      },
+      "phases": [
+        {
+          "id": "founding",
+          "growth_rule": "cluster_at_cause",
+          "program": [
+            {"role": "chapel", "binding": "church", "inhabitant": "priest"},
+            {"role": "crossing inn", "binding": "long_house", "inhabitant": "bard"}
+          ]
+        },
+        {
+          "id": "bridge_market",
+          "growth_rule": "market_frontage",
+          "program": [
+            {"role": "shop", "binding": "shop", "inhabitant": "merchant"},
+            {"role": "town hall", "binding": "town_hall", "inhabitant": "mayor"}
+          ]
+        },
+        {
+          "id": "bank_consolidation",
+          "growth_rule": "route_frontage",
+          "program": [
+            {"role": "warehouse", "binding": "warehouse", "inhabitant": "farmer"},
+            {"role": "large house", "binding": "large_house", "inhabitant": "resident"}
+          ]
+        },
+        {
+          "id": "late_housing",
+          "growth_rule": "edge_expansion",
+          "program": [
+            {"role": "brick house", "binding": "brick_house_1", "inhabitant": "old man"},
+            {"role": "wooden house", "binding": "wooden_house", "inhabitant": "boy"}
+          ]
+        },
+        {"id": "route_abandonment", "growth_rule": "leave_obsolete_trace", "program": []}
+      ],
+      "story_motifs": ["ford before bridge", "two banks", "bridgehead market", "superseded approach"]
+    },
+    {
+      "id": "road_confluence",
+      "map_id": "M974",
+      "name": "Threeways",
+      "seed": 5502,
+      "cause": {
+        "type": "road_confluence",
+        "gate_count": 3,
+        "through_route": true,
+        "freight_pressure": "high",
+        "pressure": "movement and exchange"
+      },
+      "phases": [
+        {
+          "id": "roadside_origin",
+          "growth_rule": "cluster_at_cause",
+          "program": [
+            {"role": "roadside inn", "binding": "long_house", "inhabitant": "bard"},
+            {"role": "shop", "binding": "shop", "inhabitant": "merchant"}
+          ]
+        },
+        {
+          "id": "freight_turnout",
+          "growth_rule": "freight_expansion",
+          "program": [
+            {"role": "warehouse", "binding": "warehouse", "inhabitant": "farmer"},
+            {"role": "town hall", "binding": "town_hall", "inhabitant": "mayor"}
+          ]
+        },
+        {
+          "id": "civic_response",
+          "growth_rule": "civic_infill",
+          "program": [
+            {"role": "church", "binding": "church", "inhabitant": "priest"},
+            {"role": "apartment", "binding": "apartment", "inhabitant": "resident"}
+          ]
+        },
+        {
+          "id": "farm_edge_housing",
+          "growth_rule": "edge_expansion",
+          "program": [
+            {"role": "brick house", "binding": "brick_house_2", "inhabitant": "old man"},
+            {"role": "wooden house", "binding": "wooden_house", "inhabitant": "boy"}
+          ]
+        },
+        {"id": "field_boundary_loss", "growth_rule": "leave_obsolete_trace", "program": []}
+      ],
+      "story_motifs": ["three road gates", "freight turnout", "leftover civic ground", "erased field boundary"]
+    },
+    {
+      "id": "civic_accretion",
+      "map_id": "M972",
+      "name": "Ashcourt",
+      "seed": 5503,
+      "cause": {
+        "type": "civic_accretion",
+        "initial_order": "formal",
+        "later_pressure": "piecemeal enclosure",
+        "surviving_boundary_binding": "old_wall",
+        "pressure": "administration followed by private growth"
+      },
+      "phases": [
+        {
+          "id": "formal_foundation",
+          "growth_rule": "civic_infill",
+          "program": [
+            {"role": "town hall", "binding": "town_hall", "inhabitant": "mayor"},
+            {"role": "church", "binding": "church", "inhabitant": "priest"}
+          ]
+        },
+        {
+          "id": "market_shift",
+          "growth_rule": "market_frontage",
+          "program": [
+            {"role": "shop", "binding": "shop", "inhabitant": "merchant"},
+            {"role": "long house", "binding": "long_house", "inhabitant": "bard"}
+          ]
+        },
+        {
+          "id": "plot_subdivision",
+          "growth_rule": "route_frontage",
+          "program": [
+            {"role": "apartment", "binding": "apartment", "inhabitant": "resident"},
+            {"role": "large house", "binding": "large_house", "inhabitant": "old man"}
+          ]
+        },
+        {
+          "id": "outer_accretion",
+          "growth_rule": "edge_expansion",
+          "program": [
+            {"role": "brick house", "binding": "brick_house_1", "inhabitant": "farmer"},
+            {"role": "wooden house", "binding": "wooden_house", "inhabitant": "boy"}
+          ]
+        },
+        {"id": "enclosure_decay", "growth_rule": "leave_boundary_fragment", "program": []}
+      ],
+      "story_motifs": ["formal court", "displaced market", "subdivided plots", "surviving wall fragment"]
+    }
+  ]
+}

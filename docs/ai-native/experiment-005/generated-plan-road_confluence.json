@@ -1,0 +1,1415 @@
+{
+  "schema": "rpgcobo.ai-native.generated-town-plan.v1",
+  "generator": "tools/historical_growth.py",
+  "brief_id": "road_confluence",
+  "map_id": "M974",
+  "name": "Threeways",
+  "seed": 5502,
+  "cause": {
+    "type": "road_confluence",
+    "gate_count": 3,
+    "through_route": true,
+    "freight_pressure": "high",
+    "pressure": "movement and exchange"
+  },
+  "story_motifs": [
+    "three road gates",
+    "freight turnout",
+    "leftover civic ground",
+    "erased field boundary"
+  ],
+  "map_size": [
+    128,
+    64,
+    128
+  ],
+  "nodes": [
+    {
+      "id": "node-01",
+      "kind": "junction",
+      "point": [
+        57,
+        60
+      ],
+      "phase": "roadside_origin"
+    },
+    {
+      "id": "node-02",
+      "kind": "gate",
+      "point": [
+        5,
+        78
+      ],
+      "phase": "roadside_origin",
+      "edge": "west"
+    },
+    {
+      "id": "node-03",
+      "kind": "gate",
+      "point": [
+        122,
+        58
+      ],
+      "phase": "roadside_origin",
+      "edge": "east"
+    },
+    {
+      "id": "node-04",
+      "kind": "gate",
+      "point": [
+        94,
+        5
+      ],
+      "phase": "roadside_origin",
+      "edge": "north"
+    },
+    {
+      "id": "node-05",
+      "kind": "freight",
+      "point": [
+        95,
+        41
+      ],
+      "phase": "freight_turnout"
+    },
+    {
+      "id": "node-06",
+      "kind": "market",
+      "point": [
+        57,
+        70
+      ],
+      "phase": "roadside_origin"
+    },
+    {
+      "id": "node-07",
+      "kind": "civic",
+      "point": [
+        58,
+        84
+      ],
+      "phase": "civic_response"
+    },
+    {
+      "id": "node-08",
+      "kind": "residential",
+      "point": [
+        56,
+        32
+      ],
+      "phase": "farm_edge_housing"
+    }
+  ],
+  "geography": [],
+  "routes": [
+    {
+      "id": "route-01",
+      "kind": "regional_through_road",
+      "phase": "roadside_origin",
+      "status": "active",
+      "material": "road",
+      "width": 5,
+      "curvature": 0.325,
+      "seed": 550201,
+      "points": [
+        [
+          5,
+          78
+        ],
+        [
+          31,
+          72
+        ],
+        [
+          57,
+          60
+        ],
+        [
+          90,
+          63
+        ],
+        [
+          122,
+          58
+        ]
+      ]
+    },
+    {
+      "id": "route-02",
+      "kind": "third_road",
+      "phase": "roadside_origin",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.122,
+      "seed": 550202,
+      "points": [
+        [
+          94,
+          5
+        ],
+        [
+          84,
+          32
+        ],
+        [
+          57,
+          60
+        ]
+      ]
+    },
+    {
+      "id": "route-03",
+      "kind": "freight_spur",
+      "phase": "freight_turnout",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.34,
+      "seed": 550203,
+      "points": [
+        [
+          57,
+          60
+        ],
+        [
+          95,
+          41
+        ]
+      ]
+    },
+    {
+      "id": "route-04",
+      "kind": "civic_spur",
+      "phase": "civic_response",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.165,
+      "seed": 550204,
+      "points": [
+        [
+          57,
+          60
+        ],
+        [
+          58,
+          84
+        ]
+      ]
+    },
+    {
+      "id": "route-05",
+      "kind": "farm_edge_lane",
+      "phase": "farm_edge_housing",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.332,
+      "seed": 550205,
+      "points": [
+        [
+          57,
+          60
+        ],
+        [
+          56,
+          32
+        ]
+      ]
+    },
+    {
+      "id": "route-06",
+      "kind": "connector",
+      "phase": "roadside_origin",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.14,
+      "seed": 550206,
+      "points": [
+        [
+          59,
+          52
+        ],
+        [
+          63,
+          57
+        ]
+      ]
+    },
+    {
+      "id": "route-07",
+      "kind": "connector",
+      "phase": "roadside_origin",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.166,
+      "seed": 550207,
+      "points": [
+        [
+          67,
+          74
+        ],
+        [
+          57,
+          64
+        ]
+      ]
+    },
+    {
+      "id": "route-08",
+      "kind": "connector",
+      "phase": "freight_turnout",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.099,
+      "seed": 550208,
+      "points": [
+        [
+          88,
+          52
+        ],
+        [
+          86,
+          63
+        ]
+      ]
+    },
+    {
+      "id": "route-09",
+      "kind": "connector",
+      "phase": "freight_turnout",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.164,
+      "seed": 550209,
+      "points": [
+        [
+          81,
+          35
+        ],
+        [
+          90,
+          43
+        ]
+      ]
+    },
+    {
+      "id": "route-10",
+      "kind": "connector",
+      "phase": "civic_response",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.138,
+      "seed": 550210,
+      "points": [
+        [
+          46,
+          82
+        ],
+        [
+          58,
+          72
+        ]
+      ]
+    },
+    {
+      "id": "route-11",
+      "kind": "connector",
+      "phase": "civic_response",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.155,
+      "seed": 550211,
+      "points": [
+        [
+          24,
+          70
+        ],
+        [
+          28,
+          73
+        ]
+      ]
+    },
+    {
+      "id": "route-12",
+      "kind": "connector",
+      "phase": "farm_edge_housing",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.148,
+      "seed": 550212,
+      "points": [
+        [
+          96,
+          80
+        ],
+        [
+          95,
+          62
+        ]
+      ]
+    },
+    {
+      "id": "route-13",
+      "kind": "connector",
+      "phase": "farm_edge_housing",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.159,
+      "seed": 550213,
+      "points": [
+        [
+          22,
+          90
+        ],
+        [
+          22,
+          74
+        ]
+      ]
+    },
+    {
+      "id": "route-14",
+      "kind": "obsolete_route",
+      "phase": "field_boundary_loss",
+      "status": "obsolete",
+      "material": "dirt_track",
+      "width": 1,
+      "curvature": 0.475,
+      "seed": 550214,
+      "points": [
+        [
+          32,
+          122
+        ],
+        [
+          51,
+          74
+        ]
+      ]
+    }
+  ],
+  "districts": [
+    {
+      "id": "district-01",
+      "kind": "confluence",
+      "center_node": "node-01",
+      "phase": "roadside_origin",
+      "radius": 18,
+      "uses": [
+        "inn",
+        "commerce",
+        "movement"
+      ]
+    },
+    {
+      "id": "district-02",
+      "kind": "freight",
+      "center_node": "node-05",
+      "phase": "freight_turnout",
+      "radius": 21,
+      "uses": [
+        "storage",
+        "loading"
+      ]
+    },
+    {
+      "id": "district-03",
+      "kind": "civic",
+      "center_node": "node-07",
+      "phase": "civic_response",
+      "radius": 19,
+      "uses": [
+        "administration",
+        "ceremony"
+      ]
+    },
+    {
+      "id": "district-04",
+      "kind": "farm_edge",
+      "center_node": "node-08",
+      "phase": "farm_edge_housing",
+      "radius": 27,
+      "uses": [
+        "residential",
+        "gardens"
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "surface-01",
+      "kind": "freight_yard",
+      "phase": "freight_turnout",
+      "material": "civic_stone",
+      "rect": [
+        79,
+        29,
+        32,
+        24
+      ]
+    },
+    {
+      "id": "surface-02",
+      "kind": "roadside_market",
+      "phase": "roadside_origin",
+      "material": "civic_stone",
+      "rect": [
+        48,
+        65,
+        17,
+        10
+      ]
+    },
+    {
+      "id": "surface-03",
+      "kind": "kitchen_garden",
+      "phase": "freight_turnout",
+      "material": "dirt_track",
+      "rect": [
+        82,
+        53,
+        11,
+        6
+      ],
+      "building": "building-03"
+    },
+    {
+      "id": "surface-04",
+      "kind": "kitchen_garden",
+      "phase": "farm_edge_housing",
+      "material": "dirt_track",
+      "rect": [
+        90,
+        81,
+        11,
+        8
+      ],
+      "building": "building-07"
+    }
+  ],
+  "ponds": [],
+  "infrastructure": [],
+  "plots": [
+    {
+      "id": "plot-01",
+      "phase": "roadside_origin",
+      "district": "district-01",
+      "rect": [
+        44,
+        38,
+        30,
+        16
+      ],
+      "frontage_route": "route-03",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-02",
+      "phase": "roadside_origin",
+      "district": "district-01",
+      "rect": [
+        57,
+        55,
+        20,
+        20
+      ],
+      "frontage_route": "route-04",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-03",
+      "phase": "freight_turnout",
+      "district": "district-02",
+      "rect": [
+        76,
+        38,
+        24,
+        16
+      ],
+      "frontage_route": "route-01",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-04",
+      "phase": "freight_turnout",
+      "district": "district-02",
+      "rect": [
+        66,
+        15,
+        30,
+        21
+      ],
+      "frontage_route": "route-03",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-05",
+      "phase": "civic_response",
+      "district": "district-01",
+      "rect": [
+        36,
+        59,
+        20,
+        25
+      ],
+      "frontage_route": "route-04",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-06",
+      "phase": "civic_response",
+      "district": "district-01",
+      "rect": [
+        12,
+        49,
+        24,
+        23
+      ],
+      "frontage_route": "route-01",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-07",
+      "phase": "farm_edge_housing",
+      "district": "district-02",
+      "rect": [
+        87,
+        65,
+        18,
+        16
+      ],
+      "frontage_route": "route-01",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-08",
+      "phase": "farm_edge_housing",
+      "district": "district-03",
+      "rect": [
+        13,
+        74,
+        18,
+        18
+      ],
+      "frontage_route": "route-01",
+      "status": "occupied"
+    }
+  ],
+  "buildings": [
+    {
+      "id": "building-01",
+      "role": "roadside inn",
+      "binding": "long_house",
+      "phase": "roadside_origin",
+      "district": "district-01",
+      "plot": "plot-01",
+      "rect": [
+        47,
+        41,
+        24,
+        10
+      ],
+      "origin": [
+        47,
+        1,
+        41
+      ],
+      "asset_size": [
+        24,
+        12,
+        10
+      ],
+      "entrance": [
+        59,
+        52
+      ],
+      "connect_to": [
+        63,
+        57
+      ],
+      "frontage_route": "route-03",
+      "inhabitant": "bard",
+      "message": "Every road claims it reached Threeways first. The inn faces movement rather than ceremony.",
+      "rotation": 0,
+      "placement_score": 14.951,
+      "connector_route": "route-06"
+    },
+    {
+      "id": "building-02",
+      "role": "shop",
+      "binding": "shop",
+      "phase": "roadside_origin",
+      "district": "district-01",
+      "plot": "plot-02",
+      "rect": [
+        59,
+        57,
+        16,
+        16
+      ],
+      "origin": [
+        59,
+        1,
+        57
+      ],
+      "asset_size": [
+        16,
+        13,
+        16
+      ],
+      "entrance": [
+        67,
+        74
+      ],
+      "connect_to": [
+        57,
+        64
+      ],
+      "frontage_route": "route-04",
+      "inhabitant": "merchant",
+      "message": "Every road claims it reached Threeways first. Trade follows the route people actually use, not the one on the plan.",
+      "rotation": 0,
+      "placement_score": 15.047,
+      "connector_route": "route-07"
+    },
+    {
+      "id": "building-03",
+      "role": "warehouse",
+      "binding": "warehouse",
+      "phase": "freight_turnout",
+      "district": "district-02",
+      "plot": "plot-03",
+      "rect": [
+        79,
+        41,
+        18,
+        10
+      ],
+      "origin": [
+        79,
+        1,
+        41
+      ],
+      "asset_size": [
+        18,
+        12,
+        10
+      ],
+      "entrance": [
+        88,
+        52
+      ],
+      "connect_to": [
+        86,
+        63
+      ],
+      "frontage_route": "route-01",
+      "inhabitant": "farmer",
+      "message": "Every road claims it reached Threeways first. Goods need space, so the road always widens around us.",
+      "rotation": 0,
+      "placement_score": 19.94,
+      "connector_route": "route-08"
+    },
+    {
+      "id": "building-04",
+      "role": "town hall",
+      "binding": "town_hall",
+      "phase": "freight_turnout",
+      "district": "district-02",
+      "plot": "plot-04",
+      "rect": [
+        68,
+        17,
+        26,
+        17
+      ],
+      "origin": [
+        68,
+        1,
+        17
+      ],
+      "asset_size": [
+        26,
+        20,
+        17
+      ],
+      "entrance": [
+        81,
+        35
+      ],
+      "connect_to": [
+        90,
+        43
+      ],
+      "frontage_route": "route-03",
+      "inhabitant": "mayor",
+      "message": "Every road claims it reached Threeways first. We keep records of additions that were never meant to be permanent.",
+      "rotation": 0,
+      "placement_score": 35.741,
+      "connector_route": "route-09"
+    },
+    {
+      "id": "building-05",
+      "role": "church",
+      "binding": "church",
+      "phase": "civic_response",
+      "district": "district-01",
+      "plot": "plot-05",
+      "rect": [
+        39,
+        62,
+        14,
+        19
+      ],
+      "origin": [
+        39,
+        1,
+        62
+      ],
+      "asset_size": [
+        14,
+        23,
+        19
+      ],
+      "entrance": [
+        46,
+        82
+      ],
+      "connect_to": [
+        58,
+        72
+      ],
+      "frontage_route": "route-04",
+      "inhabitant": "priest",
+      "message": "Every road claims it reached Threeways first. The bells mark an older center than the market does.",
+      "rotation": 0,
+      "placement_score": 20.62,
+      "connector_route": "route-10"
+    },
+    {
+      "id": "building-06",
+      "role": "apartment",
+      "binding": "apartment",
+      "phase": "civic_response",
+      "district": "district-01",
+      "plot": "plot-06",
+      "rect": [
+        15,
+        52,
+        18,
+        17
+      ],
+      "origin": [
+        15,
+        1,
+        52
+      ],
+      "asset_size": [
+        18,
+        16,
+        17
+      ],
+      "entrance": [
+        24,
+        70
+      ],
+      "connect_to": [
+        28,
+        73
+      ],
+      "frontage_route": "route-01",
+      "inhabitant": "resident",
+      "message": "Every road claims it reached Threeways first. Our plot was divided from two older holdings.",
+      "rotation": 0,
+      "placement_score": 45.215,
+      "connector_route": "route-11"
+    },
+    {
+      "id": "building-07",
+      "role": "brick house",
+      "binding": "brick_house_2",
+      "phase": "farm_edge_housing",
+      "district": "district-02",
+      "plot": "plot-07",
+      "rect": [
+        89,
+        67,
+        14,
+        12
+      ],
+      "origin": [
+        89,
+        1,
+        67
+      ],
+      "asset_size": [
+        14,
+        11,
+        12
+      ],
+      "entrance": [
+        96,
+        80
+      ],
+      "connect_to": [
+        95,
+        62
+      ],
+      "frontage_route": "route-01",
+      "inhabitant": "old man",
+      "message": "Every road claims it reached Threeways first. The old boundary survives as a shortcut now.",
+      "rotation": 0,
+      "placement_score": 52.335,
+      "connector_route": "route-12"
+    },
+    {
+      "id": "building-08",
+      "role": "wooden house",
+      "binding": "wooden_house",
+      "phase": "farm_edge_housing",
+      "district": "district-03",
+      "plot": "plot-08",
+      "rect": [
+        16,
+        77,
+        12,
+        12
+      ],
+      "origin": [
+        16,
+        1,
+        77
+      ],
+      "asset_size": [
+        12,
+        10,
+        12
+      ],
+      "entrance": [
+        22,
+        90
+      ],
+      "connect_to": [
+        22,
+        74
+      ],
+      "frontage_route": "route-01",
+      "inhabitant": "boy",
+      "message": "Every road claims it reached Threeways first. The newest homes always know the oldest back paths.",
+      "rotation": 0,
+      "placement_score": 54.951,
+      "connector_route": "route-13"
+    }
+  ],
+  "props": [
+    {
+      "id": "prop-01",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        9,
+        72
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-02",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        18,
+        72
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-03",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        31,
+        73
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-04",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        50,
+        58
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-05",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        79,
+        65
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-06",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        86,
+        59
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-07",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        103,
+        63
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-08",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        112,
+        59
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-09",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        116,
+        64
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-10",
+      "kind": "table",
+      "cluster": "market",
+      "point": [
+        60,
+        78
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-11",
+      "kind": "barrel",
+      "cluster": "freight",
+      "point": [
+        103,
+        37
+      ],
+      "rotation": 3,
+      "radius": 1
+    },
+    {
+      "id": "prop-12",
+      "kind": "barrel",
+      "cluster": "freight",
+      "point": [
+        100,
+        52
+      ],
+      "rotation": 0,
+      "radius": 1
+    },
+    {
+      "id": "prop-13",
+      "kind": "barrel",
+      "cluster": "freight",
+      "point": [
+        100,
+        41
+      ],
+      "rotation": 3,
+      "radius": 1
+    },
+    {
+      "id": "prop-14",
+      "kind": "barrel",
+      "cluster": "freight",
+      "point": [
+        97,
+        36
+      ],
+      "rotation": 1,
+      "radius": 1
+    },
+    {
+      "id": "prop-15",
+      "kind": "table",
+      "cluster": "freight",
+      "point": [
+        107,
+        41
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-16",
+      "kind": "lamp",
+      "cluster": "freight",
+      "point": [
+        86,
+        37
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-17",
+      "kind": "bench",
+      "cluster": "civic",
+      "point": [
+        54,
+        86
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-18",
+      "kind": "bench",
+      "cluster": "civic",
+      "point": [
+        67,
+        84
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-19",
+      "kind": "flowerbed",
+      "cluster": "civic",
+      "point": [
+        61,
+        89
+      ],
+      "rotation": 2,
+      "radius": 3
+    },
+    {
+      "id": "prop-20",
+      "kind": "flowerbed",
+      "cluster": "civic",
+      "point": [
+        55,
+        94
+      ],
+      "rotation": 3,
+      "radius": 3
+    },
+    {
+      "id": "prop-21",
+      "kind": "well",
+      "cluster": "civic",
+      "point": [
+        68,
+        77
+      ],
+      "rotation": 2,
+      "radius": 3
+    },
+    {
+      "id": "prop-22",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-03",
+      "point": [
+        92,
+        55
+      ],
+      "rotation": 0,
+      "radius": 3
+    },
+    {
+      "id": "prop-23",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-07",
+      "point": [
+        94,
+        84
+      ],
+      "rotation": 2,
+      "radius": 3
+    },
+    {
+      "id": "prop-24",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-08",
+      "point": [
+        18,
+        93
+      ],
+      "rotation": 2,
+      "radius": 3
+    }
+  ],
+  "forest_patches": [
+    {
+      "id": "forest-01",
+      "kind": "edge_grove",
+      "rect": [
+        6,
+        6,
+        25,
+        13
+      ],
+      "density": 0.62,
+      "clearing_rate": 0.373,
+      "spacing": 5,
+      "max_count": 15,
+      "seed": 55021
+    },
+    {
+      "id": "forest-02",
+      "kind": "edge_grove",
+      "rect": [
+        6,
+        108,
+        27,
+        14
+      ],
+      "density": 0.488,
+      "clearing_rate": 0.303,
+      "spacing": 6,
+      "max_count": 15,
+      "seed": 55022
+    },
+    {
+      "id": "forest-03",
+      "kind": "edge_grove",
+      "rect": [
+        95,
+        108,
+        27,
+        14
+      ],
+      "density": 0.549,
+      "clearing_rate": 0.26,
+      "spacing": 6,
+      "max_count": 19,
+      "seed": 55023
+    }
+  ],
+  "phases": [
+    {
+      "id": "roadside_origin",
+      "growth_rule": "cluster_at_cause",
+      "program": [
+        {
+          "role": "roadside inn",
+          "binding": "long_house",
+          "inhabitant": "bard"
+        },
+        {
+          "role": "shop",
+          "binding": "shop",
+          "inhabitant": "merchant"
+        }
+      ],
+      "created_buildings": [
+        "building-01",
+        "building-02"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 0,
+        "routes": 5,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 2,
+        "routes": 7,
+        "infrastructure": 0
+      }
+    },
+    {
+      "id": "freight_turnout",
+      "growth_rule": "freight_expansion",
+      "program": [
+        {
+          "role": "warehouse",
+          "binding": "warehouse",
+          "inhabitant": "farmer"
+        },
+        {
+          "role": "town hall",
+          "binding": "town_hall",
+          "inhabitant": "mayor"
+        }
+      ],
+      "created_buildings": [
+        "building-03",
+        "building-04"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 2,
+        "routes": 7,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 4,
+        "routes": 9,
+        "infrastructure": 0
+      }
+    },
+    {
+      "id": "civic_response",
+      "growth_rule": "civic_infill",
+      "program": [
+        {
+          "role": "church",
+          "binding": "church",
+          "inhabitant": "priest"
+        },
+        {
+          "role": "apartment",
+          "binding": "apartment",
+          "inhabitant": "resident"
+        }
+      ],
+      "created_buildings": [
+        "building-05",
+        "building-06"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 4,
+        "routes": 9,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 6,
+        "routes": 11,
+        "infrastructure": 0
+      }
+    },
+    {
+      "id": "farm_edge_housing",
+      "growth_rule": "edge_expansion",
+      "program": [
+        {
+          "role": "brick house",
+          "binding": "brick_house_2",
+          "inhabitant": "old man"
+        },
+        {
+          "role": "wooden house",
+          "binding": "wooden_house",
+          "inhabitant": "boy"
+        }
+      ],
+      "created_buildings": [
+        "building-07",
+        "building-08"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 6,
+        "routes": 11,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 8,
+        "routes": 13,
+        "infrastructure": 0
+      }
+    },
+    {
+      "id": "field_boundary_loss",
+      "growth_rule": "leave_obsolete_trace",
+      "program": [],
+      "created_buildings": [],
+      "created_history_marks": [
+        "route-14"
+      ],
+      "before": {
+        "buildings": 8,
+        "routes": 13,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 8,
+        "routes": 14,
+        "infrastructure": 0
+      }
+    }
+  ],
+  "entry": {
+    "gate_node": "node-02",
+    "player": [
+      7,
+      78
+    ],
+    "guide": [
+      11,
+      77
+    ],
+    "guide_model": "guard",
+    "message": "Welcome to Threeways. Follow the oldest active route toward the road confluence."
+  },
+  "decisions": [
+    {
+      "decision": "derive causal geometry from seed and topology",
+      "cause_type": "road_confluence",
+      "input_coordinates": 0,
+      "generated_nodes": 8,
+      "generated_routes": 5
+    }
+  ],
+  "metrics": {
+    "generated_spatial_records": 69,
+    "input_coordinate_fields": 0,
+    "nodes": 8,
+    "active_routes": 5,
+    "obsolete_routes": 1,
+    "route_angle_bins_15deg": 6,
+    "districts": 4,
+    "plots": 8,
+    "buildings": 8,
+    "props": 24,
+    "plot_area_cv": 0.245,
+    "mean_building_distance_by_phase": {
+      "roadside_origin": 12.661,
+      "freight_turnout": 38.021,
+      "civic_response": 24.459,
+      "farm_edge_housing": 41.495
+    }
+  },
+  "checksum": "5cd57a53bf8f61369c780777f7db5f2e451931841a579113739c18fd10ba05fe"
+}

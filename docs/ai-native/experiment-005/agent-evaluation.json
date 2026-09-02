@@ -1,0 +1,105 @@
+{
+  "schema": "rpgcobo.ai-native.historical-growth-visual-evaluation.v1",
+  "evaluated_on": "2026-09-02",
+  "evaluator": "autonomous agent visual review",
+  "evidence": {
+    "river_crossing": "work/agent-output/M975-river_crossing-reloaded.png",
+    "road_confluence": "work/agent-output/M974-road_confluence-reloaded.png",
+    "civic_accretion": "work/agent-output/M972-civic_accretion-reloaded.png"
+  },
+  "method": "The three captures were reviewed only after a save, complete RPG-Cobo reload, and reopen. Structural metrics were used as supporting evidence, not as a substitute for visual judgment.",
+  "criteria": {
+    "causal_legibility": "Can a viewer infer the settlement's originating cause?",
+    "historical_layering": "Are multiple periods simultaneously visible in routes, plots, land use, and leftover fabric?",
+    "coherent_irregularity": "Does asymmetry appear caused rather than random?",
+    "spatial_hierarchy": "Are primary routes, civic or commercial spaces, and minor connectors distinct?",
+    "density_and_proportion": "Do occupied and open areas suit the RPG-Cobo map scale?",
+    "functional_character": "Do distinct areas suggest different activities?",
+    "technical_readability": "Does the compiled result remain readable despite asset and rotation constraints?"
+  },
+  "visual_scores": {
+    "river_crossing": {
+      "causal_legibility": 9.4,
+      "historical_layering": 8.2,
+      "coherent_irregularity": 8.5,
+      "spatial_hierarchy": 8.7,
+      "density_and_proportion": 7.0,
+      "functional_character": 8.0,
+      "technical_readability": 8.4,
+      "overall": 8.31,
+      "strengths": [
+        "The river, ford trace, bridge, and opposing approaches explain the settlement immediately.",
+        "Buildings occupy unequal bank-specific clusters rather than forming a generic central ring.",
+        "The abandoned approach remains visible without competing with the active crossing."
+      ],
+      "weaknesses": [
+        "The crossing zone has more open ground than the implied traffic pressure would normally permit.",
+        "One market prop was rejected and two inhabitants share a position with the entry logic, weakening local activity.",
+        "The rigid building rotations still contrast with the more organic route geometry."
+      ]
+    },
+    "road_confluence": {
+      "causal_legibility": 8.8,
+      "historical_layering": 7.6,
+      "coherent_irregularity": 7.5,
+      "spatial_hierarchy": 8.7,
+      "density_and_proportion": 6.8,
+      "functional_character": 7.8,
+      "technical_readability": 9.1,
+      "overall": 8.04,
+      "strengths": [
+        "Several arrival roads visibly converge and buildings respond to more than one frontage.",
+        "The freight turnout and outer farm edges are distinct from the civic center.",
+        "Every planned prop was accepted and the map reloaded without event-overlap warnings."
+      ],
+      "weaknesses": [
+        "The oversized paved center and basin make the result feel designed in one operation.",
+        "Radial connectors are more diagrammatic than historically pressured.",
+        "The settlement edge is sparse enough that late growth reads as decoration rather than accretion."
+      ]
+    },
+    "civic_accretion": {
+      "causal_legibility": 8.4,
+      "historical_layering": 9.2,
+      "coherent_irregularity": 9.0,
+      "spatial_hierarchy": 8.8,
+      "density_and_proportion": 7.8,
+      "functional_character": 8.7,
+      "technical_readability": 8.5,
+      "overall": 8.63,
+      "strengths": [
+        "The old diagonal route, offset civic court, displaced market, later residential node, and decayed enclosure visibly disagree in a productive way.",
+        "Two paved centers imply a real shift in importance rather than a single timeless town square.",
+        "The 0.471 plot-area variation is visible in the unequal building masses and setbacks.",
+        "Open space is divided into legible episodes instead of forming one undifferentiated void."
+      ],
+      "weaknesses": [
+        "The market and civic courts need more evidence of repeated everyday use.",
+        "Two outer inhabitants occupy the same connector target, producing a non-fatal overlap warning.",
+        "Some late buildings remain isolated because available assets cannot rotate to follow their frontage."
+      ]
+    }
+  },
+  "selected_variant": "civic_accretion",
+  "selection_reason": "Ashcourt is the best test of the historical-growth claim. Willowford most clearly explains why a town exists and Threeways is technically the cleanest, but Ashcourt most convincingly shows time: an initial civic geometry, a market that moved off-center, subdivided plots, outer accretion, and a decaying enclosure all remain visible together. Its irregularity is therefore causal and layered rather than simply picturesque.",
+  "selected_refinement": {
+    "intent": "Increase evidence of use at the generated market, civic, and residential nodes without supplying positions or rewriting the simulated geometry.",
+    "prop_clusters": [
+      {
+        "node_kind": "market",
+        "props": ["table", "table", "bench", "lamp"],
+        "radius": 13
+      },
+      {
+        "node_kind": "civic_core",
+        "props": ["bench", "lamp", "flowerbed"],
+        "radius": 12
+      },
+      {
+        "node_kind": "residential",
+        "props": ["flowerbed", "flowerbed", "bench"],
+        "radius": 11
+      }
+    ]
+  }
+}

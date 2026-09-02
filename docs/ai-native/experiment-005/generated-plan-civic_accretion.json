@@ -1,0 +1,1333 @@
+{
+  "schema": "rpgcobo.ai-native.generated-town-plan.v1",
+  "generator": "tools/historical_growth.py",
+  "brief_id": "civic_accretion",
+  "map_id": "M972",
+  "name": "Ashcourt",
+  "seed": 5503,
+  "cause": {
+    "type": "civic_accretion",
+    "initial_order": "formal",
+    "later_pressure": "piecemeal enclosure",
+    "surviving_boundary_binding": "old_wall",
+    "pressure": "administration followed by private growth"
+  },
+  "story_motifs": [
+    "formal court",
+    "displaced market",
+    "subdivided plots",
+    "surviving wall fragment"
+  ],
+  "map_size": [
+    128,
+    64,
+    128
+  ],
+  "nodes": [
+    {
+      "id": "node-01",
+      "kind": "civic_core",
+      "point": [
+        57,
+        55
+      ],
+      "phase": "formal_foundation"
+    },
+    {
+      "id": "node-02",
+      "kind": "gate",
+      "point": [
+        60,
+        5
+      ],
+      "phase": "formal_foundation",
+      "edge": "north"
+    },
+    {
+      "id": "node-03",
+      "kind": "gate",
+      "point": [
+        63,
+        122
+      ],
+      "phase": "formal_foundation",
+      "edge": "south"
+    },
+    {
+      "id": "node-04",
+      "kind": "market",
+      "point": [
+        34,
+        66
+      ],
+      "phase": "market_shift"
+    },
+    {
+      "id": "node-05",
+      "kind": "residential",
+      "point": [
+        83,
+        79
+      ],
+      "phase": "outer_accretion"
+    }
+  ],
+  "geography": [],
+  "routes": [
+    {
+      "id": "route-01",
+      "kind": "formal_axis",
+      "phase": "formal_foundation",
+      "status": "active",
+      "material": "road",
+      "width": 5,
+      "curvature": 0.03,
+      "seed": 550301,
+      "points": [
+        [
+          60,
+          5
+        ],
+        [
+          57,
+          55
+        ]
+      ]
+    },
+    {
+      "id": "route-02",
+      "kind": "adapted_axis",
+      "phase": "plot_subdivision",
+      "status": "active",
+      "material": "road",
+      "width": 5,
+      "curvature": 0.19,
+      "seed": 550302,
+      "points": [
+        [
+          57,
+          55
+        ],
+        [
+          63,
+          122
+        ]
+      ]
+    },
+    {
+      "id": "route-03",
+      "kind": "market_lane",
+      "phase": "market_shift",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.395,
+      "seed": 550303,
+      "points": [
+        [
+          57,
+          55
+        ],
+        [
+          34,
+          66
+        ],
+        [
+          5,
+          97
+        ]
+      ]
+    },
+    {
+      "id": "route-04",
+      "kind": "subdivision_lane",
+      "phase": "plot_subdivision",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 3,
+      "curvature": 0.181,
+      "seed": 550304,
+      "points": [
+        [
+          57,
+          55
+        ],
+        [
+          83,
+          79
+        ],
+        [
+          122,
+          86
+        ]
+      ]
+    },
+    {
+      "id": "route-05",
+      "kind": "connector",
+      "phase": "formal_foundation",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.126,
+      "seed": 550305,
+      "points": [
+        [
+          47,
+          53
+        ],
+        [
+          53,
+          57
+        ]
+      ]
+    },
+    {
+      "id": "route-06",
+      "kind": "connector",
+      "phase": "formal_foundation",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.147,
+      "seed": 550306,
+      "points": [
+        [
+          55,
+          80
+        ],
+        [
+          51,
+          58
+        ]
+      ]
+    },
+    {
+      "id": "route-07",
+      "kind": "connector",
+      "phase": "market_shift",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.128,
+      "seed": 550307,
+      "points": [
+        [
+          20,
+          76
+        ],
+        [
+          26,
+          75
+        ]
+      ]
+    },
+    {
+      "id": "route-08",
+      "kind": "connector",
+      "phase": "market_shift",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.119,
+      "seed": 550308,
+      "points": [
+        [
+          36,
+          97
+        ],
+        [
+          22,
+          78
+        ]
+      ]
+    },
+    {
+      "id": "route-09",
+      "kind": "connector",
+      "phase": "plot_subdivision",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.1,
+      "seed": 550309,
+      "points": [
+        [
+          77,
+          91
+        ],
+        [
+          59,
+          82
+        ]
+      ]
+    },
+    {
+      "id": "route-10",
+      "kind": "connector",
+      "phase": "plot_subdivision",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.073,
+      "seed": 550310,
+      "points": [
+        [
+          80,
+          67
+        ],
+        [
+          74,
+          70
+        ]
+      ]
+    },
+    {
+      "id": "route-11",
+      "kind": "connector",
+      "phase": "outer_accretion",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.079,
+      "seed": 550311,
+      "points": [
+        [
+          101,
+          76
+        ],
+        [
+          99,
+          82
+        ]
+      ]
+    },
+    {
+      "id": "route-12",
+      "kind": "connector",
+      "phase": "outer_accretion",
+      "status": "active",
+      "material": "dirt_track",
+      "width": 2,
+      "curvature": 0.127,
+      "seed": 550312,
+      "points": [
+        [
+          96,
+          99
+        ],
+        [
+          99,
+          82
+        ]
+      ]
+    },
+    {
+      "id": "route-13",
+      "kind": "obsolete_boundary",
+      "phase": "enclosure_decay",
+      "status": "obsolete",
+      "material": "dirt_track",
+      "width": 1,
+      "curvature": 0.07,
+      "seed": 550313,
+      "points": [
+        [
+          48,
+          42
+        ],
+        [
+          8,
+          40
+        ]
+      ]
+    }
+  ],
+  "districts": [
+    {
+      "id": "district-01",
+      "kind": "old_court",
+      "center_node": "node-01",
+      "phase": "formal_foundation",
+      "radius": 19,
+      "uses": [
+        "administration",
+        "ceremony"
+      ]
+    },
+    {
+      "id": "district-02",
+      "kind": "shifted_market",
+      "center_node": "node-04",
+      "phase": "market_shift",
+      "radius": 18,
+      "uses": [
+        "commerce",
+        "meeting"
+      ]
+    },
+    {
+      "id": "district-03",
+      "kind": "subdivided_plots",
+      "center_node": "node-05",
+      "phase": "plot_subdivision",
+      "radius": 29,
+      "uses": [
+        "residential",
+        "gardens"
+      ]
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "surface-01",
+      "kind": "old_civic_court",
+      "phase": "formal_foundation",
+      "material": "civic_stone",
+      "rect": [
+        44,
+        44,
+        25,
+        21
+      ]
+    },
+    {
+      "id": "surface-02",
+      "kind": "shifted_market",
+      "phase": "market_shift",
+      "material": "civic_stone",
+      "rect": [
+        26,
+        62,
+        16,
+        9
+      ]
+    },
+    {
+      "id": "surface-03",
+      "kind": "kitchen_garden",
+      "phase": "market_shift",
+      "material": "dirt_track",
+      "rect": [
+        30,
+        98,
+        11,
+        8
+      ],
+      "building": "building-04"
+    },
+    {
+      "id": "surface-04",
+      "kind": "kitchen_garden",
+      "phase": "plot_subdivision",
+      "material": "dirt_track",
+      "rect": [
+        71,
+        92,
+        11,
+        5
+      ],
+      "building": "building-05"
+    },
+    {
+      "id": "surface-05",
+      "kind": "kitchen_garden",
+      "phase": "outer_accretion",
+      "material": "dirt_track",
+      "rect": [
+        95,
+        77,
+        11,
+        6
+      ],
+      "building": "building-07"
+    },
+    {
+      "id": "surface-06",
+      "kind": "kitchen_garden",
+      "phase": "outer_accretion",
+      "material": "dirt_track",
+      "rect": [
+        90,
+        76,
+        11,
+        8
+      ],
+      "building": "building-08"
+    }
+  ],
+  "ponds": [
+    {
+      "id": "pond-01",
+      "kind": "court_basin",
+      "phase": "formal_foundation",
+      "center": [
+        54,
+        53
+      ],
+      "radius": 4,
+      "irregularity": 0.07,
+      "seed": 550391
+    }
+  ],
+  "infrastructure": [
+    {
+      "id": "infrastructure-01",
+      "kind": "boundary_fragment",
+      "binding": "old_wall",
+      "phase": "enclosure_decay",
+      "origin": [
+        19,
+        1,
+        30
+      ],
+      "rect": [
+        19,
+        30,
+        22,
+        2
+      ],
+      "asset_size": [
+        22,
+        5,
+        2
+      ]
+    }
+  ],
+  "plots": [
+    {
+      "id": "plot-01",
+      "phase": "formal_foundation",
+      "district": "district-01",
+      "rect": [
+        29,
+        30,
+        36,
+        27
+      ],
+      "frontage_route": "route-03",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-02",
+      "phase": "formal_foundation",
+      "district": "district-01",
+      "rect": [
+        45,
+        57,
+        20,
+        25
+      ],
+      "frontage_route": "route-03",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-03",
+      "phase": "market_shift",
+      "district": "district-02",
+      "rect": [
+        10,
+        57,
+        20,
+        20
+      ],
+      "frontage_route": "route-03",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-04",
+      "phase": "market_shift",
+      "district": "district-02",
+      "rect": [
+        21,
+        83,
+        30,
+        16
+      ],
+      "frontage_route": "route-03",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-05",
+      "phase": "plot_subdivision",
+      "district": "district-03",
+      "rect": [
+        66,
+        71,
+        22,
+        21
+      ],
+      "frontage_route": "route-02",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-06",
+      "phase": "plot_subdivision",
+      "district": "district-03",
+      "rect": [
+        71,
+        51,
+        18,
+        18
+      ],
+      "frontage_route": "route-04",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-07",
+      "phase": "outer_accretion",
+      "district": "district-03",
+      "rect": [
+        93,
+        61,
+        16,
+        16
+      ],
+      "frontage_route": "route-04",
+      "status": "occupied"
+    },
+    {
+      "id": "plot-08",
+      "phase": "outer_accretion",
+      "district": "district-03",
+      "rect": [
+        88,
+        84,
+        16,
+        16
+      ],
+      "frontage_route": "route-04",
+      "status": "occupied"
+    }
+  ],
+  "buildings": [
+    {
+      "id": "building-01",
+      "role": "town hall",
+      "binding": "town_hall",
+      "phase": "formal_foundation",
+      "district": "district-01",
+      "plot": "plot-01",
+      "rect": [
+        34,
+        35,
+        26,
+        17
+      ],
+      "origin": [
+        34,
+        1,
+        35
+      ],
+      "asset_size": [
+        26,
+        20,
+        17
+      ],
+      "entrance": [
+        47,
+        53
+      ],
+      "connect_to": [
+        53,
+        57
+      ],
+      "frontage_route": "route-03",
+      "inhabitant": "mayor",
+      "message": "The court was measured before the plots began to shift. We keep records of additions that were never meant to be permanent.",
+      "rotation": 0,
+      "placement_score": 14.074,
+      "connector_route": "route-05"
+    },
+    {
+      "id": "building-02",
+      "role": "church",
+      "binding": "church",
+      "phase": "formal_foundation",
+      "district": "district-01",
+      "plot": "plot-02",
+      "rect": [
+        48,
+        60,
+        14,
+        19
+      ],
+      "origin": [
+        48,
+        1,
+        60
+      ],
+      "asset_size": [
+        14,
+        23,
+        19
+      ],
+      "entrance": [
+        55,
+        80
+      ],
+      "connect_to": [
+        51,
+        58
+      ],
+      "frontage_route": "route-03",
+      "inhabitant": "priest",
+      "message": "The court was measured before the plots began to shift. The bells mark an older center than the market does.",
+      "rotation": 0,
+      "placement_score": 19.373,
+      "connector_route": "route-06"
+    },
+    {
+      "id": "building-03",
+      "role": "shop",
+      "binding": "shop",
+      "phase": "market_shift",
+      "district": "district-02",
+      "plot": "plot-03",
+      "rect": [
+        12,
+        59,
+        16,
+        16
+      ],
+      "origin": [
+        12,
+        1,
+        59
+      ],
+      "asset_size": [
+        16,
+        13,
+        16
+      ],
+      "entrance": [
+        20,
+        76
+      ],
+      "connect_to": [
+        26,
+        75
+      ],
+      "frontage_route": "route-03",
+      "inhabitant": "merchant",
+      "message": "The court was measured before the plots began to shift. Trade follows the route people actually use, not the one on the plan.",
+      "rotation": 0,
+      "placement_score": 25.325,
+      "connector_route": "route-07"
+    },
+    {
+      "id": "building-04",
+      "role": "long house",
+      "binding": "long_house",
+      "phase": "market_shift",
+      "district": "district-02",
+      "plot": "plot-04",
+      "rect": [
+        24,
+        86,
+        24,
+        10
+      ],
+      "origin": [
+        24,
+        1,
+        86
+      ],
+      "asset_size": [
+        24,
+        12,
+        10
+      ],
+      "entrance": [
+        36,
+        97
+      ],
+      "connect_to": [
+        22,
+        78
+      ],
+      "frontage_route": "route-03",
+      "inhabitant": "bard",
+      "message": "The court was measured before the plots began to shift. This building has served more purposes than its owners remember.",
+      "rotation": 0,
+      "placement_score": 41.043,
+      "connector_route": "route-08"
+    },
+    {
+      "id": "building-05",
+      "role": "apartment",
+      "binding": "apartment",
+      "phase": "plot_subdivision",
+      "district": "district-03",
+      "plot": "plot-05",
+      "rect": [
+        68,
+        73,
+        18,
+        17
+      ],
+      "origin": [
+        68,
+        1,
+        73
+      ],
+      "asset_size": [
+        18,
+        16,
+        17
+      ],
+      "entrance": [
+        77,
+        91
+      ],
+      "connect_to": [
+        59,
+        82
+      ],
+      "frontage_route": "route-02",
+      "inhabitant": "resident",
+      "message": "The court was measured before the plots began to shift. Our plot was divided from two older holdings.",
+      "rotation": 0,
+      "placement_score": 17.519,
+      "connector_route": "route-09"
+    },
+    {
+      "id": "building-06",
+      "role": "large house",
+      "binding": "large_house",
+      "phase": "plot_subdivision",
+      "district": "district-03",
+      "plot": "plot-06",
+      "rect": [
+        74,
+        54,
+        12,
+        12
+      ],
+      "origin": [
+        74,
+        1,
+        54
+      ],
+      "asset_size": [
+        12,
+        12,
+        12
+      ],
+      "entrance": [
+        80,
+        67
+      ],
+      "connect_to": [
+        74,
+        70
+      ],
+      "frontage_route": "route-04",
+      "inhabitant": "old man",
+      "message": "The court was measured before the plots began to shift. The lane arrived after the garden, then cut it in half.",
+      "rotation": 0,
+      "placement_score": 18.953,
+      "connector_route": "route-10"
+    },
+    {
+      "id": "building-07",
+      "role": "brick house",
+      "binding": "brick_house_1",
+      "phase": "outer_accretion",
+      "district": "district-03",
+      "plot": "plot-07",
+      "rect": [
+        95,
+        63,
+        12,
+        12
+      ],
+      "origin": [
+        95,
+        1,
+        63
+      ],
+      "asset_size": [
+        12,
+        11,
+        12
+      ],
+      "entrance": [
+        101,
+        76
+      ],
+      "connect_to": [
+        99,
+        82
+      ],
+      "frontage_route": "route-04",
+      "inhabitant": "farmer",
+      "message": "The court was measured before the plots began to shift. The old boundary survives as a shortcut now.",
+      "rotation": 0,
+      "placement_score": 23.374,
+      "connector_route": "route-11"
+    },
+    {
+      "id": "building-08",
+      "role": "wooden house",
+      "binding": "wooden_house",
+      "phase": "outer_accretion",
+      "district": "district-03",
+      "plot": "plot-08",
+      "rect": [
+        90,
+        86,
+        12,
+        12
+      ],
+      "origin": [
+        90,
+        1,
+        86
+      ],
+      "asset_size": [
+        12,
+        10,
+        12
+      ],
+      "entrance": [
+        96,
+        99
+      ],
+      "connect_to": [
+        99,
+        82
+      ],
+      "frontage_route": "route-04",
+      "inhabitant": "boy",
+      "message": "The court was measured before the plots began to shift. The newest homes always know the oldest back paths.",
+      "rotation": 0,
+      "placement_score": 29.754,
+      "connector_route": "route-12"
+    }
+  ],
+  "props": [
+    {
+      "id": "prop-01",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        59,
+        15
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-02",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        63,
+        33
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-03",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        63,
+        47
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-04",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        59,
+        89
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-05",
+      "kind": "lamp",
+      "cluster": "primary_route",
+      "point": [
+        65,
+        108
+      ],
+      "rotation": 1,
+      "radius": 2
+    },
+    {
+      "id": "prop-06",
+      "kind": "table",
+      "cluster": "market",
+      "point": [
+        42,
+        72
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-07",
+      "kind": "table",
+      "cluster": "market",
+      "point": [
+        38,
+        66
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-08",
+      "kind": "bench",
+      "cluster": "market",
+      "point": [
+        32,
+        74
+      ],
+      "rotation": 2,
+      "radius": 2
+    },
+    {
+      "id": "prop-09",
+      "kind": "well",
+      "cluster": "market",
+      "point": [
+        35,
+        57
+      ],
+      "rotation": 2,
+      "radius": 3
+    },
+    {
+      "id": "prop-10",
+      "kind": "lamp",
+      "cluster": "market",
+      "point": [
+        34,
+        69
+      ],
+      "rotation": 0,
+      "radius": 2
+    },
+    {
+      "id": "prop-11",
+      "kind": "bench",
+      "cluster": "civic",
+      "point": [
+        51,
+        55
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-12",
+      "kind": "bench",
+      "cluster": "civic",
+      "point": [
+        68,
+        54
+      ],
+      "rotation": 3,
+      "radius": 2
+    },
+    {
+      "id": "prop-13",
+      "kind": "flowerbed",
+      "cluster": "civic",
+      "point": [
+        66,
+        60
+      ],
+      "rotation": 2,
+      "radius": 3
+    },
+    {
+      "id": "prop-14",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-04",
+      "point": [
+        38,
+        101
+      ],
+      "rotation": 1,
+      "radius": 3
+    },
+    {
+      "id": "prop-15",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-06",
+      "point": [
+        84,
+        49
+      ],
+      "rotation": 3,
+      "radius": 3
+    },
+    {
+      "id": "prop-16",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-07",
+      "point": [
+        90,
+        68
+      ],
+      "rotation": 0,
+      "radius": 3
+    },
+    {
+      "id": "prop-17",
+      "kind": "flowerbed",
+      "cluster": "domestic:building-08",
+      "point": [
+        101,
+        102
+      ],
+      "rotation": 1,
+      "radius": 3
+    }
+  ],
+  "forest_patches": [
+    {
+      "id": "forest-01",
+      "kind": "edge_grove",
+      "rect": [
+        97,
+        6,
+        25,
+        13
+      ],
+      "density": 0.546,
+      "clearing_rate": 0.418,
+      "spacing": 5,
+      "max_count": 17,
+      "seed": 55031
+    },
+    {
+      "id": "forest-02",
+      "kind": "edge_grove",
+      "rect": [
+        6,
+        6,
+        25,
+        13
+      ],
+      "density": 0.484,
+      "clearing_rate": 0.418,
+      "spacing": 6,
+      "max_count": 16,
+      "seed": 55032
+    },
+    {
+      "id": "forest-03",
+      "kind": "edge_grove",
+      "rect": [
+        95,
+        108,
+        27,
+        14
+      ],
+      "density": 0.543,
+      "clearing_rate": 0.258,
+      "spacing": 6,
+      "max_count": 13,
+      "seed": 55033
+    }
+  ],
+  "phases": [
+    {
+      "id": "formal_foundation",
+      "growth_rule": "civic_infill",
+      "program": [
+        {
+          "role": "town hall",
+          "binding": "town_hall",
+          "inhabitant": "mayor"
+        },
+        {
+          "role": "church",
+          "binding": "church",
+          "inhabitant": "priest"
+        }
+      ],
+      "created_buildings": [
+        "building-01",
+        "building-02"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 0,
+        "routes": 4,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 2,
+        "routes": 6,
+        "infrastructure": 0
+      }
+    },
+    {
+      "id": "market_shift",
+      "growth_rule": "market_frontage",
+      "program": [
+        {
+          "role": "shop",
+          "binding": "shop",
+          "inhabitant": "merchant"
+        },
+        {
+          "role": "long house",
+          "binding": "long_house",
+          "inhabitant": "bard"
+        }
+      ],
+      "created_buildings": [
+        "building-03",
+        "building-04"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 2,
+        "routes": 6,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 4,
+        "routes": 8,
+        "infrastructure": 0
+      }
+    },
+    {
+      "id": "plot_subdivision",
+      "growth_rule": "route_frontage",
+      "program": [
+        {
+          "role": "apartment",
+          "binding": "apartment",
+          "inhabitant": "resident"
+        },
+        {
+          "role": "large house",
+          "binding": "large_house",
+          "inhabitant": "old man"
+        }
+      ],
+      "created_buildings": [
+        "building-05",
+        "building-06"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 4,
+        "routes": 8,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 6,
+        "routes": 10,
+        "infrastructure": 0
+      }
+    },
+    {
+      "id": "outer_accretion",
+      "growth_rule": "edge_expansion",
+      "program": [
+        {
+          "role": "brick house",
+          "binding": "brick_house_1",
+          "inhabitant": "farmer"
+        },
+        {
+          "role": "wooden house",
+          "binding": "wooden_house",
+          "inhabitant": "boy"
+        }
+      ],
+      "created_buildings": [
+        "building-07",
+        "building-08"
+      ],
+      "created_history_marks": [],
+      "before": {
+        "buildings": 6,
+        "routes": 10,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 8,
+        "routes": 12,
+        "infrastructure": 0
+      }
+    },
+    {
+      "id": "enclosure_decay",
+      "growth_rule": "leave_boundary_fragment",
+      "program": [],
+      "created_buildings": [],
+      "created_history_marks": [
+        "infrastructure-01",
+        "route-13"
+      ],
+      "before": {
+        "buildings": 8,
+        "routes": 12,
+        "infrastructure": 0
+      },
+      "after": {
+        "buildings": 8,
+        "routes": 13,
+        "infrastructure": 1
+      }
+    }
+  ],
+  "entry": {
+    "gate_node": "node-02",
+    "player": [
+      60,
+      9
+    ],
+    "guide": [
+      59,
+      16
+    ],
+    "guide_model": "guard",
+    "message": "Welcome to Ashcourt. Follow the oldest active route toward the civic accretion."
+  },
+  "decisions": [
+    {
+      "decision": "derive causal geometry from seed and topology",
+      "cause_type": "civic_accretion",
+      "input_coordinates": 0,
+      "generated_nodes": 5,
+      "generated_routes": 4
+    }
+  ],
+  "metrics": {
+    "generated_spatial_records": 62,
+    "input_coordinate_fields": 0,
+    "nodes": 5,
+    "active_routes": 4,
+    "obsolete_routes": 1,
+    "route_angle_bins_15deg": 5,
+    "districts": 3,
+    "plots": 8,
+    "buildings": 8,
+    "props": 17,
+    "plot_area_cv": 0.471,
+    "mean_building_distance_by_phase": {
+      "formal_foundation": 14.939,
+      "market_shift": 40.287,
+      "plot_subdivision": 28.369,
+      "outer_accretion": 49.966
+    }
+  },
+  "checksum": "3462c5213265ab31d756a61c90df2771bca5457003918e8898bdd4aea0654d63"
+}
